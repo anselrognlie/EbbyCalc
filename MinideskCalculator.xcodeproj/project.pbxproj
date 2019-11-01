@@ -1,0 +1,590 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB5236CC30200780234 /* AppDelegate.m */; };
+		FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB8236CC30200780234 /* SceneDelegate.m */; };
+		FDBA3EBC236CC30200780234 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EBB236CC30200780234 /* ViewController.m */; };
+		FDBA3EBF236CC30200780234 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FDBA3EBD236CC30200780234 /* Main.storyboard */; };
+		FDBA3EC1236CC30500780234 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FDBA3EC0236CC30500780234 /* Assets.xcassets */; };
+		FDBA3EC4236CC30500780234 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FDBA3EC2236CC30500780234 /* LaunchScreen.storyboard */; };
+		FDBA3EC7236CC30500780234 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EC6236CC30500780234 /* main.m */; };
+		FDBA3ED1236CC30500780234 /* MinideskCalculatorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3ED0236CC30500780234 /* MinideskCalculatorTests.m */; };
+		FDBA3EDC236CC30500780234 /* MinideskCalculatorUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EDB236CC30500780234 /* MinideskCalculatorUITests.m */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FDBA3ECD236CC30500780234 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FDBA3EA9236CC30200780234 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FDBA3EB0236CC30200780234;
+			remoteInfo = MinideskCalculator;
+		};
+		FDBA3ED8236CC30500780234 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FDBA3EA9236CC30200780234 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FDBA3EB0236CC30200780234;
+			remoteInfo = MinideskCalculator;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		FDBA3EB1236CC30200780234 /* MinideskCalculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MinideskCalculator.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDBA3EB4236CC30200780234 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		FDBA3EB5236CC30200780234 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		FDBA3EB7236CC30200780234 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
+		FDBA3EB8236CC30200780234 /* SceneDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SceneDelegate.m; sourceTree = "<group>"; };
+		FDBA3EBA236CC30200780234 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		FDBA3EBB236CC30200780234 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		FDBA3EBE236CC30200780234 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		FDBA3EC0236CC30500780234 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		FDBA3EC3236CC30500780234 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		FDBA3EC5236CC30500780234 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FDBA3EC6236CC30500780234 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		FDBA3ECC236CC30500780234 /* MinideskCalculatorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MinideskCalculatorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDBA3ED0236CC30500780234 /* MinideskCalculatorTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MinideskCalculatorTests.m; sourceTree = "<group>"; };
+		FDBA3ED2236CC30500780234 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FDBA3ED7236CC30500780234 /* MinideskCalculatorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MinideskCalculatorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FDBA3EDB236CC30500780234 /* MinideskCalculatorUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MinideskCalculatorUITests.m; sourceTree = "<group>"; };
+		FDBA3EDD236CC30500780234 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		FDBA3EAE236CC30200780234 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDBA3EC9236CC30500780234 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDBA3ED4236CC30500780234 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		FDBA3EA8236CC30200780234 = {
+			isa = PBXGroup;
+			children = (
+				FDBA3EB3236CC30200780234 /* MinideskCalculator */,
+				FDBA3ECF236CC30500780234 /* MinideskCalculatorTests */,
+				FDBA3EDA236CC30500780234 /* MinideskCalculatorUITests */,
+				FDBA3EB2236CC30200780234 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		FDBA3EB2236CC30200780234 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				FDBA3EB1236CC30200780234 /* MinideskCalculator.app */,
+				FDBA3ECC236CC30500780234 /* MinideskCalculatorTests.xctest */,
+				FDBA3ED7236CC30500780234 /* MinideskCalculatorUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		FDBA3EB3236CC30200780234 /* MinideskCalculator */ = {
+			isa = PBXGroup;
+			children = (
+				FDBA3EB4236CC30200780234 /* AppDelegate.h */,
+				FDBA3EB5236CC30200780234 /* AppDelegate.m */,
+				FDBA3EB7236CC30200780234 /* SceneDelegate.h */,
+				FDBA3EB8236CC30200780234 /* SceneDelegate.m */,
+				FDBA3EBA236CC30200780234 /* ViewController.h */,
+				FDBA3EBB236CC30200780234 /* ViewController.m */,
+				FDBA3EBD236CC30200780234 /* Main.storyboard */,
+				FDBA3EC0236CC30500780234 /* Assets.xcassets */,
+				FDBA3EC2236CC30500780234 /* LaunchScreen.storyboard */,
+				FDBA3EC5236CC30500780234 /* Info.plist */,
+				FDBA3EC6236CC30500780234 /* main.m */,
+			);
+			path = MinideskCalculator;
+			sourceTree = "<group>";
+		};
+		FDBA3ECF236CC30500780234 /* MinideskCalculatorTests */ = {
+			isa = PBXGroup;
+			children = (
+				FDBA3ED0236CC30500780234 /* MinideskCalculatorTests.m */,
+				FDBA3ED2236CC30500780234 /* Info.plist */,
+			);
+			path = MinideskCalculatorTests;
+			sourceTree = "<group>";
+		};
+		FDBA3EDA236CC30500780234 /* MinideskCalculatorUITests */ = {
+			isa = PBXGroup;
+			children = (
+				FDBA3EDB236CC30500780234 /* MinideskCalculatorUITests.m */,
+				FDBA3EDD236CC30500780234 /* Info.plist */,
+			);
+			path = MinideskCalculatorUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		FDBA3EB0236CC30200780234 /* MinideskCalculator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FDBA3EE0236CC30500780234 /* Build configuration list for PBXNativeTarget "MinideskCalculator" */;
+			buildPhases = (
+				FDBA3EAD236CC30200780234 /* Sources */,
+				FDBA3EAE236CC30200780234 /* Frameworks */,
+				FDBA3EAF236CC30200780234 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MinideskCalculator;
+			productName = MinideskCalculator;
+			productReference = FDBA3EB1236CC30200780234 /* MinideskCalculator.app */;
+			productType = "com.apple.product-type.application";
+		};
+		FDBA3ECB236CC30500780234 /* MinideskCalculatorTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FDBA3EE3236CC30500780234 /* Build configuration list for PBXNativeTarget "MinideskCalculatorTests" */;
+			buildPhases = (
+				FDBA3EC8236CC30500780234 /* Sources */,
+				FDBA3EC9236CC30500780234 /* Frameworks */,
+				FDBA3ECA236CC30500780234 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FDBA3ECE236CC30500780234 /* PBXTargetDependency */,
+			);
+			name = MinideskCalculatorTests;
+			productName = MinideskCalculatorTests;
+			productReference = FDBA3ECC236CC30500780234 /* MinideskCalculatorTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		FDBA3ED6236CC30500780234 /* MinideskCalculatorUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FDBA3EE6236CC30500780234 /* Build configuration list for PBXNativeTarget "MinideskCalculatorUITests" */;
+			buildPhases = (
+				FDBA3ED3236CC30500780234 /* Sources */,
+				FDBA3ED4236CC30500780234 /* Frameworks */,
+				FDBA3ED5236CC30500780234 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FDBA3ED9236CC30500780234 /* PBXTargetDependency */,
+			);
+			name = MinideskCalculatorUITests;
+			productName = MinideskCalculatorUITests;
+			productReference = FDBA3ED7236CC30500780234 /* MinideskCalculatorUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FDBA3EA9236CC30200780234 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1120;
+				ORGANIZATIONNAME = "Ansel Rognlie";
+				TargetAttributes = {
+					FDBA3EB0236CC30200780234 = {
+						CreatedOnToolsVersion = 11.2;
+					};
+					FDBA3ECB236CC30500780234 = {
+						CreatedOnToolsVersion = 11.2;
+						TestTargetID = FDBA3EB0236CC30200780234;
+					};
+					FDBA3ED6236CC30500780234 = {
+						CreatedOnToolsVersion = 11.2;
+						TestTargetID = FDBA3EB0236CC30200780234;
+					};
+				};
+			};
+			buildConfigurationList = FDBA3EAC236CC30200780234 /* Build configuration list for PBXProject "MinideskCalculator" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = FDBA3EA8236CC30200780234;
+			productRefGroup = FDBA3EB2236CC30200780234 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				FDBA3EB0236CC30200780234 /* MinideskCalculator */,
+				FDBA3ECB236CC30500780234 /* MinideskCalculatorTests */,
+				FDBA3ED6236CC30500780234 /* MinideskCalculatorUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		FDBA3EAF236CC30200780234 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDBA3EC4236CC30500780234 /* LaunchScreen.storyboard in Resources */,
+				FDBA3EC1236CC30500780234 /* Assets.xcassets in Resources */,
+				FDBA3EBF236CC30200780234 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDBA3ECA236CC30500780234 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDBA3ED5236CC30500780234 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		FDBA3EAD236CC30200780234 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDBA3EBC236CC30200780234 /* ViewController.m in Sources */,
+				FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */,
+				FDBA3EC7236CC30500780234 /* main.m in Sources */,
+				FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDBA3EC8236CC30500780234 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDBA3ED1236CC30500780234 /* MinideskCalculatorTests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FDBA3ED3236CC30500780234 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FDBA3EDC236CC30500780234 /* MinideskCalculatorUITests.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FDBA3ECE236CC30500780234 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FDBA3EB0236CC30200780234 /* MinideskCalculator */;
+			targetProxy = FDBA3ECD236CC30500780234 /* PBXContainerItemProxy */;
+		};
+		FDBA3ED9236CC30500780234 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = FDBA3EB0236CC30200780234 /* MinideskCalculator */;
+			targetProxy = FDBA3ED8236CC30500780234 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		FDBA3EBD236CC30200780234 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FDBA3EBE236CC30200780234 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		FDBA3EC2236CC30500780234 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FDBA3EC3236CC30500780234 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		FDBA3EDE236CC30500780234 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		FDBA3EDF236CC30500780234 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		FDBA3EE1236CC30500780234 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RU9C9DUDK9;
+				INFOPLIST_FILE = MinideskCalculator/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		FDBA3EE2236CC30500780234 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RU9C9DUDK9;
+				INFOPLIST_FILE = MinideskCalculator/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculator;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		FDBA3EE4236CC30500780234 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RU9C9DUDK9;
+				INFOPLIST_FILE = MinideskCalculatorTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculatorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MinideskCalculator.app/MinideskCalculator";
+			};
+			name = Debug;
+		};
+		FDBA3EE5236CC30500780234 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RU9C9DUDK9;
+				INFOPLIST_FILE = MinideskCalculatorTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.2;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculatorTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MinideskCalculator.app/MinideskCalculator";
+			};
+			name = Release;
+		};
+		FDBA3EE7236CC30500780234 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RU9C9DUDK9;
+				INFOPLIST_FILE = MinideskCalculatorUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculatorUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MinideskCalculator;
+			};
+			name = Debug;
+		};
+		FDBA3EE8236CC30500780234 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = RU9C9DUDK9;
+				INFOPLIST_FILE = MinideskCalculatorUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculatorUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = MinideskCalculator;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		FDBA3EAC236CC30200780234 /* Build configuration list for PBXProject "MinideskCalculator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FDBA3EDE236CC30500780234 /* Debug */,
+				FDBA3EDF236CC30500780234 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FDBA3EE0236CC30500780234 /* Build configuration list for PBXNativeTarget "MinideskCalculator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FDBA3EE1236CC30500780234 /* Debug */,
+				FDBA3EE2236CC30500780234 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FDBA3EE3236CC30500780234 /* Build configuration list for PBXNativeTarget "MinideskCalculatorTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FDBA3EE4236CC30500780234 /* Debug */,
+				FDBA3EE5236CC30500780234 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FDBA3EE6236CC30500780234 /* Build configuration list for PBXNativeTarget "MinideskCalculatorUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FDBA3EE7236CC30500780234 /* Debug */,
+				FDBA3EE8236CC30500780234 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FDBA3EA9236CC30200780234 /* Project object */;
+}

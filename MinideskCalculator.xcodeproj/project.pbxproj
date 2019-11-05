@@ -21,6 +21,7 @@
 		FDC1A4C7236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */; };
 		FDC1A4C9236FA9DD00D21FEB /* EWCMathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4C8236FA9DD00D21FEB /* EWCMathTests.m */; };
 		FDC1A4CC2370C1BC00D21FEB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = FDC1A4CB2370C1BC00D21FEB /* Localizable.strings */; };
+		FDC1A4CF2371349B00D21FEB /* EWCNumericField.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4CE2371349B00D21FEB /* EWCNumericField.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,8 @@
 		FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSDecimalNumber+EWCMathCategory.m"; sourceTree = "<group>"; };
 		FDC1A4C8236FA9DD00D21FEB /* EWCMathTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCMathTests.m; sourceTree = "<group>"; };
 		FDC1A4CB2370C1BC00D21FEB /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
+		FDC1A4CD2371349B00D21FEB /* EWCNumericField.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCNumericField.h; sourceTree = "<group>"; };
+		FDC1A4CE2371349B00D21FEB /* EWCNumericField.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCNumericField.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -122,6 +125,8 @@
 				FDBA3EC6236CC30500780234 /* main.m */,
 				FDC1A4C5236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.h */,
 				FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */,
+				FDC1A4CD2371349B00D21FEB /* EWCNumericField.h */,
+				FDC1A4CE2371349B00D21FEB /* EWCNumericField.m */,
 			);
 			path = MinideskCalculator;
 			sourceTree = "<group>";
@@ -247,6 +252,7 @@
 			files = (
 				FDBA3EF1236CC36100780234 /* EWCGridLayoutView.m in Sources */,
 				FDBA3EBC236CC30200780234 /* ViewController.m in Sources */,
+				FDC1A4CF2371349B00D21FEB /* EWCNumericField.m in Sources */,
 				FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */,
 				FDBA3EF0236CC36100780234 /* EWCRoundedCornerButton.m in Sources */,
 				FDBA3EC7236CC30500780234 /* main.m in Sources */,

@@ -1,0 +1,66 @@
+//
+//  EWCCalculator.h
+//  Minidesk Calculator
+//
+//  Created by Ansel Rognlie on 10/29/19.
+//  Copyright © 2019 Ansel Rognlie. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+NS_ASSUME_NONNULL_BEGIN
+
+typedef void(^EWCCalculatorUpdatedCallback)(void);
+
+typedef NS_ENUM(NSInteger, EWCCalculatorKey) {
+  EWCCalculatorNoKey = 1,
+  EWCCalculatorRateKey,
+  EWCCalculatorTaxPlusKey,
+  EWCCalculatorTaxMinusKey,
+  EWCCalculatorClearKey,
+  EWCCalculatorSevenKey,
+  EWCCalculatorEightKey,
+  EWCCalculatorNineKey,
+  EWCCalculatorMultiplyKey,
+  EWCCalculatorDivideKey,
+  EWCCalculatorSignKey,
+  EWCCalculatorFourKey,
+  EWCCalculatorFiveKey,
+  EWCCalculatorSixKey,
+  EWCCalculatorSubtractKey,
+  EWCCalculatorMemoryKey,
+  EWCCalculatorPercentKey,
+  EWCCalculatorOneKey,
+  EWCCalculatorTwoKey,
+  EWCCalculatorThreeKey,
+  EWCCalculatorAddKey,
+  EWCCalculatorMemoryMinusKey,
+  EWCCalculatorSqrtKey,
+  EWCCalculatorZeroKey,
+  EWCCalculatorDecimalKey,
+  EWCCalculatorEqualKey,
+  EWCCalculatorMemoryPlusKey,
+};
+
+@interface EWCCalculator : NSObject
+
+@property (nonatomic, readonly, getter=isMemoryStatusVisible) BOOL memoryStatusVisible;
+@property (nonatomic, readonly, getter=isErrorStatusVisible) BOOL errorStatusVisible;
+@property (nonatomic, readonly, getter=isTaxStatusVisible) BOOL taxStatusVisible;
+@property (nonatomic, readonly, getter=isTaxPlusStatusVisible) BOOL taxPlusStatusVisible;
+@property (nonatomic, readonly, getter=isTaxMinusStatusVisible) BOOL taxMinusStatusVisible;
+@property (nonatomic, readonly, getter=isTaxPercentStatusVisible) BOOL taxPercentStatusVisible;
+@property (nonatomic, readonly, getter=isRateShifted) BOOL rateShifted;
+
+@property (nonatomic, readonly) NSString *displayContent;
+
++ (instancetype)calculator;
+- (instancetype)init;
+
+- (void)registerUpdateCallbackWithBlock:(EWCCalculatorUpdatedCallback)callback;
+
+- (void)pressKey:(EWCCalculatorKey)key;
+
+@end
+
+NS_ASSUME_NONNULL_END

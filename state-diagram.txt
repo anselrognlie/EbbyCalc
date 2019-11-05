@@ -1,0 +1,140 @@
+start:
+  onEnter:
+    acc=0
+    inp=acc
+    opd=0
+    op=none
+    goto:ready
+
+ready: -- initial user interaction
+  onEnter:
+  onDigit:
+    startDigit(digit)
+    goto:input
+  onSign:
+    startSign()
+    goto:input
+  onDecimal:
+    startDecimal()
+    goto:input
+  onEqual: -
+  onBinOp:
+    acc=inp
+    set op
+    goto:operand
+  onClear: -
+
+input: -- reading first input for a calculation
+  onEnter:
+  onDigit:
+
+    processDigit(digit)
+  onSign:
+    processSign()
+  onDecimal:
+    processDecimal()
+  onEqual:
+    acc=inp
+    goto:calculated
+  onBinOp:
+    acc=inp
+    set op
+    goto:operand
+  onClear:
+    goto:start
+
+operand: -- waiting for second input
+  onEnter:
+  onDigit:
+    startDigit(digit)
+    goto:inputNext
+  onSign:
+    startSign()
+    goto:inputNext
+  onDecimal:
+    startDecimal()
+    goto:inputNext
+  onEqual:
+    opd=inp
+    goto:calculated
+  onBinOp:
+    set op
+    goto:operand
+  onClear:
+    goto:start
+
+nextCleared: -- clear pressed during second input
+  onEnter:
+  onDigit:
+    startDigit(digit)
+    goto:inputNext
+  onSign:
+    startSign()
+    goto:inputNext
+  onDecimal:
+    startDecimal()
+    goto:inputNext
+  onEqual:
+    inp=acc
+    -- op=none
+    goto:calculated
+  onBinOp:
+    inp=acc
+    set op
+    goto:operand
+  onClear:
+    goto:start
+
+inputNext: -- reading the second input for a calculation
+  onEnter:
+  onDigit:
+    processDigit(digit)
+  onSign:
+    processSign()
+  onDecimal:
+    processDecimal()
+  onEqual:
+    opd=inp
+    applyOp()
+    inp=acc
+    goto:calculated
+  onBinOp:
+    opd=inp
+    applyOp()
+    inp=acc
+    set op
+    goto:operand
+  onClear:
+    inp=0
+    goto:nextCleared
+
+calculated:
+  onEnter:
+  onDigit:
+    startDigit(digit)
+    goto:input
+  onSign:
+    startSign()
+    goto:input
+  onDecimal:
+    startDecimal()
+    goto:input
+  onEqual:
+    -- repeat last calculation
+    applyOp()
+    inp=acc
+    goto:calculated
+  onBinOp:
+    set op
+    goto:operand
+  onClear:
+    goto:start
+
+percent notes:
+- only has effect in a calculation chain
+ - note this is true even after the equal key due to equal chaining
+- it is functionally equivalent to
+ 1. take the current numerical argument (whether in display or from chaining)
+ 2. treat it as though it interprets the value/100 (a percent)
+ 3. the equal key is pressed
+ - note that this doesn't update the stored value if this was used in chaining

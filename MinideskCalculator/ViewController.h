@@ -1,8 +1,8 @@
 //
 //  ViewController.h
-//  MinideskCalculator
+//  Minidesk Calculator
 //
-//  Created by Ansel Rognlie on 11/1/19.
+//  Created by Ansel Rognlie on 10/23/19.
 //  Copyright © 2019 Ansel Rognlie. All rights reserved.
 //
 

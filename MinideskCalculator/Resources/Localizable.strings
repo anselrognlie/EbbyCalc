@@ -1,0 +1,41 @@
+/* 
+  Calculator.strings
+  MinideskCalculator
+
+  Created by Ansel Rognlie on 11/4/19.
+  Copyright © 2019 Ansel Rognlie. All rights reserved.
+*/
+
+"Rate Button" = "rate";
+"Tax+ Button" = "tax+";
+"Store Button" = "store";
+"Tax- Button" = "tax-";
+"Recall Button" = "recall";
+
+"Clear Button" = "C";
+"All Clear Button" = "AC";
+
+"Zero Button" = "0";
+"One Button" = "1";
+"Two Button" = "2";
+"Three Button" = "3";
+"Four Button" = "4";
+"Five Button" = "5";
+"Six Button" = "6";
+"Seven Button" = "7";
+"Eight Button" = "8";
+"Nine Button" = "9";
+"Decimal Button" = ".";
+"Sign Button" = "+|-";
+
+"Multiply Button" = "×";
+"Divide Button" = "÷";
+"Subtract Button" = "−";
+"Add Button" = "+";
+"Percent Button" = "%";
+"Sqrt Button" = "√";
+"Equal Button" = "=";
+
+"Memory Button" = "mrc";
+"Memory- Button" = "m-";
+"Memory+ Button" = "m+";

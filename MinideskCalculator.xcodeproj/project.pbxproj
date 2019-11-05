@@ -14,19 +14,17 @@
 		FDBA3EC1236CC30500780234 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FDBA3EC0236CC30500780234 /* Assets.xcassets */; };
 		FDBA3EC4236CC30500780234 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FDBA3EC2236CC30500780234 /* LaunchScreen.storyboard */; };
 		FDBA3EC7236CC30500780234 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EC6236CC30500780234 /* main.m */; };
-		FDBA3ED1236CC30500780234 /* MinideskCalculatorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3ED0236CC30500780234 /* MinideskCalculatorTests.m */; };
-		FDBA3EDC236CC30500780234 /* MinideskCalculatorUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EDB236CC30500780234 /* MinideskCalculatorUITests.m */; };
+		FDBA3EF0236CC36100780234 /* EWCRoundedCornerButton.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EEB236CC36000780234 /* EWCRoundedCornerButton.m */; };
+		FDBA3EF1236CC36100780234 /* EWCGridLayoutView.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EED236CC36100780234 /* EWCGridLayoutView.m */; };
+		FDBA3EF2236CC36100780234 /* EWCCalculator.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EEE236CC36100780234 /* EWCCalculator.m */; };
+		FDBA3EF4236CC3CF00780234 /* EWCCalculatorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EF3236CC3CF00780234 /* EWCCalculatorTests.m */; };
+		FDC1A4C7236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */; };
+		FDC1A4C9236FA9DD00D21FEB /* EWCMathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4C8236FA9DD00D21FEB /* EWCMathTests.m */; };
+		FDC1A4CC2370C1BC00D21FEB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = FDC1A4CB2370C1BC00D21FEB /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		FDBA3ECD236CC30500780234 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = FDBA3EA9236CC30200780234 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = FDBA3EB0236CC30200780234;
-			remoteInfo = MinideskCalculator;
-		};
-		FDBA3ED8236CC30500780234 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = FDBA3EA9236CC30200780234 /* Project object */;
 			proxyType = 1;
@@ -49,11 +47,19 @@
 		FDBA3EC5236CC30500780234 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FDBA3EC6236CC30500780234 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		FDBA3ECC236CC30500780234 /* MinideskCalculatorTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MinideskCalculatorTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		FDBA3ED0236CC30500780234 /* MinideskCalculatorTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MinideskCalculatorTests.m; sourceTree = "<group>"; };
 		FDBA3ED2236CC30500780234 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		FDBA3ED7236CC30500780234 /* MinideskCalculatorUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MinideskCalculatorUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		FDBA3EDB236CC30500780234 /* MinideskCalculatorUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = MinideskCalculatorUITests.m; sourceTree = "<group>"; };
-		FDBA3EDD236CC30500780234 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FDBA3EEA236CC36000780234 /* EWCGridLayoutView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EWCGridLayoutView.h; sourceTree = "<group>"; };
+		FDBA3EEB236CC36000780234 /* EWCRoundedCornerButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EWCRoundedCornerButton.m; sourceTree = "<group>"; };
+		FDBA3EEC236CC36100780234 /* EWCRoundedCornerButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EWCRoundedCornerButton.h; sourceTree = "<group>"; };
+		FDBA3EED236CC36100780234 /* EWCGridLayoutView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EWCGridLayoutView.m; sourceTree = "<group>"; };
+		FDBA3EEE236CC36100780234 /* EWCCalculator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EWCCalculator.m; sourceTree = "<group>"; };
+		FDBA3EEF236CC36100780234 /* EWCCalculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EWCCalculator.h; sourceTree = "<group>"; };
+		FDBA3EF3236CC3CF00780234 /* EWCCalculatorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EWCCalculatorTests.m; sourceTree = "<group>"; };
+		FDC1A4C1236D00E700D21FEB /* MinideskCalculator.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = MinideskCalculator.entitlements; sourceTree = "<group>"; };
+		FDC1A4C5236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSDecimalNumber+EWCMathCategory.h"; sourceTree = "<group>"; };
+		FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSDecimalNumber+EWCMathCategory.m"; sourceTree = "<group>"; };
+		FDC1A4C8236FA9DD00D21FEB /* EWCMathTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCMathTests.m; sourceTree = "<group>"; };
+		FDC1A4CB2370C1BC00D21FEB /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,13 +77,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		FDBA3ED4236CC30500780234 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -86,7 +85,6 @@
 			children = (
 				FDBA3EB3236CC30200780234 /* MinideskCalculator */,
 				FDBA3ECF236CC30500780234 /* MinideskCalculatorTests */,
-				FDBA3EDA236CC30500780234 /* MinideskCalculatorUITests */,
 				FDBA3EB2236CC30200780234 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -96,7 +94,6 @@
 			children = (
 				FDBA3EB1236CC30200780234 /* MinideskCalculator.app */,
 				FDBA3ECC236CC30500780234 /* MinideskCalculatorTests.xctest */,
-				FDBA3ED7236CC30500780234 /* MinideskCalculatorUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -104,6 +101,14 @@
 		FDBA3EB3236CC30200780234 /* MinideskCalculator */ = {
 			isa = PBXGroup;
 			children = (
+				FDC1A4CA2370C14500D21FEB /* Resources */,
+				FDC1A4C1236D00E700D21FEB /* MinideskCalculator.entitlements */,
+				FDBA3EEF236CC36100780234 /* EWCCalculator.h */,
+				FDBA3EEE236CC36100780234 /* EWCCalculator.m */,
+				FDBA3EEA236CC36000780234 /* EWCGridLayoutView.h */,
+				FDBA3EED236CC36100780234 /* EWCGridLayoutView.m */,
+				FDBA3EEC236CC36100780234 /* EWCRoundedCornerButton.h */,
+				FDBA3EEB236CC36000780234 /* EWCRoundedCornerButton.m */,
 				FDBA3EB4236CC30200780234 /* AppDelegate.h */,
 				FDBA3EB5236CC30200780234 /* AppDelegate.m */,
 				FDBA3EB7236CC30200780234 /* SceneDelegate.h */,
@@ -115,6 +120,8 @@
 				FDBA3EC2236CC30500780234 /* LaunchScreen.storyboard */,
 				FDBA3EC5236CC30500780234 /* Info.plist */,
 				FDBA3EC6236CC30500780234 /* main.m */,
+				FDC1A4C5236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.h */,
+				FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */,
 			);
 			path = MinideskCalculator;
 			sourceTree = "<group>";
@@ -122,19 +129,19 @@
 		FDBA3ECF236CC30500780234 /* MinideskCalculatorTests */ = {
 			isa = PBXGroup;
 			children = (
-				FDBA3ED0236CC30500780234 /* MinideskCalculatorTests.m */,
+				FDBA3EF3236CC3CF00780234 /* EWCCalculatorTests.m */,
 				FDBA3ED2236CC30500780234 /* Info.plist */,
+				FDC1A4C8236FA9DD00D21FEB /* EWCMathTests.m */,
 			);
 			path = MinideskCalculatorTests;
 			sourceTree = "<group>";
 		};
-		FDBA3EDA236CC30500780234 /* MinideskCalculatorUITests */ = {
+		FDC1A4CA2370C14500D21FEB /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				FDBA3EDB236CC30500780234 /* MinideskCalculatorUITests.m */,
-				FDBA3EDD236CC30500780234 /* Info.plist */,
+				FDC1A4CB2370C1BC00D21FEB /* Localizable.strings */,
 			);
-			path = MinideskCalculatorUITests;
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -175,24 +182,6 @@
 			productReference = FDBA3ECC236CC30500780234 /* MinideskCalculatorTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		FDBA3ED6236CC30500780234 /* MinideskCalculatorUITests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = FDBA3EE6236CC30500780234 /* Build configuration list for PBXNativeTarget "MinideskCalculatorUITests" */;
-			buildPhases = (
-				FDBA3ED3236CC30500780234 /* Sources */,
-				FDBA3ED4236CC30500780234 /* Frameworks */,
-				FDBA3ED5236CC30500780234 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				FDBA3ED9236CC30500780234 /* PBXTargetDependency */,
-			);
-			name = MinideskCalculatorUITests;
-			productName = MinideskCalculatorUITests;
-			productReference = FDBA3ED7236CC30500780234 /* MinideskCalculatorUITests.xctest */;
-			productType = "com.apple.product-type.bundle.ui-testing";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -206,10 +195,6 @@
 						CreatedOnToolsVersion = 11.2;
 					};
 					FDBA3ECB236CC30500780234 = {
-						CreatedOnToolsVersion = 11.2;
-						TestTargetID = FDBA3EB0236CC30200780234;
-					};
-					FDBA3ED6236CC30500780234 = {
 						CreatedOnToolsVersion = 11.2;
 						TestTargetID = FDBA3EB0236CC30200780234;
 					};
@@ -230,7 +215,6 @@
 			targets = (
 				FDBA3EB0236CC30200780234 /* MinideskCalculator */,
 				FDBA3ECB236CC30500780234 /* MinideskCalculatorTests */,
-				FDBA3ED6236CC30500780234 /* MinideskCalculatorUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -240,6 +224,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDC1A4CC2370C1BC00D21FEB /* Localizable.strings in Resources */,
 				FDBA3EC4236CC30500780234 /* LaunchScreen.storyboard in Resources */,
 				FDBA3EC1236CC30500780234 /* Assets.xcassets in Resources */,
 				FDBA3EBF236CC30200780234 /* Main.storyboard in Resources */,
@@ -253,13 +238,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		FDBA3ED5236CC30500780234 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -267,10 +245,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FDBA3EF1236CC36100780234 /* EWCGridLayoutView.m in Sources */,
 				FDBA3EBC236CC30200780234 /* ViewController.m in Sources */,
 				FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */,
+				FDBA3EF0236CC36100780234 /* EWCRoundedCornerButton.m in Sources */,
 				FDBA3EC7236CC30500780234 /* main.m in Sources */,
+				FDC1A4C7236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m in Sources */,
 				FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */,
+				FDBA3EF2236CC36100780234 /* EWCCalculator.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,15 +260,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDBA3ED1236CC30500780234 /* MinideskCalculatorTests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		FDBA3ED3236CC30500780234 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				FDBA3EDC236CC30500780234 /* MinideskCalculatorUITests.m in Sources */,
+				FDBA3EF4236CC3CF00780234 /* EWCCalculatorTests.m in Sources */,
+				FDC1A4C9236FA9DD00D21FEB /* EWCMathTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -297,11 +272,6 @@
 			isa = PBXTargetDependency;
 			target = FDBA3EB0236CC30200780234 /* MinideskCalculator */;
 			targetProxy = FDBA3ECD236CC30500780234 /* PBXContainerItemProxy */;
-		};
-		FDBA3ED9236CC30500780234 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = FDBA3EB0236CC30200780234 /* MinideskCalculator */;
-			targetProxy = FDBA3ED8236CC30500780234 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -439,7 +409,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MinideskCalculator/MinideskCalculator.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = RU9C9DUDK9;
 				INFOPLIST_FILE = MinideskCalculator/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -448,6 +420,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -456,7 +429,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = MinideskCalculator/MinideskCalculator.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = RU9C9DUDK9;
 				INFOPLIST_FILE = MinideskCalculator/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -465,6 +440,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculator;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -509,42 +485,6 @@
 			};
 			name = Release;
 		};
-		FDBA3EE7236CC30500780234 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = RU9C9DUDK9;
-				INFOPLIST_FILE = MinideskCalculatorUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculatorUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MinideskCalculator;
-			};
-			name = Debug;
-		};
-		FDBA3EE8236CC30500780234 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = RU9C9DUDK9;
-				INFOPLIST_FILE = MinideskCalculatorUITests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculatorUITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = MinideskCalculator;
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -571,15 +511,6 @@
 			buildConfigurations = (
 				FDBA3EE4236CC30500780234 /* Debug */,
 				FDBA3EE5236CC30500780234 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		FDBA3EE6236CC30500780234 /* Build configuration list for PBXNativeTarget "MinideskCalculatorUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				FDBA3EE7236CC30500780234 /* Debug */,
-				FDBA3EE8236CC30500780234 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

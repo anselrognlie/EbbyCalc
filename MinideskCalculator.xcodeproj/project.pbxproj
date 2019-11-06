@@ -22,6 +22,10 @@
 		FDC1A4C9236FA9DD00D21FEB /* EWCMathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4C8236FA9DD00D21FEB /* EWCMathTests.m */; };
 		FDC1A4CC2370C1BC00D21FEB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = FDC1A4CB2370C1BC00D21FEB /* Localizable.strings */; };
 		FDC1A4CF2371349B00D21FEB /* EWCNumericField.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4CE2371349B00D21FEB /* EWCNumericField.m */; };
+		FDC1A4D22372470600D21FEB /* EWCCalculatorToken.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4D12372470600D21FEB /* EWCCalculatorToken.m */; };
+		FDC1A4D52372495B00D21FEB /* EWCCalculatorOpcode.h in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4D42372495B00D21FEB /* EWCCalculatorOpcode.h */; };
+		FDC1A4D723726C4D00D21FEB /* EWCCalculatorKey.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4D623726C4D00D21FEB /* EWCCalculatorKey.m */; };
+		FDC1A4D923726CF200D21FEB /* EWCCalculatorOpcode.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4D823726CF200D21FEB /* EWCCalculatorOpcode.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -63,6 +67,12 @@
 		FDC1A4CB2370C1BC00D21FEB /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		FDC1A4CD2371349B00D21FEB /* EWCNumericField.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCNumericField.h; sourceTree = "<group>"; };
 		FDC1A4CE2371349B00D21FEB /* EWCNumericField.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCNumericField.m; sourceTree = "<group>"; };
+		FDC1A4D02372470600D21FEB /* EWCCalculatorToken.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCCalculatorToken.h; sourceTree = "<group>"; };
+		FDC1A4D12372470600D21FEB /* EWCCalculatorToken.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCCalculatorToken.m; sourceTree = "<group>"; };
+		FDC1A4D32372476200D21FEB /* EWCCalculatorKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCCalculatorKey.h; sourceTree = "<group>"; };
+		FDC1A4D42372495B00D21FEB /* EWCCalculatorOpcode.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCCalculatorOpcode.h; sourceTree = "<group>"; };
+		FDC1A4D623726C4D00D21FEB /* EWCCalculatorKey.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCCalculatorKey.m; sourceTree = "<group>"; };
+		FDC1A4D823726CF200D21FEB /* EWCCalculatorOpcode.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCCalculatorOpcode.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,6 +137,12 @@
 				FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */,
 				FDC1A4CD2371349B00D21FEB /* EWCNumericField.h */,
 				FDC1A4CE2371349B00D21FEB /* EWCNumericField.m */,
+				FDC1A4D02372470600D21FEB /* EWCCalculatorToken.h */,
+				FDC1A4D12372470600D21FEB /* EWCCalculatorToken.m */,
+				FDC1A4D32372476200D21FEB /* EWCCalculatorKey.h */,
+				FDC1A4D623726C4D00D21FEB /* EWCCalculatorKey.m */,
+				FDC1A4D42372495B00D21FEB /* EWCCalculatorOpcode.h */,
+				FDC1A4D823726CF200D21FEB /* EWCCalculatorOpcode.m */,
 			);
 			path = MinideskCalculator;
 			sourceTree = "<group>";
@@ -251,6 +267,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FDBA3EF1236CC36100780234 /* EWCGridLayoutView.m in Sources */,
+				FDC1A4D22372470600D21FEB /* EWCCalculatorToken.m in Sources */,
 				FDBA3EBC236CC30200780234 /* ViewController.m in Sources */,
 				FDC1A4CF2371349B00D21FEB /* EWCNumericField.m in Sources */,
 				FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */,
@@ -258,7 +275,10 @@
 				FDBA3EC7236CC30500780234 /* main.m in Sources */,
 				FDC1A4C7236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m in Sources */,
 				FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */,
+				FDC1A4D923726CF200D21FEB /* EWCCalculatorOpcode.m in Sources */,
+				FDC1A4D52372495B00D21FEB /* EWCCalculatorOpcode.h in Sources */,
 				FDBA3EF2236CC36100780234 /* EWCCalculator.m in Sources */,
+				FDC1A4D723726C4D00D21FEB /* EWCCalculatorKey.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

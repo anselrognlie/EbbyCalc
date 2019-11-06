@@ -7,40 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "EWCCalculatorKey.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^EWCCalculatorUpdatedCallback)(void);
-
-typedef NS_ENUM(NSInteger, EWCCalculatorKey) {
-  EWCCalculatorNoKey = 1,
-  EWCCalculatorRateKey,
-  EWCCalculatorTaxPlusKey,
-  EWCCalculatorTaxMinusKey,
-  EWCCalculatorClearKey,
-  EWCCalculatorSevenKey,
-  EWCCalculatorEightKey,
-  EWCCalculatorNineKey,
-  EWCCalculatorMultiplyKey,
-  EWCCalculatorDivideKey,
-  EWCCalculatorSignKey,
-  EWCCalculatorFourKey,
-  EWCCalculatorFiveKey,
-  EWCCalculatorSixKey,
-  EWCCalculatorSubtractKey,
-  EWCCalculatorMemoryKey,
-  EWCCalculatorPercentKey,
-  EWCCalculatorOneKey,
-  EWCCalculatorTwoKey,
-  EWCCalculatorThreeKey,
-  EWCCalculatorAddKey,
-  EWCCalculatorMemoryMinusKey,
-  EWCCalculatorSqrtKey,
-  EWCCalculatorZeroKey,
-  EWCCalculatorDecimalKey,
-  EWCCalculatorEqualKey,
-  EWCCalculatorMemoryPlusKey,
-};
 
 @interface EWCCalculator : NSObject
 

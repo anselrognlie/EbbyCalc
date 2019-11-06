@@ -8,58 +8,36 @@
 
 #import "EWCCalculator.h"
 #import "NSDecimalNumber+EWCMathCategory.h"
+#import "EWCNumericField.h"
+#import "EWCCalculatorOpcode.h"
+#import "EWCCalculatorToken.h"
 
 typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   EWCCalculatorInputModeRegular = 1,
   EWCCalculatorInputModeFraction,
 };
 
-typedef NS_ENUM(NSInteger, EWCCalculatorOperator) {
-  EWCCalculatorNoOperator = 1,
-  EWCCalculatorAddOperator,
-  EWCCalculatorSubtractOperator,
-  EWCCalculatorMultiplyOperator,
-  EWCCalculatorDivideOperator,
-};
-
-typedef NS_ENUM(NSInteger, EWCCalculatorState) {
-  EWCCalculatorStartState = 1,
-  EWCCalculatorReadyState,
-  EWCCalculatorCalculatedState,
-  EWCCalculatorCalculatedOperandState,
-  EWCCalculatorFirstInputState,
-  EWCCalculatorSecondInputState,
-  EWCCalculatorOperandState,
-  EWCCalculatorSecondClearedState,
-  EWCCalculatorErrorState,
-  EWCCalculatorErrorClearedState,
-  EWCCalculatorRateShiftedState,
-  EWCCalculatorShowTaxState,
-};
-
 @interface EWCCalculator() {
   EWCCalculatorUpdatedCallback _callback;
   BOOL _shift;
   BOOL _error;
-  NSDecimalNumber *_accumulator;
-  NSDecimalNumber *_input;
-  BOOL _inputClearsCurrent;
-  NSDecimalNumber *_taxRate;
-  NSDecimalNumber *_memory;
-  NSDecimalNumber *_operand;
-  EWCCalculatorOperator _operator;
+  EWCNumericField *_accumulator;
+  EWCNumericField *_input;
+  EWCNumericField *_display;
+  BOOL _editingDisplay;  // NO when user hasn't contributed to input yet
+  BOOL _displayAvailable;  // YES if consider display to have useable data
+  EWCNumericField *_taxRate;
+  EWCNumericField *_memory;
+  EWCNumericField *_operand;
+  EWCCalculatorOpcode _operation;
   NSNumberFormatter *_formatter;
   EWCCalculatorInputMode _inputMode;
   short _fractionPower;
   short _sign;
-  EWCCalculatorState _state;
-  EWCCalculatorState _unshiftState;
   EWCCalculatorKey _key;
 
-  // fields for tracking values before we know whether we are performing a
-  // unary or binary operation
-  NSDecimalNumber *_pendingInput;
-  EWCCalculatorOperator _pendingOperator;
+  NSMutableArray<EWCCalculatorToken *> *_queue;
+  short _ip;
 }
 
 @property (nonatomic, getter=isMemoryStatusVisible) BOOL memoryStatusVisible;
@@ -67,7 +45,6 @@ typedef NS_ENUM(NSInteger, EWCCalculatorState) {
 @property (nonatomic, getter=isTaxPlusStatusVisible) BOOL taxPlusStatusVisible;
 @property (nonatomic, getter=isTaxMinusStatusVisible) BOOL taxMinusStatusVisible;
 @property (nonatomic, getter=isTaxPercentStatusVisible) BOOL taxPercentStatusVisible;
-@property (nonatomic) NSDecimalNumber *displayValue;
 
 @end
 
@@ -93,14 +70,17 @@ typedef NS_ENUM(NSInteger, EWCCalculatorState) {
   _taxMinusStatusVisible = NO;
   _taxPercentStatusVisible = NO;
   _error = NO;
-  _state = EWCCalculatorReadyState;
-  _inputClearsCurrent = YES;
+  _editingDisplay = YES;
 
-  _taxRate = [NSDecimalNumber zero];
-  _memory = [NSDecimalNumber zero];
+  _taxRate = [EWCNumericField new];
+  _memory = [EWCNumericField new];
+  _display = [EWCNumericField new];
+  _accumulator = [EWCNumericField new];
+  _operand = [EWCNumericField new];
   _formatter = [self getFormatter];
-  _state = EWCCalculatorStartState;
   _key = EWCCalculatorNoKey;
+
+  _queue = [NSMutableArray<EWCCalculatorToken *> new];
 
   [self fullClear];
 }
@@ -119,7 +99,7 @@ typedef NS_ENUM(NSInteger, EWCCalculatorState) {
 
 - (NSString *)displayContent {
 
-  NSDecimalNumber *value = self.displayValue;
+  NSDecimalNumber *value = _display.value;
   NSString *display = [_formatter stringFromNumber:value];
 
   display = [self processDisplay:display];
@@ -127,41 +107,8 @@ typedef NS_ENUM(NSInteger, EWCCalculatorState) {
   return display;
 }
 
-- (NSDecimalNumber *)displayValue {
-
-  NSDecimalNumber *display;
-
-  switch (_state) {
-    case EWCCalculatorCalculatedState:
-    case EWCCalculatorCalculatedOperandState:
-    case EWCCalculatorErrorState:
-    case EWCCalculatorErrorClearedState:
-      display = [_accumulator copy];
-      break;
-
-    default:
-      display = [_input copy];
-      break;
-  }
-
-  return display;
-}
-
 - (void)setDisplayValue:(NSDecimalNumber *)value {
-
-  switch (_state) {
-    case EWCCalculatorCalculatedState:
-    case EWCCalculatorCalculatedOperandState:
-    case EWCCalculatorErrorState:
-    case EWCCalculatorErrorClearedState:
-      _accumulator = [value copy];
-      break;
-
-    default:
-      _input = [value copy];
-      _inputClearsCurrent = YES;
-      break;
-  }
+  _display.value = value;
 }
 
 - (NSString *)processDisplay:(NSString *)display {
@@ -178,62 +125,100 @@ typedef NS_ENUM(NSInteger, EWCCalculatorState) {
 }
 
 - (BOOL)isErrorStatusVisible {
-  return _state == EWCCalculatorErrorState;
+  return _error;
 }
 
 - (void)fullClear {
+  [self clearDisplay];
   [self clearInput];
   [self clearAccumulator];
   [self clearOperand];
-  _operator = EWCCalculatorNoOperator;
+  _operation = EWCCalculatorNoOpcode;
 }
 
-- (void)clearInput {
-  _input = [NSDecimalNumber zero];
+- (void)clearDisplay {
+  [_display clear];
   _inputMode = EWCCalculatorInputModeRegular;
   _fractionPower = 0;
   _sign = 1;
   _formatter.minimumFractionDigits = 0;
   _shift = NO;
-  _inputClearsCurrent = YES;
+  _editingDisplay = NO;
+  _displayAvailable = NO;
+}
+
+- (void)clearInput {
+  [_input clear];
 }
 
 - (void)clearAccumulator {
-  _accumulator = [NSDecimalNumber zero];
+  [_accumulator clear];
 }
 
 - (void)clearOperand {
-  _operand = [NSDecimalNumber zero];
+  [_operand clear];
 }
 
-- (void)copyToAccumulator:(NSDecimalNumber *)number {
-  _accumulator = [number copy];
+- (void)clearTaxRate {
+  [_taxRate clear];
 }
 
-- (void)copyToOperand:(NSDecimalNumber *)number {
-  _operand = [number copy];
+- (void)clearMemory {
+  [_memory clear];
 }
 
-- (void)copyToInput:(NSDecimalNumber *)number {
-  _input = [number copy];
+- (void)setAccumulator:(NSDecimalNumber *)number {
+  _accumulator.value = number;
+}
+
+- (void)setOperand:(NSDecimalNumber *)number {
+  _operand.value = number;
+}
+
+- (void)setInput:(NSDecimalNumber *)number {
+  _input.value = number;
+}
+
+- (void)setDisplay:(NSDecimalNumber *)number {
+  _display.value = number;
+  _editingDisplay = NO;
+  _displayAvailable = NO;
+}
+
+- (void)setTaxRate:(NSDecimalNumber *)number {
+  _taxRate.value = number;
+}
+
+- (void)setMemory:(NSDecimalNumber *)number {
+  _memory.value = number;
+}
+
+- (void)addValueToMemory:(NSDecimalNumber *)number {
+  _memory.value = [_memory.value decimalNumberByAdding:number];
+}
+
+- (void)subtractValueFromMemory:(NSDecimalNumber *)number {
+  _memory.value = [_memory.value decimalNumberBySubtracting:number];
 }
 
 - (void)digitPressed:(int)digit {
   // no action if in error state
-  if ([self isInErrorState]) { return; }
+  if (_error) { return; }
 
-  if (_inputClearsCurrent) {
-    [self clearInput];
-    _inputClearsCurrent = NO;
+  if (! _editingDisplay) {
+    [self clearDisplay];
+    _editingDisplay = YES;
   }
+
+  _displayAvailable = YES;
 
   digit *= _sign;
 
   switch (_inputMode) {
     case EWCCalculatorInputModeRegular: {
       NSDecimalNumber *decimalDigit = [[NSDecimalNumber alloc] initWithInt:digit];
-      _input = [_input decimalNumberByMultiplyingByPowerOf10:1];
-      _input = [_input decimalNumberByAdding:decimalDigit];
+      NSDecimalNumber *tmp = [_display.value decimalNumberByMultiplyingByPowerOf10:1];
+      _display.value = [tmp decimalNumberByAdding:decimalDigit];
     }
     break;
 
@@ -242,204 +227,121 @@ typedef NS_ENUM(NSInteger, EWCCalculatorState) {
       _formatter.minimumFractionDigits = -_fractionPower;
       NSDecimalNumber *decimalDigit = [[NSDecimalNumber alloc] initWithInt:digit];
       decimalDigit = [decimalDigit decimalNumberByMultiplyingByPowerOf10:_fractionPower];
-      _input = [_input decimalNumberByAdding:decimalDigit];
+      _display.value = [_display.value decimalNumberByAdding:decimalDigit];
     }
     break;
   }
 }
 
-- (void)setOperator:(EWCCalculatorOperator)op {
-  if ([self isInErrorState]) { return; }
+- (void)performBinaryOperation:(EWCCalculatorOpcode)op
+  withData:(NSDecimalNumber *)data
+  andOperand:(NSDecimalNumber *)operand {
 
-  // queue the pending operator
-  _operator = op;
+  if (op == EWCCalculatorDivideOpcode
+    && [operand isEqualToNumber:@0]) {
+    // error
+    [self setError];
+    return;
+  }
+
+  switch (op) {
+    case EWCCalculatorAddOpcode:
+      [self setAccumulator:[data decimalNumberByAdding:operand]];
+      break;
+
+    case EWCCalculatorSubtractOpcode:
+      [self setAccumulator:[data decimalNumberBySubtracting:operand]];
+      break;
+
+    case EWCCalculatorMultiplyOpcode:
+      [self setAccumulator:[data decimalNumberByMultiplyingBy:operand]];
+      break;
+
+    case EWCCalculatorDivideOpcode:
+      [self setAccumulator:[data decimalNumberByDividingBy:operand]];
+      break;
+
+    default:
+      [self setError];
+      return;
+  }
+
+  [self setOperand:operand];
+  _operation = op;
+  [self setDisplay:_accumulator.value];
 }
 
-// returns NO on error
-- (BOOL)performOperation {
+- (void)performUnaryOperation:(EWCCalculatorOpcode)op
+  withData:(NSDecimalNumber *)data {
 
-//  if ((_operator == EWCCalculatorDivideOperator
-//    && [_operand isEqualToNumber:@0])
-//    || _operator == EWCCalculatorNoOperator) {
-//    return NO;
-//  }
+  switch (op) {
+    case EWCCalculatorAddOpcode:
+      [self performBinaryOperation:op
+        withData:[NSDecimalNumber zero]
+        andOperand:data];
+      break;
 
-  if (_operator == EWCCalculatorDivideOperator
-    && [_operand isEqualToNumber:@0]) {
-    return NO;
+    case EWCCalculatorSubtractOpcode:
+      [self performBinaryOperation:op
+        withData:[NSDecimalNumber zero]
+        andOperand:data];
+      break;
+
+    case EWCCalculatorMultiplyOpcode:
+      [self performBinaryOperation:op
+        withData:data
+        andOperand:data];
+      break;
+
+    case EWCCalculatorDivideOpcode:
+      [self performBinaryOperation:op
+        withData:[NSDecimalNumber one]
+        andOperand:data];
+      break;
+
+    default:
+      [self setError];
+      return;
   }
-
-  switch (_operator) {
-    case EWCCalculatorAddOperator:
-      _accumulator = [_accumulator decimalNumberByAdding:_operand];
-      break;
-
-    case EWCCalculatorSubtractOperator:
-      _accumulator = [_accumulator decimalNumberBySubtracting:_operand];
-      break;
-
-    case EWCCalculatorMultiplyOperator:
-      _accumulator = [_accumulator decimalNumberByMultiplyingBy:_operand];
-      break;
-
-    case EWCCalculatorDivideOperator:
-      _accumulator = [_accumulator decimalNumberByDividingBy:_operand];
-      break;
-
-    case EWCCalculatorNoOperator:
-      break;
-  }
-
-  return YES;
-}
-
-// returns NO on error
-- (BOOL)performUnaryOperation {
-
-  if ((_operator == EWCCalculatorDivideOperator
-    && [_operand isEqualToNumber:@0])
-    || _operator == EWCCalculatorNoOperator) {
-    return NO;
-  }
-
-  switch (_operator) {
-    case EWCCalculatorAddOperator:
-      _accumulator = [NSDecimalNumber zero];
-      _accumulator = [_accumulator decimalNumberByAdding:_operand];
-      break;
-
-    case EWCCalculatorSubtractOperator:
-      _accumulator = [NSDecimalNumber zero];
-      _accumulator = [_accumulator decimalNumberBySubtracting:_operand];
-      break;
-
-    case EWCCalculatorMultiplyOperator:
-      _accumulator = [_operand copy];
-      _accumulator = [_accumulator decimalNumberByMultiplyingBy:_operand];
-      break;
-
-    case EWCCalculatorDivideOperator:
-      _accumulator = [NSDecimalNumber one];
-      _accumulator = [_accumulator decimalNumberByDividingBy:_operand];
-      break;
-
-    case EWCCalculatorNoOperator:
-      break;
-  }
-
-  return YES;
-}
-
-- (BOOL)performSqrt {
-  BOOL ok = YES;
-
-  // get whatever value is currently displayed
-  NSDecimalNumber *num = self.displayValue;
-
-  // if the value is negative, treat it as positive, but set the error
-  if ([num compare:[NSDecimalNumber zero]] == NSOrderedAscending) {
-    ok = NO;
-    num = [num decimalNumberByMultiplyingBy:[[NSDecimalNumber alloc] initWithInt:-1]];
-  }
-
-  // take sqrt, but guarantee no more than 10 digits of accuracy
-  NSDecimalNumberHandler *handler = [NSDecimalNumberHandler
-    decimalNumberHandlerWithRoundingMode:NSRoundPlain
-    scale:10 raiseOnExactness:NO
-    raiseOnOverflow:NO
-    raiseOnUnderflow:NO
-    raiseOnDivideByZero:NO];
-
-  num = [num ewc_decimalNumberBySqrtWithBehavior:handler];
-
-  // write back to where we got the value
-  self.displayValue = num;
-
-  return ok;
 }
 
 - (void)signPressed {
   // no action if in error state
-  if ([self isInErrorState]) { return; }
+  if (_error) { return; }
 
-  if ([_input isEqualToNumber:@0]) { return; }
+  if ([_display.value isEqualToNumber:@0]) { return; }
+
+  _displayAvailable = YES;
 
   _sign = -_sign;
 
   NSDecimalNumber *minusOne = [[NSDecimalNumber alloc] initWithInt:-1];
-  _input = [_input decimalNumberByMultiplyingBy:minusOne];
+  _display.value = [_display.value decimalNumberByMultiplyingBy:minusOne];
 }
 
-- (void)invertAccumulator {
+- (void)sqrtPressed {
   // no action if in error state
-  if ([self isInErrorState]) { return; }
+  if (_error) { return; }
 
-  if ([_accumulator isEqualToNumber:@0]) { return; }
-
-  NSDecimalNumber *minusOne = [[NSDecimalNumber alloc] initWithInt:-1];
-  _accumulator = [_accumulator decimalNumberByMultiplyingBy:minusOne];
+  [self setDisplay:[_display.value ewc_decimalNumberBySqrt]];
+  _displayAvailable = YES;
 }
-
 
 - (void)decimalPressed {
-  if ([self isInErrorState]) { return; }
+  if (_error) { return; }
 
-  if (_inputClearsCurrent) {
-    [self clearInput];
-    _inputClearsCurrent = NO;
+  if (! _editingDisplay) {
+    [self clearDisplay];
+    _editingDisplay = YES;
   }
+
+  _displayAvailable = YES;
 
   // do we already have a decimal
   if (_inputMode != EWCCalculatorInputModeRegular) { return; }
 
   _inputMode = EWCCalculatorInputModeFraction;
   _fractionPower = 0;
-}
-
-- (void)runState:(EWCCalculatorState)state {
-  _state = state;
-  [self runState];
-}
-
-- (void)runState {
-  switch (_state) {
-    case EWCCalculatorStartState:
-      [self runStartState];
-      break;
-    case EWCCalculatorReadyState:
-      [self runReadyState];
-      break;
-    case EWCCalculatorCalculatedState:
-      [self runCalculatedState];
-      break;
-    case EWCCalculatorFirstInputState:
-      [self runFirstInputState];
-      break;
-    case EWCCalculatorSecondInputState:
-      [self runSecondInputState];
-      break;
-    case EWCCalculatorOperandState:
-      [self runOperandState];
-      break;
-    case EWCCalculatorCalculatedOperandState:
-      [self runOperandState];
-      break;
-    case EWCCalculatorSecondClearedState:
-      [self runSecondClearedState];
-      break;
-    case EWCCalculatorErrorState:
-      [self runErrorState];
-      break;
-    case EWCCalculatorErrorClearedState:
-      [self runErrorClearedState];
-      break;
-    case EWCCalculatorRateShiftedState:
-      [self runRateShiftedState];
-      break;
-    case EWCCalculatorShowTaxState:
-      [self runShowTaxState];
-      break;
-  }
 }
 
 - (BOOL)isDigitKey:(EWCCalculatorKey)key {
@@ -463,118 +365,60 @@ typedef NS_ENUM(NSInteger, EWCCalculatorState) {
 
 // return -1 if invalid
 - (short)digitFromKey:(EWCCalculatorKey)key {
-  switch (key) {
-    case EWCCalculatorZeroKey:
-      return 0;
-
-    case EWCCalculatorOneKey:
-      return 1;
-
-    case EWCCalculatorTwoKey:
-      return 2;
-
-    case EWCCalculatorThreeKey:
-      return 3;
-
-    case EWCCalculatorFourKey:
-      return 4;
-
-    case EWCCalculatorFiveKey:
-      return 5;
-
-    case EWCCalculatorSixKey:
-      return 6;
-
-    case EWCCalculatorSevenKey:
-      return 7;
-
-    case EWCCalculatorEightKey:
-      return 8;
-
-    case EWCCalculatorNineKey:
-        return 9;
-
-    default:
-      return -1;
+  if (key < EWCCalculatorZeroKey || key > EWCCalculatorNineKey) {
+    return -1;
   }
+
+  return (key - EWCCalculatorZeroKey);
 }
 
-- (BOOL)isBinaryOpKey:(EWCCalculatorKey)key {
+- (EWCCalculatorOpcode)getOpcodeFromKey:(EWCCalculatorKey)key {
+  EWCCalculatorOpcode op;
+
   switch (key) {
     case EWCCalculatorAddKey:
-    case EWCCalculatorSubtractKey:
-    case EWCCalculatorMultiplyKey:
-    case EWCCalculatorDivideKey:
-      return YES;
-
-    default:
-      return NO;
-  }
-}
-
-- (EWCCalculatorOperator)getOperatorFromKey:(EWCCalculatorKey)key {
-  EWCCalculatorOperator op;
-  switch (key) {
-    case EWCCalculatorAddKey:
-      op = EWCCalculatorAddOperator;
+      op = EWCCalculatorAddOpcode;
       break;
 
     case EWCCalculatorSubtractKey:
-      op = EWCCalculatorSubtractOperator;
+      op = EWCCalculatorSubtractOpcode;
       break;
 
     case EWCCalculatorMultiplyKey:
-      op = EWCCalculatorMultiplyOperator;
+      op = EWCCalculatorMultiplyOpcode;
       break;
 
     case EWCCalculatorDivideKey:
-      op = EWCCalculatorDivideOperator;
+      op = EWCCalculatorDivideOpcode;
+      break;
+
+    case EWCCalculatorPercentKey:
+      op = EWCCalculatorPercentOpcode;
+      break;
+
+    case EWCCalculatorEqualKey:
+      op = EWCCalculatorEqualOpcode;
       break;
 
     default:
-      op = EWCCalculatorNoOperator;
+      op = EWCCalculatorNoOpcode;
       break;
   }
 
   return op;
 }
 
-- (void)setOperator {
-  EWCCalculatorOperator op = [self getOperatorFromKey:_key];
-  if (op == EWCCalculatorNoOperator) {
-    [self goToError];
-  } else {
-    _operator = op;
-  }
-}
-
-- (void)startInputAndTransitionTo:(EWCCalculatorState)state {
-  BOOL ok = YES;
-
-  if ([self isDigitKey:_key] || _key == EWCCalculatorDecimalKey) {
-    [self clearInput];
-  }
-
-  ok = [self processInput];
-
-  if (ok) {
-    [self goToState:state];
-  } else {
-    [self goToError];
-  }
-}
-
-// returns NO if error
-- (BOOL)processInput {
-  if ([self isDigitKey:_key]) {
-    short digit = [self digitFromKey:_key];
+// returns NO if key was not handled
+- (BOOL)processInputKey:(EWCCalculatorKey)key {
+  if ([self isDigitKey:key]) {
+    short digit = [self digitFromKey:key];
     if (digit == -1) {
       return NO;
     }
     [self digitPressed:digit];
-  } else if (_key == EWCCalculatorSignKey) {
+  } else if (key == EWCCalculatorSignKey) {
     [self signPressed];
-  } else if (_key == EWCCalculatorDecimalKey) {
+  } else if (key == EWCCalculatorDecimalKey) {
     [self decimalPressed];
   } else {
     return NO;
@@ -583,352 +427,300 @@ typedef NS_ENUM(NSInteger, EWCCalculatorState) {
   return YES;
 }
 
-- (void)goToError {
-  [self goToState:EWCCalculatorErrorState];
+- (void)setError {
+  _error = YES;
+  [_queue removeAllObjects];
+  _ip = 0;
 }
 
-- (BOOL)isInErrorState {
-  return _state == EWCCalculatorErrorState;
-}
+- (void)performLastOperation {
+  NSDecimalNumber *acc = _accumulator.value;
+  NSDecimalNumber *opd = _operand.value;
+  EWCCalculatorOpcode op = _operation;
 
-- (void)goToState:(EWCCalculatorState)state {
-  _state = state;
+  switch (op) {
+    case EWCCalculatorAddOpcode:
+      acc = [acc decimalNumberByAdding:opd];
+      break;
 
-  if (_state == EWCCalculatorErrorState) {
-    _error = YES;
-  }
-}
+    case EWCCalculatorSubtractOpcode:
+      acc = [acc decimalNumberBySubtracting:opd];
+      break;
 
-- (void)runStartState {
-  [self clearAccumulator];
-  [self clearInput];
-  [self clearOperand];
-  _operator = EWCCalculatorNoOperator;
+    case EWCCalculatorMultiplyOpcode:
+      acc = [acc decimalNumberByMultiplyingBy:opd];
+      break;
 
-  _pendingInput = [NSDecimalNumber zero];
-  _pendingOperator = EWCCalculatorNoOperator;
+    case EWCCalculatorDivideOpcode:
+      acc = [acc decimalNumberByDividingBy:opd];
+      break;
 
-  [self runState:EWCCalculatorReadyState];
-}
-
-- (void)runReadyState {
-  if ([self isDigitKey:_key]) {
-    [self startInputAndTransitionTo:EWCCalculatorFirstInputState];
-  } else if ([self isBinaryOpKey:_key]) {
-    [self copyToAccumulator:_input];
-    [self setOperator];
-    [self goToState:EWCCalculatorOperandState];
-  } else {
-    switch (_key) {
-      case EWCCalculatorSignKey:
-      case EWCCalculatorDecimalKey:
-        [self startInputAndTransitionTo:EWCCalculatorFirstInputState];
-        break;
-
-      case EWCCalculatorEqualKey:
-      case EWCCalculatorClearKey:
-      case EWCCalculatorNoKey:
-      default:
-        ;
-    }
-  }
-}
-
-- (void)runFirstInputState {
-  if ([self isDigitKey:_key]) {
-    [self processInput];
-  } else if ([self isBinaryOpKey:_key]) {
-    [self copyToAccumulator:_input];
-    [self copyToOperand:_input];
-    [self setOperator];
-    [self goToState:EWCCalculatorOperandState];
-  } else {
-    switch (_key) {
-      case EWCCalculatorSignKey:
-      case EWCCalculatorDecimalKey:
-        [self processInput];
-        break;
-
-      case EWCCalculatorEqualKey:
-        [self copyToAccumulator:_input];
-        [self goToState:EWCCalculatorCalculatedState];
-        break;
-
-      case EWCCalculatorClearKey:
-        _key = EWCCalculatorNoKey;
-        [self runState:EWCCalculatorStartState];
-        break;
-
-      default:
-        ;
-    }
-  }
-}
-
-- (void)runOperandState {
-  BOOL ok = YES;
-
-  if ([self isDigitKey:_key]) {
-    [self startInputAndTransitionTo:EWCCalculatorSecondInputState];
-  } else if ([self isBinaryOpKey:_key]) {
-    [self copyToAccumulator:_input];
-    [self setOperator];
-    // just stay in this state
-  } else {
-    switch (_key) {
-      case EWCCalculatorSignKey:
-      case EWCCalculatorDecimalKey:
-        [self startInputAndTransitionTo:EWCCalculatorSecondInputState];
-        break;
-
-      case EWCCalculatorEqualKey:
-        ok = [self performUnaryOperation];
-        if (! ok) {
-          [self goToError];
-          return;
-        }
-        [self goToState:EWCCalculatorCalculatedState];
-        break;
-
-      case EWCCalculatorClearKey:
-        _key = EWCCalculatorNoKey;
-        [self runState:EWCCalculatorStartState];
-        break;
-
-      default:
-        ;
-    }
-  }
-}
-
-- (void)runSecondInputState {
-  BOOL ok = YES;
-
-  if ([self isDigitKey:_key]) {
-    [self processInput];
-  } else if ([self isBinaryOpKey:_key]) {
-    [self copyToOperand:_input];
-    ok = [self performOperation];
-    if (! ok) {
-      [self goToError];
+    default:
+      // nop
       return;
+  }
+
+  [self setAccumulator:acc];
+  [self setDisplay:acc];
+}
+
+- (BOOL)parseStartingWithOp:(EWCCalculatorToken *)aToken {
+
+  // must be one of
+  // o= - change the operator used for last operation (and execute it)
+  // od= - binary operation
+  // odo - binary operation with a continuation
+
+  BOOL shouldCommit = NO;
+
+  EWCCalculatorToken *o1 = nil, *d1 = nil, *o2 = nil, *eq = nil;
+  o1 = aToken;
+
+  d1 = [self nextTokenAs:EWCCalculatorDataTokenType];
+  if (! d1) {
+    eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
+    if (eq) {
+      // o= - change the operator used for last operation (and execute it)
+      _operation = o1.opcode;
+      [self performLastOperation];
+      return YES;
     }
-    [self copyToInput:_accumulator];
-    [self setOperator];
-    [self goToState:EWCCalculatorOperandState];
-  } else {
-    switch (_key) {
-      case EWCCalculatorSignKey:
-      case EWCCalculatorDecimalKey:
-        [self processInput];
-        break;
 
-      case EWCCalculatorEqualKey:
-        [self copyToOperand:_input];
-        ok = [self performOperation];
-        if (! ok) {
-          [self goToError];
-          return;
-        }
-        [self goToState:EWCCalculatorCalculatedState];
-        break;
+    return NO;
+  }
 
-      case EWCCalculatorClearKey:
-        [self clearInput];
-        [self runState:EWCCalculatorSecondClearedState];
-        break;
-
-      default:
-        ;
+  o2 = [self nextTokenAs:EWCCalculatorBinOpTokenType];
+  if (! o2) {
+    eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
+    if (eq) {
+      // od= - binary operation
+      NSDecimalNumber *acc = _accumulator.value;
+      [self performBinaryOperation:o1.opcode withData:acc andOperand:d1.data];
+      return YES;
     }
+
+    return NO;
+  }
+
+  // odo - binary operation with a continuation
+  NSDecimalNumber *acc = _accumulator.value;
+  [self pushbackToken];
+  [self performBinaryOperation:o1.opcode withData:acc andOperand:d1.data];
+
+  return shouldCommit;
+}
+
+- (BOOL)parseStartingWithData:(EWCCalculatorToken *)aToken {
+
+  // must be one of
+  // d= - assign d to acc, and perform last if present
+  // do= - unary operation on d
+  // dod= - binary operation
+  // dodo - binary operation with a continuation
+
+  BOOL shouldCommit = NO;
+
+  EWCCalculatorToken *d1 = nil, *o1 = nil, *d2 = nil, *o2 = nil, *eq = nil;
+  d1 = aToken;
+
+  o1 = [self nextTokenAs:EWCCalculatorBinOpTokenType];
+  if (! o1) {
+    eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
+    if (eq) {
+      // d= - assign d to acc, and perform last if present
+      [self setAccumulator:d1.data];
+      if (_operation != EWCCalculatorNoOpcode) {
+        [self performLastOperation];
+      }
+      return YES;
+    }
+
+    return NO;
+  }
+
+  d2 = [self nextTokenAs:EWCCalculatorDataTokenType];
+  if (! d2) {
+    eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
+    if (eq) {
+      // do= - unary operation on d
+      [self performUnaryOperation:o1.opcode withData:d1.data];
+      return YES;
+    }
+
+    return NO;
+  }
+
+  o2 = [self nextTokenAs:EWCCalculatorBinOpTokenType];
+  if (! o2) {
+    eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
+    if (eq) {
+      // dod= - binary operation
+      [self performBinaryOperation:o1.opcode withData:d1.data andOperand:d2.data];
+      return YES;
+    }
+
+    return NO;
+  }
+
+  // dodo - binary operation with a continuation
+  [self pushbackToken];
+  [self performBinaryOperation:o1.opcode withData:d1.data andOperand:d2.data];
+
+  return shouldCommit;
+}
+
+- (void)parseQueue {
+
+  BOOL shouldCommit = NO;
+  _ip = 0;
+
+  EWCCalculatorToken *token = [self nextToken];
+  switch (token.tokenType) {
+    case EWCCalculatorEmptyTokenType:
+      // nothing to do
+      return;
+
+    case EWCCalculatorBinOpTokenType:
+      // could be continuation op or unary
+      shouldCommit = [self parseStartingWithOp:token];
+      break;
+
+    case EWCCalculatorEqualTokenType:
+      // perform last operation
+      [self performLastOperation];
+      shouldCommit = YES;
+      break;
+
+    case EWCCalculatorDataTokenType:
+      // could be start of binary op, or simple assignment
+      shouldCommit = [self parseStartingWithData:token];
+      break;
+  }
+
+  if (shouldCommit) {
+    // clear processed items
+    [_queue removeObjectsInRange:NSMakeRange(0, _ip)];
+    _ip = 0;
   }
 }
 
-- (void)runSecondClearedState {
-  BOOL ok = YES;
+- (EWCCalculatorToken *)nextTokenAs:(EWCCalculatorTokenType)tokenType {  
+  if (_queue.count == 0 || _ip >= _queue.count) { return nil; }
 
-  if ([self isDigitKey:_key]) {
-    [self startInputAndTransitionTo:EWCCalculatorSecondInputState];
-  } else if ([self isBinaryOpKey:_key]) {
-    [self copyToAccumulator:_input];
-    [self setOperator];
-    [self goToState:EWCCalculatorOperandState];
+  EWCCalculatorToken *token = _queue[_ip];
+  if (token.tokenType == tokenType) {
+    ++_ip;
   } else {
-    switch (_key) {
-      case EWCCalculatorSignKey:
-      case EWCCalculatorDecimalKey:
-        [self startInputAndTransitionTo:EWCCalculatorSecondInputState];
-        break;
-
-      case EWCCalculatorEqualKey:
-        [self copyToOperand:_input];
-        ok = [self performOperation];
-        if (! ok) {
-          [self goToError];
-          return;
-        }
-        [self goToState:EWCCalculatorCalculatedState];
-        break;
-
-      case EWCCalculatorClearKey:
-        _key = EWCCalculatorNoKey;
-        [self runState:EWCCalculatorStartState];
-        break;
-
-      default:
-        ;
-    }
+    token = nil;
   }
+
+  return token;
 }
 
-- (void)runCalculatedState {
-  BOOL ok = YES;
+- (EWCCalculatorToken *)nextToken {
+  if (_queue.count == 0 || _ip >= _queue.count) { return nil; }
 
-  if ([self isDigitKey:_key]) {
-    [self startInputAndTransitionTo:EWCCalculatorFirstInputState];
-  } else if ([self isBinaryOpKey:_key]) {
-    [self copyToInput:_accumulator];
-    [self copyToOperand:_input];
-    [self setOperator];
-    [self goToState:EWCCalculatorOperandState];
-  } else {
-    switch (_key) {
-      case EWCCalculatorDecimalKey:
-        [self startInputAndTransitionTo:EWCCalculatorFirstInputState];
-        break;
+  EWCCalculatorToken *token = _queue[_ip];
+  ++_ip;
 
-      case EWCCalculatorSignKey:
-        [self invertAccumulator];
-        // remain in current state
-        break;
-
-      case EWCCalculatorEqualKey:
-        ok = [self performOperation];
-        if (! ok) {
-          [self goToError];
-          return;
-        }
-        // remain in current state
-        break;
-
-      case EWCCalculatorClearKey:
-        _key = EWCCalculatorNoKey;
-        [self runState:EWCCalculatorStartState];
-        break;
-
-      case EWCCalculatorNoKey:
-      default:
-        ;
-    }
-  }
+  return token;
 }
 
-- (void)runErrorState {
-  // TEMPORARY
-  if (_key == EWCCalculatorClearKey) {
+- (void)pushbackToken {
+  --_ip;
+}
+
+- (void)enqueueBinOp:(EWCCalculatorOpcode)op {
+
+  // if the last item in queue is a binary op, and we are adding a binary op,
+  // just replace it (user changed mind about operator)
+  BOOL replaced = NO;
+  if (_queue.count > 0) {
+    EWCCalculatorToken *last = _queue[_queue.count - 1];
+    if (last.tokenType == EWCCalculatorBinOpTokenType) {
+      _queue[_queue.count - 1] = [EWCCalculatorToken tokenWithBinOp:op];
+      replaced = YES;
+    }
+  }
+
+  if (! replaced) {
+    [_queue addObject:[EWCCalculatorToken tokenWithBinOp:op]];
+  }
+
+  [self parseQueue];
+}
+
+- (void)enqueueData:(NSDecimalNumber *)data {
+  [_queue addObject:[EWCCalculatorToken tokenWithData:data]];
+  [self parseQueue];
+}
+
+- (void)enqueueToken:(EWCCalculatorToken *)token {
+  [_queue addObject:token];
+  [self parseQueue];
+}
+
+- (void)resetAll {
+  [self fullClear];
+  [_queue removeAllObjects];
+}
+
+- (void)processClearKey {
+  if (_error) {
     _error = NO;
-//    [self copyToAccumulator:_input];
-    [self goToState:EWCCalculatorErrorClearedState];
+    return;
+  }
+
+  [self resetAll];
+}
+
+- (void)runErrorStateWithInput:(EWCCalculatorKey)key {
+  if (key == EWCCalculatorClearKey) {
+    [self processClearKey];
   }
 }
 
-- (void)runErrorClearedState {
-  if ([self isDigitKey:_key]) {
-    [self startInputAndTransitionTo:EWCCalculatorFirstInputState];
-  } else if ([self isBinaryOpKey:_key]) {
-//    [self copyToAccumulator:_input];
-    [self copyToInput:_accumulator];
-    [self setOperator];
-    [self goToState:EWCCalculatorOperandState];
-  } else {
-    switch (_key) {
-      case EWCCalculatorDecimalKey:
-        [self startInputAndTransitionTo:EWCCalculatorFirstInputState];
-        break;
+- (BOOL)processKey:(EWCCalculatorKey)key {
+  BOOL handled = NO;
 
-      case EWCCalculatorSignKey:
-        [self invertAccumulator];
-        // remain in current state
-        break;
-
-      case EWCCalculatorEqualKey:
-        [self copyToAccumulator:_input];
-        [self goToState:EWCCalculatorCalculatedState];
-        break;
-
-      case EWCCalculatorClearKey:
-        _key = EWCCalculatorNoKey;
-        [self runState:EWCCalculatorStartState];
-        break;
-
-      case EWCCalculatorNoKey:
-      default:
-        ;
-    }
+  if (_error) {
+    [self runErrorStateWithInput:key];
+    return YES;
   }
-}
 
-- (void)runRateShiftedState {
-  switch (_key) {
-    case EWCCalculatorTaxPlusKey:
-      // when shifted, this is store
-      _taxRate = self.displayValue;
-      _taxPercentStatusVisible = YES;
-      [self goToState:EWCCalculatorShowTaxState];
-      break;
+  handled = [self processInputKey:key];
+  if (handled) { return handled; }
 
-    case EWCCalculatorTaxMinusKey:
-      // when shifted, this is recall
-      self.displayValue = _taxRate;
-      _taxPercentStatusVisible = YES;
-      [self goToState:EWCCalculatorShowTaxState];
-      break;
-
-    default:
-      _shift = NO;
-      _state = _unshiftState;
-      [self runState];
+  if (key == EWCCalculatorSqrtKey) {
+    [self sqrtPressed];
+    return YES;
   }
-}
 
-- (void)runShowTaxState {
-  switch (_key) {
-    case EWCCalculatorTaxPlusKey:
-      // when shifted, this is store
-      _taxRate = self.displayValue;
-      break;
+  // we pressed a key that doesn't contribute to editing the display
+  // so the input is complete
 
-    case EWCCalculatorTaxMinusKey:
-      // when shifted, this is recall
-      self.displayValue = _taxRate;
-      break;
-
-    default:
-      _shift = NO;
-      _state = _unshiftState;
-      [self runState];
+  if (_displayAvailable) {
+    _editingDisplay = NO;
+    _displayAvailable = NO;
+    [self enqueueData:_display.value];
   }
+
+  if (key == EWCCalculatorClearKey) {
+    [self processClearKey];
+    return YES;
+  } else if (EWCCalculatorKeyIsBinaryOp(key)) {
+    [self enqueueBinOp:[self getOpcodeFromKey:key]];
+  } else if (key == EWCCalculatorEqualKey) {
+    [self enqueueToken:[EWCCalculatorToken tokenAsEqual]];
+  }
+
+  return handled;
 }
 
 - (void)pressKey:(EWCCalculatorKey)key {
   _key = key;
 
-  if (_key == EWCCalculatorSqrtKey) {
-    if (! [self performSqrt]) {
-      [self copyToAccumulator:self.displayValue];
-      [self goToError];
-    }
-  } else if (_key == EWCCalculatorRateKey) {
-    _shift = ! _shift;
-    if (_shift) {
-      _unshiftState = _state;
-      [self goToState:EWCCalculatorRateShiftedState];
-    } else {
-      [self runState];
-    }
-  } else {
-    [self runState];
-  }
+  [self processKey:key];
 
   if (_callback) {
     _callback();

@@ -15,6 +15,8 @@ typedef NS_ENUM(NSInteger, EWCGridLayoutCellStyle) {
   EWCGridLayoutCellFillStyle,
 };
 
+typedef void(^EWCGridCustomLayoutCallback)(UIView *view, CGRect frame, CGFloat minWidth, CGFloat minHeight);
+
 @interface EWCGridLayoutView : UIView
 
 @property (nonatomic, strong) NSArray<NSNumber *> *rows;
@@ -38,6 +40,14 @@ typedef NS_ENUM(NSInteger, EWCGridLayoutCellStyle) {
   startingInRow:(NSInteger)startRow column:(NSInteger)startColumn
   endingInRow:(NSInteger)endRow column:(NSInteger)endColumn;
 
+- (void)addSubView:(UIView *)subView
+  inRow:(NSInteger)row column:(NSInteger)column
+  withLayout:(nullable EWCGridCustomLayoutCallback)callback;
+
+- (void)addSubView:(UIView *)subView
+  startingInRow:(NSInteger)startRow column:(NSInteger)startColumn
+  endingInRow:(NSInteger)endRow column:(NSInteger)endColumn
+  withLayout:(nullable EWCGridCustomLayoutCallback)callback;
 
 @end
 

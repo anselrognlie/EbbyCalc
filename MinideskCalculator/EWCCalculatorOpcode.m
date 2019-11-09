@@ -21,3 +21,15 @@ BOOL EWCCalculatorOpcodeIsBinaryOp(EWCCalculatorOpcode opcode) {
       return NO;
   }
 }
+
+EWCCalculatorOpcode
+  EWCCalculatorOpcodeModifyForEqualMode(
+  EWCCalculatorOpcode opcode,
+  EWCCalculatorOpcode mode) {
+
+  if (mode == EWCCalculatorEqualOpcode) {
+    return opcode;
+  }
+
+  return opcode + (EWCCalculatorAddPercentOpcode - EWCCalculatorAddOpcode);
+}

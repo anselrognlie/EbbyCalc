@@ -8,7 +8,6 @@
 
 #import "NSDecimalNumber+EWCMathCategory.h"
 
-#import <AppKit/AppKit.h>
 
 static BOOL diffWithinDelta(NSDecimalNumber *n1, NSDecimalNumber *n2, NSDecimalNumber *delta) {
   NSDecimalNumber *diff = [n1 ewc_decimalNumberByAbsoluteDifferenceFrom:n2];
@@ -93,6 +92,66 @@ static BOOL diffWithinDelta(NSDecimalNumber *n1, NSDecimalNumber *n2, NSDecimalN
   }
 
   return [n1 decimalNumberBySubtracting:aNumber];
+}
+
+- (NSDecimalNumber *)ewc_decimalNumberByRestrictingToDigits:(short)digits {
+  NSDecimalNumber *tmp = self;
+  BOOL negative = NO;
+
+  // make sure tmp is positive for the checks
+  if ([tmp compare:[NSDecimalNumber zero]] == NSOrderedAscending) {
+    tmp = [[NSDecimalNumber zero] decimalNumberBySubtracting:tmp];
+    negative = YES;
+  }
+
+  // first check for underflow, which just returns 0
+  NSDecimalNumber *minimum = [NSDecimalNumber decimalNumberWithMantissa:1 exponent:-(digits - 1) isNegative:NO];
+  if ([tmp compare:minimum] == NSOrderedAscending) {
+    return [NSDecimalNumber zero];
+  }
+
+  NSDecimalNumber *maximum = [NSDecimalNumber decimalNumberWithMantissa:1 exponent:digits isNegative:NO];
+  maximum = [maximum decimalNumberBySubtracting:[NSDecimalNumber one]];
+  if ([tmp compare:maximum] == NSOrderedDescending) {
+    // our number is too big
+    return nil;
+  }
+
+  // number will fit, but we may need to round the decimal portion
+
+  // fix out how many fractional digits to allow
+  // with no whole portion, we can fit up to max - 1 (must show zero before decimal)
+  // and we may reduce all the way down to zero if the whole portion is max digits
+  // so if num < 1, round to max - 1, otherwise round to max - whole digits
+
+  short scale;
+  if ([tmp compare:[NSDecimalNumber one]] == NSOrderedAscending) {
+    scale = digits - 1;
+  } else {
+    NSDecimalNumber *scaleTmp = tmp;
+    short exp = 0;
+    do {
+      ++exp;
+      scaleTmp = [scaleTmp decimalNumberByMultiplyingByPowerOf10:-1];
+    } while ([scaleTmp compare:[NSDecimalNumber one]] != NSOrderedAscending);
+
+    scale = digits - exp;
+  }
+
+  NSDecimalNumberHandler *formatter = [NSDecimalNumberHandler
+    decimalNumberHandlerWithRoundingMode:NSRoundPlain
+    scale:scale
+    raiseOnExactness:NO
+    raiseOnOverflow:NO
+    raiseOnUnderflow:NO
+    raiseOnDivideByZero:NO];
+  tmp = [tmp decimalNumberByRoundingAccordingToBehavior:formatter];
+
+  if (negative) {
+    tmp = [[NSDecimalNumber zero] decimalNumberBySubtracting:tmp];
+  }
+
+  return tmp;
 }
 
 @end

@@ -9,13 +9,21 @@
 #import <Foundation/Foundation.h>
 
 typedef NS_ENUM(NSInteger, EWCCalculatorOpcode) {
-  EWCCalculatorNoOpcode = 1,
+  EWCCalculatorNoOpcode = 0,
   EWCCalculatorAddOpcode,
   EWCCalculatorSubtractOpcode,
   EWCCalculatorMultiplyOpcode,
   EWCCalculatorDivideOpcode,
+  EWCCalculatorAddPercentOpcode,
+  EWCCalculatorSubtractPercentOpcode,
+  EWCCalculatorMultiplyPercentOpcode,
+  EWCCalculatorDividePercentOpcode,
   EWCCalculatorPercentOpcode,
   EWCCalculatorEqualOpcode,
 };
 
 BOOL EWCCalculatorOpcodeIsBinaryOp(EWCCalculatorOpcode opcode);
+EWCCalculatorOpcode
+  EWCCalculatorOpcodeModifyForEqualMode(
+  EWCCalculatorOpcode opcode,
+  EWCCalculatorOpcode mode);

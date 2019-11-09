@@ -11,6 +11,7 @@
 #import "EWCGridLayoutView.h"
 #import "EWCRoundedCornerButton.h"
 #import "EWCCalculator.h"
+#import "EWCCalculatorUserDefaultsData.h"
 
 typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
   EWCApplicationRegularDefaultLayout = 0,
@@ -41,6 +42,7 @@ typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
   NSMutableArray<EWCRoundedCornerButton *> *_textButtons;
   NSMutableArray<EWCRoundedCornerButton *> *_digitButtons;
   NSMutableArray<EWCRoundedCornerButton *> *_opButtons;
+  NSMutableArray<EWCRoundedCornerButton *> *_allButtons;
   EWCCalculator *_calculator;
   UIButton *_clearButton;
   UIButton *_taxPlusButton;
@@ -64,8 +66,13 @@ static const float DISPLAY_FONT_SIZE_AS_PERCENT_OF_WIDE = 0.126;
 static const float DISPLAY_FONT_SIZE_AS_PERCENT_OF_TALL = 0.180;
 //static const float DISPLAY_HEIGHT_FROM_FONT = 1.390;
 static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
+static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 
 @implementation ViewController
+
+- (UIStatusBarStyle)preferredStatusBarStyle {
+  return UIStatusBarStyleLightContent;
+}
 
 + (UIColor *)regularTextColor {
   return [UIColor darkGrayColor];
@@ -85,6 +92,10 @@ static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
   _textButtons = [NSMutableArray<EWCRoundedCornerButton *> new];
   _digitButtons = [NSMutableArray<EWCRoundedCornerButton *> new];
   _opButtons = [NSMutableArray<EWCRoundedCornerButton *> new];
+  _allButtons = [NSMutableArray<EWCRoundedCornerButton *> new];
+
+  _displayArea.adjustsFontSizeToFitWidth = YES;
+  _displayArea.minimumScaleFactor = .25;
 
   [self setupCalculator];
 
@@ -101,6 +112,10 @@ static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
   [_calculator registerUpdateCallbackWithBlock:^{
     [controller updateDisplayFromCalculator];
   }];
+
+//  _calculator.maximumDigits = 2;
+  _calculator.maximumDigits = 16;
+  _calculator.dataProvider = [EWCCalculatorUserDefaultsData new];
 }
 
 - (void)setupGrid {
@@ -130,6 +145,7 @@ static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
     _taxIndicator,
     _taxPlusIndicator,
     _taxMinusIndicator,
+    _taxPercentIndicator,
   ] mutableCopy];
 
 }
@@ -141,140 +157,223 @@ static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
   CGFloat sWidth = screen.size.width, sHeight = screen.size.height;
   CGFloat fontDim = (sWidth < sHeight) ? sWidth : sHeight;
 
+  button = [self makeDigitButton:NSLocalizedString(@"Zero Button", @"label for the 0 button")
+    action:@selector(onZeroButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"One Button", @"label for the 1 button")
+    action:@selector(onOneButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Two Button", @"label for the 2 button")
+    action:@selector(onTwoButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Three Button", @"label for the 3 button")
+    action:@selector(onThreeButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Four Button", @"label for the 4 button")
+    action:@selector(onFourButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Five Button", @"label for the 5 button")
+    action:@selector(onFiveButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Six Button", @"label for the 6 button")
+    action:@selector(onSixButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Seven Button", @"label for the 7 button")
+    action:@selector(onSevenButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Eight Button", @"label for the 8 button")
+    action:@selector(onEightButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Nine Button", @"label for the 9 button")
+    action:@selector(onNineButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeTextButton:NSLocalizedString(@"Clear Button", "label for the button that clears the input")
+    action:@selector(onClearButtonPressed:forEvent:) forWidth:fontDim];
+  [_textButtons addObject:button];
+  _clearButton = button;
+  [_allButtons addObject:button];
+
   button = [self makeTextButton:NSLocalizedString(@"Rate Button", "label for the button that switches to tax rate management mode")
     action:@selector(onRateButtonPressed:forEvent:) forWidth:fontDim];
   [button setTitleColor:[ViewController shiftedTextColor]
     forState:UIControlStateNormal];
-  [_grid addSubView:button inRow:0 column:3];
   [_textButtons addObject:button];
+  [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Tax+ Button", "label for the button that adds tax to the current value")
     action:@selector(onTaxPlusButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:0 column:4];
   [_textButtons addObject:button];
   _taxPlusButton = button;
+  [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Tax- Button", "label for the button that removes tax from the current value")
     action:@selector(onTaxMinusButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:0 column:5];
   [_textButtons addObject:button];
   _taxMinusButton = button;
-
-  button = [self makeTextButton:NSLocalizedString(@"Clear Button", "label for the button that clears the input")
-    action:@selector(onClearButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:1 column:0];
-  [_textButtons addObject:button];
-  _clearButton = button;
-
-  button = [self makeDigitButton:NSLocalizedString(@"Seven Button", @"label for the 7 button")
-    action:@selector(onSevenButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:1 column:1];
-  [_digitButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Eight Button", @"label for the 8 button")
-    action:@selector(onEightButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:1 column:2];
-  [_digitButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Nine Button", @"label for the 9 button")
-    action:@selector(onNineButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:1 column:3];
-  [_digitButtons addObject:button];
-
-  button = [self makeMainOperatorButton:NSLocalizedString(@"Multiply Button", @"label for the button that performs multiplication")
-    action:@selector(onMultiplyButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:1 column:4];
-  [_opButtons addObject:button];
-
-  button = [self makeMainOperatorButton:NSLocalizedString(@"Divide Button", @"label for the button that performs division")
-    action:@selector(onDivideButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:1 column:5];
-  [_opButtons addObject:button];
-
-  button = [self makeSubOperatorButton:NSLocalizedString(@"Sign Button", @"label for the button that toggles the sign")
-    action:@selector(onSignButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:2 column:0];
-  [_textButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Four Button", @"label for the 4 button")
-    action:@selector(onFourButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:2 column:1];
-  [_digitButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Five Button", @"label for the 5 button")
-    action:@selector(onFiveButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:2 column:2];
-  [_digitButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Six Button", @"label for the 6 button")
-    action:@selector(onSixButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:2 column:3];
-  [_digitButtons addObject:button];
-
-  button = [self makeMainOperatorButton:NSLocalizedString(@"Subtract Button", @"label for the button that performs subtraction")
-    action:@selector(onSubtractButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:2 column:4];
-  [_opButtons addObject:button];
+  [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Memory Button", @"label for the button that retrieves and clears the memory")
     action:@selector(onMemoryButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:2 column:5];
   [_textButtons addObject:button];
-
-  button = [self makeSubOperatorButton:NSLocalizedString(@"Percent Button", @"label for the button that take percents")
-    action:@selector(onPercentButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:3 column:0];
-  [_textButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"One Button", @"label for the 1 button")
-    action:@selector(onOneButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:3 column:1];
-  [_digitButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Two Button", @"label for the 2 button")
-    action:@selector(onTwoButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:3 column:2];
-  [_digitButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Three Button", @"label for the 3 button")
-    action:@selector(onThreeButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:3 column:3];
-  [_digitButtons addObject:button];
-
-  button = [self makeMainOperatorButton:NSLocalizedString(@"Add Button", @"label for the button that performs addition")
-    action:@selector(onAddButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button startingInRow:3 column:4 endingInRow:4 column:4];
-  [_opButtons addObject:button];
-
-  button = [self makeTextButton:NSLocalizedString(@"Memory- Button", @"label for the button that subtracts from the memory")
-    action:@selector(onMemoryMinusButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:3 column:5];
-  [_textButtons addObject:button];
-
-  button = [self makeSubOperatorButton:NSLocalizedString(@"Sqrt Button", @"label for the button that performs square roots")
-    action:@selector(onSqrtButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:4 column:0];
-  [_textButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Zero Button", @"label for the 0 button")
-    action:@selector(onZeroButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:4 column:1];
-  [_digitButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Decimal Button", @"label for the button that designates the decimal point")
-    action:@selector(onDecimalButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:4 column:2];
-  [_digitButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Equal Button", @"label for the button that executes operations")
-    action:@selector(onEqualButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:4 column:3];
-  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Memory+ Button", @"label for the button that adds to the memory")
     action:@selector(onMemoryPlusButtonPressed:forEvent:) forWidth:fontDim];
-  [_grid addSubView:button inRow:4 column:5];
   [_textButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeTextButton:NSLocalizedString(@"Memory- Button", @"label for the button that subtracts from the memory")
+    action:@selector(onMemoryMinusButtonPressed:forEvent:) forWidth:fontDim];
+  [_textButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeMainOperatorButton:NSLocalizedString(@"Add Button", @"label for the button that performs addition")
+    action:@selector(onAddButtonPressed:forEvent:) forWidth:fontDim];
+  [_opButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeMainOperatorButton:NSLocalizedString(@"Subtract Button", @"label for the button that performs subtraction")
+    action:@selector(onSubtractButtonPressed:forEvent:) forWidth:fontDim];
+  [_opButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeMainOperatorButton:NSLocalizedString(@"Multiply Button", @"label for the button that performs multiplication")
+    action:@selector(onMultiplyButtonPressed:forEvent:) forWidth:fontDim];
+  [button setTitleEdgeInsets:UIEdgeInsetsMake(0, 0, 10, 0)];
+  [_opButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeMainOperatorButton:NSLocalizedString(@"Divide Button", @"label for the button that performs division")
+    action:@selector(onDivideButtonPressed:forEvent:) forWidth:fontDim];
+  [_opButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeSubOperatorButton:NSLocalizedString(@"Sign Button", @"label for the button that toggles the sign")
+    action:@selector(onSignButtonPressed:forEvent:) forWidth:fontDim];
+  [_textButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Decimal Button", @"label for the button that designates the decimal point")
+    action:@selector(onDecimalButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeSubOperatorButton:NSLocalizedString(@"Percent Button", @"label for the button that take percents")
+    action:@selector(onPercentButtonPressed:forEvent:) forWidth:fontDim];
+  [_textButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeSubOperatorButton:NSLocalizedString(@"Sqrt Button", @"label for the button that performs square roots")
+    action:@selector(onSqrtButtonPressed:forEvent:) forWidth:fontDim];
+  [_textButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Equal Button", @"label for the button that executes operations")
+    action:@selector(onEqualButtonPressed:forEvent:) forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+}
+
+- (void)layoutGrid {
+
+  EWCGridCustomLayoutCallback callback = ^(UIView *view, CGRect frame, CGFloat minWidth, CGFloat minHeight) {
+    NSInteger radius = (NSInteger)((minWidth < minHeight) ? minWidth : minHeight) / 2;
+
+    EWCRoundedCornerButton *button = (EWCRoundedCornerButton *)view;
+    button.frame = frame;
+    button.cornerRadius = radius;
+  };
+
+  if (_layout == EWCApplicationRegularTallLayout) {
+    // tall
+
+    // configure grid layout
+    _grid.rows = @[@1.0, @1.0, @1.0, @1.0, @1.0, @1.0, @1.0, @1.0, @1.0];
+    _grid.columns = @[@1.0, @1.0, @1.0];
+
+    // rehome buttons
+    [_grid addSubView:_allButtons[EWCCalculatorZeroKey] inRow:8 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorOneKey] inRow:7 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorTwoKey] inRow:7 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorThreeKey] inRow:7 column:2];
+    [_grid addSubView:_allButtons[EWCCalculatorFourKey] inRow:6 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorFiveKey] inRow:6 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorSixKey] inRow:6 column:2];
+    [_grid addSubView:_allButtons[EWCCalculatorSevenKey] inRow:5 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorEightKey] inRow:5 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorNineKey] inRow:5 column:2];
+    [_grid addSubView:_allButtons[EWCCalculatorClearKey] inRow:2 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorRateKey] inRow:0 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorTaxPlusKey] inRow:0 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorTaxMinusKey] inRow:0 column:2];
+    [_grid addSubView:_allButtons[EWCCalculatorMemoryKey] inRow:1 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorMemoryPlusKey] inRow:1 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorMemoryMinusKey] inRow:1 column:2];
+    [_grid addSubView:_allButtons[EWCCalculatorAddKey] startingInRow:3 column:2 endingInRow:4 column:2 withLayout:callback];
+    [_grid addSubView:_allButtons[EWCCalculatorSubtractKey] inRow:4 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorMultiplyKey] inRow:3 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorDivideKey] inRow:3 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorSignKey] inRow:4 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorDecimalKey] inRow:8 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorPercentKey] inRow:2 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorSqrtKey] inRow:2 column:2];
+    [_grid addSubView:_allButtons[EWCCalculatorEqualKey] inRow:8 column:2];
+
+  } else {
+    // wide
+
+    // configure grid layout
+    _grid.rows = @[@1.0, @1.0, @1.0, @1.0, @1.0];
+    _grid.columns = @[@1.0, @1.0, @1.0, @1.0, @1.0, @1.0];
+
+    // rehome buttons
+    [_grid addSubView:_allButtons[EWCCalculatorZeroKey] inRow:4 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorOneKey] inRow:3 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorTwoKey] inRow:3 column:2];
+    [_grid addSubView:_allButtons[EWCCalculatorThreeKey] inRow:3 column:3];
+    [_grid addSubView:_allButtons[EWCCalculatorFourKey] inRow:2 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorFiveKey] inRow:2 column:2];
+    [_grid addSubView:_allButtons[EWCCalculatorSixKey] inRow:2 column:3];
+    [_grid addSubView:_allButtons[EWCCalculatorSevenKey] inRow:1 column:1];
+    [_grid addSubView:_allButtons[EWCCalculatorEightKey] inRow:1 column:2];
+    [_grid addSubView:_allButtons[EWCCalculatorNineKey] inRow:1 column:3];
+    [_grid addSubView:_allButtons[EWCCalculatorClearKey] inRow:1 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorRateKey] inRow:0 column:3];
+    [_grid addSubView:_allButtons[EWCCalculatorTaxPlusKey] inRow:0 column:4];
+    [_grid addSubView:_allButtons[EWCCalculatorTaxMinusKey] inRow:0 column:5];
+    [_grid addSubView:_allButtons[EWCCalculatorMemoryKey] inRow:2 column:5];
+    [_grid addSubView:_allButtons[EWCCalculatorMemoryPlusKey] inRow:4 column:5];
+    [_grid addSubView:_allButtons[EWCCalculatorMemoryMinusKey] inRow:3 column:5];
+    [_grid addSubView:_allButtons[EWCCalculatorAddKey] startingInRow:3 column:4 endingInRow:4 column:4 withLayout:callback];
+    [_grid addSubView:_allButtons[EWCCalculatorSubtractKey] inRow:2 column:4];
+    [_grid addSubView:_allButtons[EWCCalculatorMultiplyKey] inRow:1 column:4];
+    [_grid addSubView:_allButtons[EWCCalculatorDivideKey] inRow:1 column:5];
+    [_grid addSubView:_allButtons[EWCCalculatorSignKey] inRow:2 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorDecimalKey] inRow:4 column:2];
+    [_grid addSubView:_allButtons[EWCCalculatorPercentKey] inRow:3 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorSqrtKey] inRow:4 column:0];
+    [_grid addSubView:_allButtons[EWCCalculatorEqualKey] inRow:4 column:3];
+  }
 }
 
 - (EWCRoundedCornerButton *)makeMainOperatorButton:(NSString *)label
@@ -369,7 +468,7 @@ static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
 }
 
 - (float)getTrailingStatusConstant:(CGFloat)width {
-  return -20 - width / 2.0;
+  return -20 - width * _grid.minColumnGutter;
 }
 
 - (float)getLeadingStatusConstant:(CGFloat)width {
@@ -377,17 +476,28 @@ static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
 }
 
 - (void)applyRegularLayout {
-  CGFloat width = self.view.bounds.size.width;
-  CGFloat height = self.view.bounds.size.height;
+  UIEdgeInsets insets = self.view.safeAreaInsets;
+
+  CGFloat width = self.view.bounds.size.width - insets.right - insets.left;
+  CGFloat height = self.view.bounds.size.height - insets.top - insets.bottom;
 
   if (width == _layoutWidth && height == _layoutHeight) { return; }
 
+  EWCApplicationLayout oldLayout = _layout;
+  float aspectRatio = height / width;
+  _layout = (aspectRatio >= TWO_GRID_HEIGHT_WIDTH_RATIO)
+    ? EWCApplicationRegularTallLayout
+    : EWCApplicationCompactWideLayout;
+
+  if (_layout != oldLayout) {
+    [self layoutGrid];
+  }
+
   if (width > height) {
-    // wide
-    _layout = EWCApplicationRegularWideLayout;
+    // use height as minimal dimension
 
     // make the bottom of the display depend on screen size
-    CGFloat fontHeight = width * DISPLAY_FONT_SIZE_AS_PERCENT_OF_WIDE;
+    CGFloat fontHeight = height * DISPLAY_FONT_SIZE_AS_PERCENT_OF_WIDE;
     CGFloat displayHeight = fontHeight * DISPLAY_HEIGHT_FROM_FONT;
     [_displayArea setFont:[_displayArea.font fontWithSize:fontHeight]];
 
@@ -395,19 +505,14 @@ static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
     _grid.cellStyle = EWCGridLayoutCellFillStyle;
 
   } else {  // width <= height
-    // tall
-    _layout = EWCApplicationRegularTallLayout;
+    // use width as minimum dimension
 
     // calculate a height that allows the grid height to equal its width
-//    CGRect safeArea = self.view.safeAreaLayoutGuide.layoutFrame;
-//    CGFloat safeWidth = safeArea.size.width;
-
     CGFloat fontHeight = width * DISPLAY_FONT_SIZE_AS_PERCENT_OF_TALL;
     CGFloat displayHeight = fontHeight * DISPLAY_HEIGHT_FROM_FONT;
     [_displayArea setFont:[_displayArea.font fontWithSize:fontHeight]];
 
     // allow bottom of display to float
-//    _gridTopConstraint.constant = -safeWidth - _gridBottomConstraint.constant;
     _gridTopConstraint.constant = -height + displayHeight + _gridBottomConstraint.constant;
     _grid.cellStyle = EWCGridLayoutCellAspectRatioStyle;
     _grid.cellAspectRatio = 1.0;
@@ -432,10 +537,6 @@ static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
   _statusLeftConstraint.constant = [self getLeadingStatusConstant:width];
 }
 
-- (void)applyCompactLayout {
-  _layout = EWCApplicationCompactTallLayout;
-}
-
 - (void)setFontSize:(CGFloat)points forButtons:(NSArray<UIButton *> *)buttons {
   // don't update if the buttons haven't been registered yet
   if (buttons.count == 0) { return; }
@@ -456,6 +557,12 @@ static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
 
 - (void)setOperatorButtonsFontSize:(CGFloat)points {
   [self setFontSize:points forButtons:_opButtons];
+
+  UIEdgeInsets inset = UIEdgeInsetsMake(0, 0, points * 0.200, 0);
+
+  for (UIButton *button in _opButtons) {
+    [button setTitleEdgeInsets:inset];
+  }
 }
 
 - (void)setStatusFontSize:(CGFloat)points {

@@ -20,37 +20,26 @@
   backgroundColor:(UIColor *)backgroundColor {
 
   EWCRoundedCornerButton *button = [EWCRoundedCornerButton new];
-  [button setTitle:label forState:UIControlStateNormal];
-  [button setTitleColor:color forState:UIControlStateNormal];
   [button setBackgroundColor:backgroundColor];
+  [button setTitleColor:color forState:UIControlStateNormal];
+  [button setTitle:label forState:UIControlStateNormal];
 
   button.normalBackgroundColor = backgroundColor;
+  button.cornerRadius = -1;
 
   return button;
 }
 
-- (void)awakeFromNib {
-  [super awakeFromNib];
-  [self ensureSettings];
-}
-
-- (void)prepareForInterfaceBuilder {
-  [super prepareForInterfaceBuilder];
-  [self ensureSettings];
-}
-
-- (void)ensureSettings {
-//  CGFloat h = self.bounds.size.height;
-//  CGFloat w = self.bounds.size.width;
-//  NSInteger radius = (h > w) ? w / 2 : h / 2;
-//
-//  self.layer.cornerRadius = radius;
-}
-
 - (void)layoutSubviews {
-  CGFloat h = self.bounds.size.height;
-  CGFloat w = self.bounds.size.width;
-  NSInteger radius = (h > w) ? w / 2 : h / 2;
+  NSInteger radius;
+
+  if (_cornerRadius >= 0) {
+    radius = _cornerRadius;
+  } else {
+    CGFloat h = self.bounds.size.height;
+    CGFloat w = self.bounds.size.width;
+    radius = (h > w) ? w / 2 : h / 2;
+  }
 
   self.layer.cornerRadius = radius;
 

@@ -7,12 +7,14 @@
 //
 
 #import "EWCGridLayoutView.h"
+#import "NSArray+EWCAlgorithmCategory.h"
 
 typedef struct {
   NSInteger startRow;
   NSInteger startColumn;
   NSInteger endRow;
   NSInteger endColumn;
+  EWCGridCustomLayoutCallback layoutCallback;
 } EWCRowColumnBounds;
 
 @interface EWCGridLayoutProps : NSObject
@@ -21,19 +23,21 @@ typedef struct {
 
 + (instancetype)propsForView:(UIView *)view
   withStartingRow:(NSInteger)startRow column:(NSInteger)startColumn
-  endingRow:(NSInteger)endRow column:(NSInteger)endColumn;
+  endingRow:(NSInteger)endRow column:(NSInteger)endColumn
+  withLayout:(nullable EWCGridCustomLayoutCallback)callback;
 
 @end
 
 @implementation EWCGridLayoutProps
 + (instancetype)propsForView:(UIView *)view
   withStartingRow:(NSInteger)startRow column:(NSInteger)startColumn
-  endingRow:(NSInteger)endRow column:(NSInteger)endColumn {
+  endingRow:(NSInteger)endRow column:(NSInteger)endColumn
+  withLayout:(nullable EWCGridCustomLayoutCallback)callback {
 
   EWCGridLayoutProps *props = [EWCGridLayoutProps new];
   props.view = view;
   props.bounds = (EWCRowColumnBounds){
-    startRow, startColumn, endRow, endColumn
+    startRow, startColumn, endRow, endColumn, [callback copy]
   };
 
   return props;
@@ -94,14 +98,45 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
 }
 
 - (float)columnWidth:(NSInteger)column {
-  return _columns[column].floatValue / [self totalColumnWeight] * self.bounds.size.width;
+  return _columns[column].doubleValue / [self totalColumnWeight] * self.bounds.size.width;
 }
 
 - (float)rowHeight:(NSInteger)row {
-  return _rows[row].floatValue / [self totalRowWeight] * self.bounds.size.height;
+  return _rows[row].doubleValue / [self totalRowWeight] * self.bounds.size.height;
 }
 
 - (void)dealloc {
+}
+
+- (CGRect)makeChildRectForGridHeight:(CGFloat)gridHeight
+  gridWidth:(CGFloat)gridWidth
+  rowTop:(CGFloat)rowTop
+  rowSpan:(CGFloat)rowSpan
+  rowGutter:(CGFloat)rowGutter
+  rowTotal:(CGFloat)rowTotal
+  columnLeft:(CGFloat)columnLeft
+  columnSpan:(CGFloat)columnSpan
+  columnGutter:(CGFloat)columnGutter
+  columnTotal:(CGFloat)columnTotal {
+
+  CGFloat top, right, bottom, left, width, height;
+  top = gridHeight * (rowTop / rowTotal);
+  height = gridHeight * (rowSpan / rowTotal);
+  bottom = top + height;
+  left = gridWidth * (columnLeft / columnTotal);
+  width = gridWidth * (columnSpan / columnTotal);
+  right = left + width;
+
+  CGFloat gutterWidth = columnGutter * gridWidth / 2.0;
+  CGFloat gutterHeight = rowGutter * gridHeight / 2.0;
+
+  CGRect frame = CGRectMake(
+    left + gutterWidth,
+    top + gutterHeight,
+    width - (2 * gutterWidth),
+    height - (2 * gutterHeight));
+
+  return frame;
 }
 
 - (void)layoutSubviews {
@@ -112,6 +147,31 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
   CGFloat columnTotal = self.totalColumnWeight;
   CGFloat gridWidth = self.frame.size.width;
   CGFloat gridHeight = self.frame.size.height;
+  CGFloat rowGutter = self.minRowGutter;
+  CGFloat columnGutter = self.minColumnGutter;
+
+  // if managing corners, calculate the minimum dimension
+//  NSInteger radius = -1;
+  CGFloat minWidth = 0, minHeight = 0;
+  {
+    CGFloat minColumn = [_columns ewc_minDouble];
+    CGFloat minRow = [_rows ewc_minDouble];
+
+    CGRect minFrame = [self makeChildRectForGridHeight:gridHeight
+      gridWidth:gridWidth
+      rowTop:0
+      rowSpan:minRow
+      rowGutter:rowGutter
+      rowTotal:rowTotal
+      columnLeft:0
+      columnSpan:minColumn
+      columnGutter:columnGutter
+      columnTotal:columnTotal];
+
+    minHeight = minFrame.size.height;
+    minWidth = minFrame.size.width;
+//    radius = (w < h) ? w / 2.0 : h / 2.0;
+  }
 
   // layout any child objects based on the props
   for (EWCGridLayoutProps *props in [_layoutProps objectEnumerator]) {
@@ -119,40 +179,41 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
     EWCRowColumnBounds bounds = props.bounds;
 
     // sum the rows and columns spanned by this view
-    CGFloat rowSpan = 0, rowTop = 0, colSpan = 0, colLeft = 0;
+    CGFloat rowSpan = 0, rowTop = 0, columnSpan = 0, columnLeft = 0;
     for (NSInteger r = 0; r <= bounds.endRow; ++r) {
       if (r < bounds.startRow) {
-        rowTop += _rows[r].floatValue;
+        rowTop += _rows[r].doubleValue;
       } else {
-        rowSpan += _rows[r].floatValue;
+        rowSpan += _rows[r].doubleValue;
       }
     }
     for (NSInteger c = 0; c <= bounds.endColumn; ++c) {
       if (c < bounds.startColumn) {
-        colLeft += _columns[c].floatValue;
+        columnLeft += _columns[c].doubleValue;
       } else {
-        colSpan += _columns[c].floatValue;
+        columnSpan += _columns[c].doubleValue;
       }
     }
 
-    CGFloat top, right, bottom, left, width, height;
-    top = gridHeight * (rowTop / rowTotal);
-    height = gridHeight * (rowSpan / rowTotal);
-    bottom = top + height;
-    left = gridWidth * (colLeft / columnTotal);
-    width = gridWidth * (colSpan / columnTotal);
-    right = left + width;
+    CGRect childFrame = [self makeChildRectForGridHeight:gridHeight
+      gridWidth:gridWidth
+      rowTop:rowTop
+      rowSpan:rowSpan
+      rowGutter:rowGutter
+      rowTotal:rowTotal
+      columnLeft:columnLeft
+      columnSpan:columnSpan
+      columnGutter:columnGutter
+      columnTotal:columnTotal];
 
-    CGFloat gutterWidth = self.minRowGutter * gridWidth / 2.0;
-    CGFloat gutterHeight = self.minColumnGutter * gridHeight / 2.0;
-
-//    CGRect oldFrame = view.frame;
-    CGRect childFrame = CGRectMake(
-      left + gutterWidth,
-      top + gutterHeight,
-      width - (2 * gutterWidth),
-      height - (2 * gutterHeight));
-    view.frame = childFrame;
+    if (bounds.layoutCallback != nil) {
+      bounds.layoutCallback(view, childFrame, minWidth, minHeight);
+//      if ([view isMemberOfClass:[EWCRoundedCornerButton class]]) {
+//        ((EWCRoundedCornerButton *)view).cornerRadius = radius;
+//      }
+    } else {
+      view.frame = childFrame;
+    }
 
     [view layoutIfNeeded];
   }
@@ -169,10 +230,7 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
 }
 
 - (CGFloat)totalWeight:(NSArray<NSNumber *> *)array {
-  CGFloat total = 0;
-  for (NSNumber *num in array) {
-    total += num.floatValue;
-  }
+  CGFloat total = [array ewc_totalDouble];
 
   if (total == 0.0) {
     total = 1.0;
@@ -183,6 +241,14 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
 
 - (CGFloat)totalColumnWeight {
   return [self totalWeight:_columns];
+}
+
+- (CGFloat)minColumnWidth {
+  return [_columns ewc_minDouble];
+}
+
+- (CGFloat)minRowHeight {
+  return [_rows ewc_minDouble];
 }
 
 //- (void)drawRect:(CGRect)rect {
@@ -271,18 +337,37 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
 - (void)addSubView:(UIView *)subView
   inRow:(NSInteger)row column:(NSInteger)column {
 
-  [self addSubView:subView startingInRow:row column:column
-    endingInRow:row column:column];
+  [self addSubView:subView inRow:row column:column withLayout:nil];
 }
 
 - (void)addSubView:(UIView *)subView
   startingInRow:(NSInteger)startRow column:(NSInteger)startColumn
   endingInRow:(NSInteger)endRow column:(NSInteger)endColumn {
 
-  [self addSubview:subView];
+  [self addSubView:subView startingInRow:startRow column:startColumn
+    endingInRow:endRow column:endColumn withLayout:nil];
+}
+
+- (void)addSubView:(UIView *)subView
+  inRow:(NSInteger)row column:(NSInteger)column
+  withLayout:(nullable EWCGridCustomLayoutCallback)callback {
+
+  [self addSubView:subView startingInRow:row column:column
+    endingInRow:row column:column withLayout:callback];
+}
+
+- (void)addSubView:(UIView *)subView
+  startingInRow:(NSInteger)startRow column:(NSInteger)startColumn
+  endingInRow:(NSInteger)endRow column:(NSInteger)endColumn
+  withLayout:(nullable EWCGridCustomLayoutCallback)callback {
+
+  if (subView.superview != self) {
+    [self addSubview:subView];
+  }
+
   [_layoutProps setObject:[EWCGridLayoutProps propsForView:subView
     withStartingRow:startRow column:startColumn
-    endingRow:endRow column:endColumn] forKey:subView];
+    endingRow:endRow column:endColumn withLayout:callback] forKey:subView];
 }
 
 - (void)debugDraw {
@@ -300,7 +385,7 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
   // draw row dividers
   CGFloat rowOffset = 0.0;
   for (int i = 0; i < _rows.count - 1; ++i) {
-    CGFloat row = _rows[i].floatValue;
+    CGFloat row = _rows[i].doubleValue;
     rowOffset += row;
     CGFloat y = (rowOffset / rowTotal) * height;
     CGContextMoveToPoint(ctx, 0, y);
@@ -310,7 +395,7 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
   // draw column dividers
   CGFloat columnOffset = 0.0;
   for (int i = 0; i < _columns.count - 1; ++i) {
-    CGFloat column = _columns[i].floatValue;
+    CGFloat column = _columns[i].doubleValue;
     columnOffset += column;
     CGFloat x = (columnOffset / columnTotal) * width;
     CGContextMoveToPoint(ctx, x, 0);
@@ -329,7 +414,7 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
     CGFloat gutterSize = _minRowGutter * height / 2.0;
     CGFloat rowOffset = 0.0;
     for (int i = 0; i < _rows.count - 1; ++i) {
-      CGFloat row = _rows[i].floatValue;
+      CGFloat row = _rows[i].doubleValue;
       rowOffset += row;
       CGFloat y = (rowOffset / rowTotal) * height;
       CGContextMoveToPoint(ctx, 0, y - gutterSize);
@@ -349,7 +434,7 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
     CGFloat gutterSize = _minColumnGutter * width / 2.0;
     CGFloat columnOffset = 0.0;
     for (int i = 0; i < _columns.count - 1; ++i) {
-      CGFloat column = _columns[i].floatValue;
+      CGFloat column = _columns[i].doubleValue;
       columnOffset += column;
       CGFloat x = (columnOffset / columnTotal) * width;
       CGContextMoveToPoint(ctx, x - gutterSize, 0);

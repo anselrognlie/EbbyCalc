@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 #import "EWCCalculatorKey.h"
 
+@protocol EWCCalculatorDataProtocol;
+
 NS_ASSUME_NONNULL_BEGIN
 
 typedef void(^EWCCalculatorUpdatedCallback)(void);
@@ -24,9 +26,10 @@ typedef void(^EWCCalculatorUpdatedCallback)(void);
 @property (nonatomic, readonly, getter=isRateShifted) BOOL rateShifted;
 
 @property (nonatomic, readonly) NSString *displayContent;
+@property (nonatomic) NSInteger maximumDigits;
+@property (nonatomic) id<EWCCalculatorDataProtocol> dataProvider;
 
 + (instancetype)calculator;
-- (instancetype)init;
 
 - (void)registerUpdateCallbackWithBlock:(EWCCalculatorUpdatedCallback)callback;
 

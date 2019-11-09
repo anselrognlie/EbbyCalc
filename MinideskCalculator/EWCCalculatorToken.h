@@ -13,7 +13,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NS_ENUM(NSInteger, EWCCalculatorTokenType) {
-  EWCCalculatorEmptyTokenType = 1,
+  EWCCalculatorEmptyTokenType = 0,
   EWCCalculatorBinOpTokenType,
   EWCCalculatorDataTokenType,
   EWCCalculatorEqualTokenType,
@@ -27,14 +27,14 @@ typedef NS_ENUM(NSInteger, EWCCalculatorTokenType) {
 
 + (instancetype)tokenWithData:(NSDecimalNumber *)data;
 + (instancetype)tokenWithBinOp:(EWCCalculatorOpcode)opcode;
-+ (instancetype)tokenAsEqual;
++ (instancetype)tokenWithEqual:(EWCCalculatorOpcode)opcode;
 
 + (instancetype)empty;
 
 - (instancetype)init;
 - (instancetype)initWithData:(NSDecimalNumber *)data;
 - (instancetype)initWithBinOp:(EWCCalculatorOpcode)opcode;
-- (instancetype)initAsEqual;
+- (instancetype)initWithEqual:(EWCCalculatorOpcode)opcode;
 
 - (nonnull instancetype)copyWithZone:(nullable NSZone *)zone;
 

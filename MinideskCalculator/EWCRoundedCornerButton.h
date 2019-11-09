@@ -14,9 +14,11 @@ IB_DESIGNABLE
 @interface EWCRoundedCornerButton : UIButton
 
 @property (nonatomic) UIColor *highlightedBackgroundColor;
+@property (nonatomic) NSInteger cornerRadius;
 
 //@property (nonatomic) IBInspectable NSInteger cornerRadius;
 + (instancetype)buttonLabeled:(NSString *)label colored:(UIColor *)color backgroundColor:(UIColor *)backgroundColor;
+
 
 @end
 

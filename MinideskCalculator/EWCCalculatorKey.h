@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 typedef NS_ENUM(NSInteger, EWCCalculatorKey) {
-  EWCCalculatorNoKey = 1,
+  EWCCalculatorNoKey = -1,
   EWCCalculatorZeroKey,
   EWCCalculatorOneKey,
   EWCCalculatorTwoKey,
@@ -39,3 +39,4 @@ typedef NS_ENUM(NSInteger, EWCCalculatorKey) {
 };
 
 BOOL EWCCalculatorKeyIsBinaryOp(EWCCalculatorKey key);
+BOOL EWCCalculatorKeyIsRateKey(EWCCalculatorKey key);

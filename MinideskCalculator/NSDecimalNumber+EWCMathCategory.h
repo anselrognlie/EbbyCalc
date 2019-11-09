@@ -6,17 +6,19 @@
 //  Copyright © 2019 Ansel Rognlie. All rights reserved.
 //
 
-#import <AppKit/AppKit.h>
-
-
 #import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NSDecimalNumber (EWCMathCategory)
+
 -(NSDecimalNumber *)ewc_decimalNumberBySqrt;
 -(NSDecimalNumber *)ewc_decimalNumberBySqrtWithBehavior:(NSDecimalNumberHandler *)handler;
 -(NSDecimalNumber *)ewc_decimalNumberByAbsoluteDifferenceFrom:(NSDecimalNumber *)aNumber;
+
+// returns nil if the restriction fails
+-(NSDecimalNumber *)ewc_decimalNumberByRestrictingToDigits:(short)digits;
+
 @end
 
 NS_ASSUME_NONNULL_END

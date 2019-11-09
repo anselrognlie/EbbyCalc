@@ -21,3 +21,15 @@ BOOL EWCCalculatorKeyIsBinaryOp(EWCCalculatorKey key) {
       return NO;
   }
 }
+
+BOOL EWCCalculatorKeyIsRateKey(EWCCalculatorKey key) {
+  switch (key) {
+    case EWCCalculatorRateKey:
+    case EWCCalculatorTaxPlusKey:
+    case EWCCalculatorTaxMinusKey:
+      return YES;
+
+    default:
+      return NO;
+  }
+}

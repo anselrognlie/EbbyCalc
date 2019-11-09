@@ -334,5 +334,38 @@
   XCTAssertEqualObjects(_calculator.displayContent, @"6.");
 }
 
+- (void)testTaxPlusDisplayBehavior {
+  XCTAssertFalse(_calculator.isTaxPlusStatusVisible, @"tax plus should NOT be visible");
+  XCTAssertFalse(_calculator.isTaxStatusVisible, @"tax should NOT be visible");
+  [_calculator pressKey:EWCCalculatorTaxPlusKey];
+  XCTAssertTrue(_calculator.isTaxPlusStatusVisible, @"tax plus SHOULD be visible");
+  XCTAssertFalse(_calculator.isTaxStatusVisible, @"tax should NOT be visible");
+  [_calculator pressKey:EWCCalculatorTaxPlusKey];
+  XCTAssertFalse(_calculator.isTaxPlusStatusVisible, @"tax plus should NOT be visible");
+  XCTAssertTrue(_calculator.isTaxStatusVisible, @"tax SHOULD be visible");
+  [_calculator pressKey:EWCCalculatorTaxPlusKey];
+  XCTAssertTrue(_calculator.isTaxPlusStatusVisible, @"tax plus SHOULD be visible");
+  XCTAssertFalse(_calculator.isTaxStatusVisible, @"tax should NOT be visible");
+  [_calculator pressKey:EWCCalculatorClearKey];
+  XCTAssertFalse(_calculator.isTaxPlusStatusVisible, @"tax plus should NOT be visible");
+  XCTAssertFalse(_calculator.isTaxStatusVisible, @"tax should NOT be visible");
+}
+
+- (void)testTaxMinusDisplayBehavior {
+  XCTAssertFalse(_calculator.isTaxMinusStatusVisible, @"tax minus should NOT be visible");
+  XCTAssertFalse(_calculator.isTaxStatusVisible, @"tax should NOT be visible");
+  [_calculator pressKey:EWCCalculatorTaxMinusKey];
+  XCTAssertTrue(_calculator.isTaxMinusStatusVisible, @"tax minus SHOULD be visible");
+  XCTAssertFalse(_calculator.isTaxStatusVisible, @"tax should NOT be visible");
+  [_calculator pressKey:EWCCalculatorTaxMinusKey];
+  XCTAssertFalse(_calculator.isTaxMinusStatusVisible, @"tax minus should NOT be visible");
+  XCTAssertTrue(_calculator.isTaxStatusVisible, @"tax SHOULD be visible");
+  [_calculator pressKey:EWCCalculatorTaxMinusKey];
+  XCTAssertTrue(_calculator.isTaxMinusStatusVisible, @"tax minus SHOULD be visible");
+  XCTAssertFalse(_calculator.isTaxStatusVisible, @"tax should NOT be visible");
+  [_calculator pressKey:EWCCalculatorClearKey];
+  XCTAssertFalse(_calculator.isTaxMinusStatusVisible, @"tax minus should NOT be visible");
+  XCTAssertFalse(_calculator.isTaxStatusVisible, @"tax should NOT be visible");
+}
 
 @end

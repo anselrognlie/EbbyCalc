@@ -28,8 +28,8 @@ static EWCCalculatorToken *s_empty = nil;
   return [[EWCCalculatorToken alloc] initWithBinOp:opcode];
 }
 
-+ (instancetype)tokenAsEqual {
-  return [[EWCCalculatorToken alloc] initAsEqual];
++ (instancetype)tokenWithEqual:(EWCCalculatorOpcode)opcode {
+  return [[EWCCalculatorToken alloc] initWithEqual:opcode];
 }
 
 + (void)initialize {
@@ -66,10 +66,11 @@ static EWCCalculatorToken *s_empty = nil;
   return self;
 }
 
-- (instancetype)initAsEqual {
+- (instancetype)initWithEqual:(EWCCalculatorOpcode)opcode {
   self = [super init];
   if (self) {
     self.tokenType = EWCCalculatorEqualTokenType;
+    self.opcode = opcode;
   }
   return self;
 }

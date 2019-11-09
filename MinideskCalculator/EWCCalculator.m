@@ -11,6 +11,7 @@
 #import "EWCNumericField.h"
 #import "EWCCalculatorOpcode.h"
 #import "EWCCalculatorToken.h"
+#import "EWCCalculatorDataProtocol.h"
 
 typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   EWCCalculatorInputModeRegular = 1,
@@ -22,7 +23,6 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   BOOL _shift;
   BOOL _error;
   EWCNumericField *_accumulator;
-  EWCNumericField *_input;
   EWCNumericField *_display;
   BOOL _editingDisplay;  // NO when user hasn't contributed to input yet
   BOOL _displayAvailable;  // YES if consider display to have useable data
@@ -34,13 +34,17 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   EWCCalculatorInputMode _inputMode;
   short _fractionPower;
   short _sign;
-  EWCCalculatorKey _key;
+  short _numDigits;
+  EWCCalculatorKey _lastKey;
+  BOOL _showingJustTax;
+
+  NSDecimalNumber *_taxResultWithTax;
+  NSDecimalNumber *_taxResultJustTax;
 
   NSMutableArray<EWCCalculatorToken *> *_queue;
   short _ip;
 }
 
-@property (nonatomic, getter=isMemoryStatusVisible) BOOL memoryStatusVisible;
 @property (nonatomic, getter=isTaxStatusVisible) BOOL taxStatusVisible;
 @property (nonatomic, getter=isTaxPlusStatusVisible) BOOL taxPlusStatusVisible;
 @property (nonatomic, getter=isTaxMinusStatusVisible) BOOL taxMinusStatusVisible;
@@ -64,25 +68,47 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 }
 
 - (void)sharedInit {
-  _memoryStatusVisible = NO;
   _taxStatusVisible = NO;
   _taxPlusStatusVisible = NO;
   _taxMinusStatusVisible = NO;
   _taxPercentStatusVisible = NO;
-  _error = NO;
-  _editingDisplay = YES;
 
+  _maximumDigits = 0;
+
+  _error = NO;
+
+  _editingDisplay = NO;
+  _displayAvailable = NO;
+  _fractionPower = 0;
+  _sign = 1;
+  _display = [EWCNumericField new];
+
+  _operation = EWCCalculatorNoOpcode;
+  _operand = [EWCNumericField new];
+
+  _accumulator = [EWCNumericField new];
+
+  _shift = NO;
   _taxRate = [EWCNumericField new];
   _memory = [EWCNumericField new];
-  _display = [EWCNumericField new];
-  _accumulator = [EWCNumericField new];
-  _operand = [EWCNumericField new];
+
   _formatter = [self getFormatter];
-  _key = EWCCalculatorNoKey;
+
+  _lastKey = EWCCalculatorNoKey;
 
   _queue = [NSMutableArray<EWCCalculatorToken *> new];
+  _ip = 0;
 
   [self fullClear];
+}
+
+- (void)setDataProvider:(id<EWCCalculatorDataProtocol>)dataProvider {
+  _dataProvider = dataProvider;
+
+  if (_dataProvider) {
+    _taxRate.value = _dataProvider.taxRate;
+    [self setMemory:_dataProvider.memory];
+  }
 }
 
 - (NSNumberFormatter *)getFormatter {
@@ -107,10 +133,6 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   return display;
 }
 
-- (void)setDisplayValue:(NSDecimalNumber *)value {
-  _display.value = value;
-}
-
 - (NSString *)processDisplay:(NSString *)display {
   // append decimal if needed
   if (! [display containsString:@"."]) {
@@ -120,20 +142,34 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   return display;
 }
 
+- (BOOL)isMemoryStatusVisible {
+  return ! _memory.empty;
+}
+
+// implements public accessor
 - (BOOL)isRateShifted {
   return _shift;
 }
 
+// implements public accessor
 - (BOOL)isErrorStatusVisible {
   return _error;
 }
 
 - (void)fullClear {
   [self clearDisplay];
-  [self clearInput];
+  [self clearCalculation];
+  _shift = NO;
+}
+
+- (void)clearCalculation {
   [self clearAccumulator];
   [self clearOperand];
+
   _operation = EWCCalculatorNoOpcode;
+
+  [_queue removeAllObjects];
+  _ip = 0;
 }
 
 - (void)clearDisplay {
@@ -142,13 +178,9 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   _fractionPower = 0;
   _sign = 1;
   _formatter.minimumFractionDigits = 0;
-  _shift = NO;
+  _numDigits = 0;
   _editingDisplay = NO;
   _displayAvailable = NO;
-}
-
-- (void)clearInput {
-  [_input clear];
 }
 
 - (void)clearAccumulator {
@@ -165,6 +197,17 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 
 - (void)clearMemory {
   [_memory clear];
+
+  if (_dataProvider) {
+    _dataProvider.memory = _memory.value;
+  }
+}
+
+- (void)clearAllTaxStatus {
+  _taxStatusVisible = NO;
+  _taxPlusStatusVisible = NO;
+  _taxMinusStatusVisible = NO;
+  _taxPercentStatusVisible = NO;
 }
 
 - (void)setAccumulator:(NSDecimalNumber *)number {
@@ -175,30 +218,67 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   _operand.value = number;
 }
 
-- (void)setInput:(NSDecimalNumber *)number {
-  _input.value = number;
+- (NSDecimalNumber *)clampErrorToMaxDigits:(NSDecimalNumber *)number {
+
+  // nothing to do if we aren't clamping
+  if (_maximumDigits == 0) {
+    return number;
+  }
+
+  NSDecimalNumber *maxDigitNumber = [NSDecimalNumber decimalNumberWithMantissa:1 exponent:_maximumDigits isNegative:NO];
+
+  NSDecimalNumber *clamped = nil;
+  do {
+    number = [number decimalNumberByDividingBy:maxDigitNumber];
+    clamped = [number ewc_decimalNumberByRestrictingToDigits:_maximumDigits];
+  } while (clamped == nil);
+
+  return clamped;
 }
 
 - (void)setDisplay:(NSDecimalNumber *)number {
-  _display.value = number;
-  _editingDisplay = NO;
-  _displayAvailable = NO;
+  [self clearDisplay];
+
+  // restrict number to the registered number of digits
+  NSDecimalNumber *clamped = [number ewc_decimalNumberByRestrictingToDigits:_maximumDigits];
+
+  if (! clamped) {
+    // precision error
+    clamped = [self clampErrorToMaxDigits:number];
+    _display.value = clamped;
+    [self setError];
+  } else {
+    _display.value = clamped;
+  }
 }
 
 - (void)setTaxRate:(NSDecimalNumber *)number {
   _taxRate.value = number;
+
+  if (_dataProvider) {
+    _dataProvider.taxRate = number;
+  }
 }
 
 - (void)setMemory:(NSDecimalNumber *)number {
-  _memory.value = number;
-}
+  // restrict number to the registered number of digits
+  NSDecimalNumber *clamped = [number ewc_decimalNumberByRestrictingToDigits:_maximumDigits];
 
-- (void)addValueToMemory:(NSDecimalNumber *)number {
-  _memory.value = [_memory.value decimalNumberByAdding:number];
-}
+  if (clamped) {
+    // number fits
+    if ([clamped compare:[NSDecimalNumber zero]] == NSOrderedSame) {
+      [self clearMemory];
+    } else {
+      _memory.value = clamped;
 
-- (void)subtractValueFromMemory:(NSDecimalNumber *)number {
-  _memory.value = [_memory.value decimalNumberBySubtracting:number];
+      if (_dataProvider) {
+        _dataProvider.memory = clamped;
+      }
+    }
+  } else {
+    // precision error, set the value to display, which will trigger error automatically
+    [self setDisplay:number];
+  }
 }
 
 - (void)digitPressed:(int)digit {
@@ -214,6 +294,11 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 
   digit *= _sign;
 
+  if (_maximumDigits && (_numDigits + 1 > _maximumDigits)) {
+    // don't allow input of more than maximum digits
+    return;
+  }
+
   switch (_inputMode) {
     case EWCCalculatorInputModeRegular: {
       NSDecimalNumber *decimalDigit = [[NSDecimalNumber alloc] initWithInt:digit];
@@ -223,6 +308,12 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
     break;
 
     case EWCCalculatorInputModeFraction: {
+      // if we had no digits, then this is the first, so increment again, as we
+      // must have a leading zero
+      if (! _numDigits) {
+        _numDigits = 1;
+      }
+
       _fractionPower--;
       _formatter.minimumFractionDigits = -_fractionPower;
       NSDecimalNumber *decimalDigit = [[NSDecimalNumber alloc] initWithInt:digit];
@@ -231,13 +322,27 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
     }
     break;
   }
+
+  ++_numDigits;
+}
+
+- (void)performLastOperation {
+  NSDecimalNumber *acc = _accumulator.value;
+  NSDecimalNumber *opd = _operand.value;
+  EWCCalculatorOpcode op = _operation;
+
+  [self performBinaryOperation:op withData:acc andOperand:opd];
 }
 
 - (void)performBinaryOperation:(EWCCalculatorOpcode)op
   withData:(NSDecimalNumber *)data
   andOperand:(NSDecimalNumber *)operand {
 
-  if (op == EWCCalculatorDivideOpcode
+  NSDecimalNumber *percent = nil;
+  NSDecimalNumber *tmp = nil;
+  NSDecimalNumber *hundredth = [NSDecimalNumber decimalNumberWithMantissa:1 exponent:-2 isNegative:NO];
+
+  if ((op == EWCCalculatorDivideOpcode || op == EWCCalculatorDividePercentOpcode)
     && [operand isEqualToNumber:@0]) {
     // error
     [self setError];
@@ -246,19 +351,42 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 
   switch (op) {
     case EWCCalculatorAddOpcode:
-      [self setAccumulator:[data decimalNumberByAdding:operand]];
+      data = [data decimalNumberByAdding:operand];
       break;
 
     case EWCCalculatorSubtractOpcode:
-      [self setAccumulator:[data decimalNumberBySubtracting:operand]];
+      data = [data decimalNumberBySubtracting:operand];
       break;
 
     case EWCCalculatorMultiplyOpcode:
-      [self setAccumulator:[data decimalNumberByMultiplyingBy:operand]];
+      data = [data decimalNumberByMultiplyingBy:operand];
       break;
 
     case EWCCalculatorDivideOpcode:
-      [self setAccumulator:[data decimalNumberByDividingBy:operand]];
+      data = [data decimalNumberByDividingBy:operand];
+      break;
+
+    case EWCCalculatorAddPercentOpcode:
+      tmp = data;
+      percent = [[operand decimalNumberByMultiplyingBy:hundredth] decimalNumberByMultiplyingBy:data];
+      data = [data decimalNumberByAdding:percent];
+      break;
+
+    case EWCCalculatorSubtractPercentOpcode:
+      percent = [[operand decimalNumberByMultiplyingBy:hundredth] decimalNumberByMultiplyingBy:data];
+      data = [data decimalNumberBySubtracting:percent];
+      break;
+
+    case EWCCalculatorMultiplyPercentOpcode:
+      data = [[operand decimalNumberByMultiplyingBy:hundredth] decimalNumberByMultiplyingBy:data];
+      break;
+
+    case EWCCalculatorDividePercentOpcode:
+      data = [data decimalNumberByDividingBy:[operand decimalNumberByMultiplyingBy:hundredth]];
+      break;
+
+    case EWCCalculatorNoOpcode:
+      // nop
       break;
 
     default:
@@ -266,8 +394,9 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
       return;
   }
 
-  [self setOperand:operand];
   _operation = op;
+  [self setAccumulator:data];
+  [self setOperand:operand];
   [self setDisplay:_accumulator.value];
 }
 
@@ -323,8 +452,22 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   // no action if in error state
   if (_error) { return; }
 
-  [self setDisplay:[_display.value ewc_decimalNumberBySqrt]];
+  BOOL shouldSetError = NO;
+
+  NSDecimalNumber *tmp = _display.value;
+  if ([tmp compare:[NSDecimalNumber zero]] == NSOrderedAscending) {
+    // negative
+    // treat as positive for the sqrt, but riase an error
+    tmp = [[NSDecimalNumber zero] decimalNumberBySubtracting:tmp];
+    shouldSetError = YES;
+  }
+
+  [self setDisplay:[tmp ewc_decimalNumberBySqrt]];
   _displayAvailable = YES;
+
+  if (shouldSetError) {
+    [self setError];
+  }
 }
 
 - (void)decimalPressed {
@@ -392,14 +535,6 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
       op = EWCCalculatorDivideOpcode;
       break;
 
-    case EWCCalculatorPercentKey:
-      op = EWCCalculatorPercentOpcode;
-      break;
-
-    case EWCCalculatorEqualKey:
-      op = EWCCalculatorEqualOpcode;
-      break;
-
     default:
       op = EWCCalculatorNoOpcode;
       break;
@@ -431,37 +566,9 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   _error = YES;
   [_queue removeAllObjects];
   _ip = 0;
-}
-
-- (void)performLastOperation {
-  NSDecimalNumber *acc = _accumulator.value;
-  NSDecimalNumber *opd = _operand.value;
-  EWCCalculatorOpcode op = _operation;
-
-  switch (op) {
-    case EWCCalculatorAddOpcode:
-      acc = [acc decimalNumberByAdding:opd];
-      break;
-
-    case EWCCalculatorSubtractOpcode:
-      acc = [acc decimalNumberBySubtracting:opd];
-      break;
-
-    case EWCCalculatorMultiplyOpcode:
-      acc = [acc decimalNumberByMultiplyingBy:opd];
-      break;
-
-    case EWCCalculatorDivideOpcode:
-      acc = [acc decimalNumberByDividingBy:opd];
-      break;
-
-    default:
-      // nop
-      return;
-  }
-
-  [self setAccumulator:acc];
-  [self setDisplay:acc];
+  [self clearAccumulator];
+  [self clearOperand];
+  _operation = EWCCalculatorNoOpcode;
 }
 
 - (BOOL)parseStartingWithOp:(EWCCalculatorToken *)aToken {
@@ -471,8 +578,6 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   // od= - binary operation
   // odo - binary operation with a continuation
 
-  BOOL shouldCommit = NO;
-
   EWCCalculatorToken *o1 = nil, *d1 = nil, *o2 = nil, *eq = nil;
   o1 = aToken;
 
@@ -481,7 +586,9 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
     eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
     if (eq) {
       // o= - change the operator used for last operation (and execute it)
-      _operation = o1.opcode;
+      EWCCalculatorOpcode op = EWCCalculatorOpcodeModifyForEqualMode(o1.opcode, eq.opcode);
+      _operation = op;
+      //_operation = o1.opcode;
       [self performLastOperation];
       return YES;
     }
@@ -495,7 +602,9 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
     if (eq) {
       // od= - binary operation
       NSDecimalNumber *acc = _accumulator.value;
-      [self performBinaryOperation:o1.opcode withData:acc andOperand:d1.data];
+      EWCCalculatorOpcode op = EWCCalculatorOpcodeModifyForEqualMode(o1.opcode, eq.opcode);
+      [self performBinaryOperation:op withData:acc andOperand:d1.data];
+//      [self performBinaryOperation:o1.opcode withData:acc andOperand:d1.data];
       return YES;
     }
 
@@ -507,7 +616,7 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   [self pushbackToken];
   [self performBinaryOperation:o1.opcode withData:acc andOperand:d1.data];
 
-  return shouldCommit;
+  return YES;
 }
 
 - (BOOL)parseStartingWithData:(EWCCalculatorToken *)aToken {
@@ -517,8 +626,6 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   // do= - unary operation on d
   // dod= - binary operation
   // dodo - binary operation with a continuation
-
-  BOOL shouldCommit = NO;
 
   EWCCalculatorToken *d1 = nil, *o1 = nil, *d2 = nil, *o2 = nil, *eq = nil;
   d1 = aToken;
@@ -542,8 +649,12 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   if (! d2) {
     eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
     if (eq) {
-      // do= - unary operation on d
-      [self performUnaryOperation:o1.opcode withData:d1.data];
+      // do= - unary operation on d, but not for percent
+      if (eq.opcode == EWCCalculatorEqualOpcode) {
+        [self performUnaryOperation:o1.opcode withData:d1.data];
+      }
+
+      // regardless, advance the queue
       return YES;
     }
 
@@ -555,7 +666,8 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
     eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
     if (eq) {
       // dod= - binary operation
-      [self performBinaryOperation:o1.opcode withData:d1.data andOperand:d2.data];
+      EWCCalculatorOpcode op = EWCCalculatorOpcodeModifyForEqualMode(o1.opcode, eq.opcode);
+      [self performBinaryOperation:op withData:d1.data andOperand:d2.data];
       return YES;
     }
 
@@ -566,7 +678,7 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   [self pushbackToken];
   [self performBinaryOperation:o1.opcode withData:d1.data andOperand:d2.data];
 
-  return shouldCommit;
+  return YES;
 }
 
 - (void)parseQueue {
@@ -586,8 +698,12 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
       break;
 
     case EWCCalculatorEqualTokenType:
-      // perform last operation
-      [self performLastOperation];
+      // perform last operation (only if normal equal)
+      if (token.opcode == EWCCalculatorEqualOpcode) {
+        [self performLastOperation];
+      }
+
+      // but clear the queue regardless
       shouldCommit = YES;
       break;
 
@@ -650,8 +766,39 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   [self parseQueue];
 }
 
+- (void)enqueueEqual:(EWCCalculatorOpcode)op {
+
+  // should not allow back to back equal tokens
+  // they get removed due to processing, so a back to back equal is strange
+  if (_queue.count > 0) {
+    EWCCalculatorToken *last = _queue[_queue.count - 1];
+    if (last.tokenType == EWCCalculatorEqualTokenType) {
+      [self setError];
+      return;
+    }
+  }
+
+  [_queue addObject:[EWCCalculatorToken tokenWithEqual:op]];
+  [self parseQueue];
+}
+
 - (void)enqueueData:(NSDecimalNumber *)data {
-  [_queue addObject:[EWCCalculatorToken tokenWithData:data]];
+
+  // if the last item in queue is data, and we are adding data,
+  // just replace it (user could have been working with memory or rate)
+  BOOL replaced = NO;
+  if (_queue.count > 0) {
+    EWCCalculatorToken *last = _queue[_queue.count - 1];
+    if (last.tokenType == EWCCalculatorDataTokenType) {
+      _queue[_queue.count - 1] = [EWCCalculatorToken tokenWithData:data];
+      replaced = YES;
+    }
+  }
+
+  if (! replaced) {
+    [_queue addObject:[EWCCalculatorToken tokenWithData:data]];
+  }
+
   [self parseQueue];
 }
 
@@ -660,40 +807,196 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   [self parseQueue];
 }
 
-- (void)resetAll {
-  [self fullClear];
-  [_queue removeAllObjects];
-}
-
 - (void)processClearKey {
   if (_error) {
     _error = NO;
+    [self clearAllTaxStatus];
     return;
   }
 
-  [self resetAll];
+  [self fullClear];
 }
 
-- (void)runErrorStateWithInput:(EWCCalculatorKey)key {
+- (void)processMemoryKey {
+  _editingDisplay = NO;
+
+  if (_lastKey == EWCCalculatorMemoryKey) {
+    // clear memory
+    [self clearMemory];
+  } else {
+    // recall memory
+    [self setDisplay:_memory.value];
+    _displayAvailable = YES;
+  }
+}
+
+- (void)processMemoryPlusKey {
+  _editingDisplay = NO;
+
+  NSDecimalNumber *mem = _memory.value;
+  NSDecimalNumber *opd = _display.value;
+  mem = [mem decimalNumberByAdding:opd];
+
+  [self setMemory:mem];
+}
+
+- (void)processMemoryMinusKey {
+  _editingDisplay = NO;
+
+  NSDecimalNumber *mem = _memory.value;
+  NSDecimalNumber *opd = _display.value;
+  mem = [mem decimalNumberBySubtracting:opd];
+
+  [self setMemory:mem];
+}
+
+- (void)processRateKey {
+  _shift = ! _shift;
+  _editingDisplay = NO;
+}
+
+- (void)displayTaxResult {
+  NSDecimalNumber *value;
+
+  if (_showingJustTax) {
+    value = _taxResultJustTax;
+  } else {
+    value = _taxResultWithTax;
+  }
+
+  [self setDisplay:value];
+//  [self setAccumulator:value];
+  _displayAvailable = YES;
+}
+
+- (void)processTaxPlusKey {
+  if (_shift) {
+    // treat as store
+    [self setTaxRate:_display.value];
+    _taxPercentStatusVisible = YES;
+    [self clearCalculation];
+  } else {
+    // treat as tax plus
+    if (_lastKey != EWCCalculatorTaxPlusKey) {
+      // first press, so do the calculation and show the summed result
+      _showingJustTax = NO;
+      _taxPlusStatusVisible = YES;
+
+      NSDecimalNumber *hundredth = [NSDecimalNumber decimalNumberWithMantissa:1 exponent:-2 isNegative:NO];
+      NSDecimalNumber *mult = [_taxRate.value decimalNumberByMultiplyingBy:hundredth];
+      NSDecimalNumber *tax = [_display.value decimalNumberByMultiplyingBy:mult];
+      NSDecimalNumber *tmp = [_display.value decimalNumberByAdding:tax];
+
+      _taxResultWithTax = tmp;
+      _taxResultJustTax = tax;
+
+    } else {
+      _showingJustTax = ! _showingJustTax;
+
+      // use the cached tax result and show the appropriate part
+      if (_showingJustTax) {
+        _taxStatusVisible = YES;
+      } else {
+        _taxPlusStatusVisible = YES;
+      }
+    }
+
+    [self displayTaxResult];
+  }
+}
+
+- (void)processTaxMinusKey {
+  if (_shift) {
+    // treat as recall
+    [self setDisplay:_taxRate.value];
+    _taxPercentStatusVisible = YES;
+    [self clearCalculation];
+  } else {
+    // treat as tax minus
+    if (_lastKey != EWCCalculatorTaxMinusKey) {
+      // first press, so do the calculation and show the difference result
+      _showingJustTax = NO;
+      _taxMinusStatusVisible = YES;
+
+      NSDecimalNumber *hundredth = [NSDecimalNumber decimalNumberWithMantissa:1 exponent:-2 isNegative:NO];
+      NSDecimalNumber *mult = [_taxRate.value decimalNumberByMultiplyingBy:hundredth];
+      mult = [mult decimalNumberByAdding:[NSDecimalNumber one]];
+
+      if ([mult compare:[NSDecimalNumber zero]] != NSOrderedSame) {
+        NSDecimalNumber *tmp = [_display.value decimalNumberByDividingBy:mult];
+        NSDecimalNumber *tax = [_display.value decimalNumberBySubtracting:tmp];
+
+        _taxResultWithTax = tmp;
+        _taxResultJustTax = tax;
+
+      } else {
+        [self setError];
+      }
+
+    } else {
+      _showingJustTax = ! _showingJustTax;
+
+      // use the cached tax result and show the appropriate part
+      if (_showingJustTax) {
+        _taxStatusVisible = YES;
+      } else {
+        _taxMinusStatusVisible = YES;
+      }
+    }
+
+    if (! _error) {
+      [self displayTaxResult];
+    }
+  }
+}
+
+- (void)processInputForErrorState:(EWCCalculatorKey)key {
   if (key == EWCCalculatorClearKey) {
     [self processClearKey];
   }
 }
 
-- (BOOL)processKey:(EWCCalculatorKey)key {
+- (void)processKey:(EWCCalculatorKey)key {
   BOOL handled = NO;
+  BOOL isRateKey = EWCCalculatorKeyIsRateKey(key);
 
   if (_error) {
-    [self runErrorStateWithInput:key];
-    return YES;
+    [self processInputForErrorState:key];
+    return;
+  }
+
+  // any key clears the tax-related status displays
+  [self clearAllTaxStatus];
+
+  // if not a tax rate-related key, unshift
+  if (! isRateKey) {
+    _shift = NO;
   }
 
   handled = [self processInputKey:key];
-  if (handled) { return handled; }
+  if (handled) { return; }
 
   if (key == EWCCalculatorSqrtKey) {
     [self sqrtPressed];
-    return YES;
+    return;
+  } else if (key == EWCCalculatorRateKey) {
+    [self processRateKey];
+    return;
+  } else if (key == EWCCalculatorTaxPlusKey) {
+    [self processTaxPlusKey];
+    return;
+  } else if (key == EWCCalculatorTaxMinusKey) {
+    [self processTaxMinusKey];
+    return;
+  } else if (key == EWCCalculatorMemoryKey) {
+    [self processMemoryKey];
+    return;
+  } else if (key == EWCCalculatorMemoryPlusKey) {
+    [self processMemoryPlusKey];
+    return;
+  } else if (key == EWCCalculatorMemoryMinusKey) {
+    [self processMemoryMinusKey];
+    return;
   }
 
   // we pressed a key that doesn't contribute to editing the display
@@ -707,20 +1010,20 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 
   if (key == EWCCalculatorClearKey) {
     [self processClearKey];
-    return YES;
   } else if (EWCCalculatorKeyIsBinaryOp(key)) {
     [self enqueueBinOp:[self getOpcodeFromKey:key]];
   } else if (key == EWCCalculatorEqualKey) {
-    [self enqueueToken:[EWCCalculatorToken tokenAsEqual]];
+    [self enqueueEqual:EWCCalculatorEqualOpcode];
+  } else if (key == EWCCalculatorPercentKey) {
+    [self enqueueEqual:EWCCalculatorPercentOpcode];
   }
-
-  return handled;
 }
 
 - (void)pressKey:(EWCCalculatorKey)key {
-  _key = key;
 
   [self processKey:key];
+
+  _lastKey = key;
 
   if (_callback) {
     _callback();

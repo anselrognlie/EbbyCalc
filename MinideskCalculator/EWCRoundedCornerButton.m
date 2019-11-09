@@ -20,15 +20,29 @@
   colored:(UIColor *)color
   backgroundColor:(UIColor *)backgroundColor {
 
-  EWCRoundedCornerButton *button = [EWCRoundedCornerButton new];
-  [button setBackgroundColor:backgroundColor];
-  [button setTitleColor:color forState:UIControlStateNormal];
-  [button setTitle:label forState:UIControlStateNormal];
-
-  button.normalBackgroundColor = backgroundColor;
-  button.cornerRadius = -1;
+  EWCRoundedCornerButton *button = [[EWCRoundedCornerButton alloc]
+    initWithLabel:label
+    color:color
+    backgroundColor:backgroundColor];
 
   return button;
+}
+
+- (instancetype)initWithLabel:(NSString *)label
+  color:(UIColor *)color
+  backgroundColor:(UIColor *)backgroundColor {
+
+  self = [super init];
+  if (self) {
+    [self setBackgroundColor:backgroundColor];
+    [self setTitleColor:color forState:UIControlStateNormal];
+    [self setTitle:label forState:UIControlStateNormal];
+
+    self.normalBackgroundColor = backgroundColor;
+    self.cornerRadius = -1;
+  }
+
+  return self;
 }
 
 - (void)layoutSubviews {
@@ -64,31 +78,5 @@
     }
   }
 }
-
-- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
-  if (! _customPointTest) {
-    return [super pointInside:point withEvent:event];
-  }
-
-  return _customPointTest(point, event, ^BOOL(CGPoint point, UIEvent * _Nullable event){
-    return [super pointInside:point withEvent:event];
-  });
-}
-
-//- (void)setCornerRadius:(NSInteger)value {
-//  self.layer.cornerRadius = value;
-//}
-//
-//- (NSInteger)cornerRadius {
-//  return self.layer.cornerRadius;
-//}
-
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect {
-    // Drawing code
-}
-*/
 
 @end

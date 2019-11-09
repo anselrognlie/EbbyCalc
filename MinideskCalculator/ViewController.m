@@ -9,7 +9,7 @@
 #import "ViewController.h"
 
 #import "EWCGridLayoutView.h"
-#import "EWCRoundedCornerButton.h"
+#import "EWCAccessibleRoundedCornerButton.h"
 #import "EWCCalculator.h"
 #import "EWCCalculatorUserDefaultsData.h"
 
@@ -478,21 +478,13 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   backgroundColor:(UIColor *)backgroundColor
   fontSize:(CGFloat)fontSize {
 
-  EWCRoundedCornerButton *button = [EWCRoundedCornerButton buttonLabeled:label
+  EWCRoundedCornerButton *button = [EWCAccessibleRoundedCornerButton buttonLabeled:label
     colored:color
     backgroundColor:backgroundColor];
   button.accessibilityLabel = accessibilityLabel;
   button.highlightedBackgroundColor = highlight;
   button.titleLabel.font = [UIFont systemFontOfSize:fontSize];
   [button addTarget:self action:selector forControlEvents:UIControlEventTouchUpInside];
-
-  button.customPointTest = ^BOOL (CGPoint point, UIEvent * _Nullable event, EWCRoundedCornerDefaultPointTest defaultTest) {
-    if (UIAccessibilityIsVoiceOverRunning()) {
-      return defaultTest(point, event);
-    }
-
-    return NO;
-  };
 
   return button;
 }

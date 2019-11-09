@@ -1,19 +1,16 @@
 //
-//  EWCRoundedCornerButton.h
-//  Minidesk Calculator
+//  EWCGridLayoutRoundedButton.h
+//  MinideskCalculator
 //
-//  Created by Ansel Rognlie on 10/23/19.
+//  Created by Ansel Rognlie on 11/9/19.
 //  Copyright © 2019 Ansel Rognlie. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import "EWCRoundedCornerButton.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface EWCRoundedCornerButton : UIButton
-
-@property (nonatomic) UIColor *highlightedBackgroundColor;
-@property (nonatomic) NSInteger cornerRadius;
+@interface EWCAccessibleRoundedCornerButton : EWCRoundedCornerButton
 
 + (instancetype)buttonLabeled:(NSString *)label colored:(UIColor *)color backgroundColor:(UIColor *)backgroundColor;
 

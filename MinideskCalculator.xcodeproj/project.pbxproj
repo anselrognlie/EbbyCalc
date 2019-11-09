@@ -20,7 +20,6 @@
 		FDBA3EF4236CC3CF00780234 /* EWCCalculatorTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EF3236CC3CF00780234 /* EWCCalculatorTests.m */; };
 		FDC1A4C7236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */; };
 		FDC1A4C9236FA9DD00D21FEB /* EWCMathTests.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4C8236FA9DD00D21FEB /* EWCMathTests.m */; };
-		FDC1A4CC2370C1BC00D21FEB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = FDC1A4CB2370C1BC00D21FEB /* Localizable.strings */; };
 		FDC1A4CF2371349B00D21FEB /* EWCNumericField.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4CE2371349B00D21FEB /* EWCNumericField.m */; };
 		FDC1A4D22372470600D21FEB /* EWCCalculatorToken.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4D12372470600D21FEB /* EWCCalculatorToken.m */; };
 		FDC1A4D52372495B00D21FEB /* EWCCalculatorOpcode.h in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4D42372495B00D21FEB /* EWCCalculatorOpcode.h */; };
@@ -28,6 +27,7 @@
 		FDC1A4D923726CF200D21FEB /* EWCCalculatorOpcode.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4D823726CF200D21FEB /* EWCCalculatorOpcode.m */; };
 		FDC1A4DC2375310100D21FEB /* NSArray+EWCAlgorithmCategory.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4DB2375310100D21FEB /* NSArray+EWCAlgorithmCategory.m */; };
 		FDC1A4F92376817B00D21FEB /* EWCCalculatorUserDefaultsData.m in Sources */ = {isa = PBXBuildFile; fileRef = FDC1A4F82376817B00D21FEB /* EWCCalculatorUserDefaultsData.m */; };
+		FDC1A4FC237758C400D21FEB /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = FDC1A4FE237758C400D21FEB /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,7 +66,6 @@
 		FDC1A4C5236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSDecimalNumber+EWCMathCategory.h"; sourceTree = "<group>"; };
 		FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSDecimalNumber+EWCMathCategory.m"; sourceTree = "<group>"; };
 		FDC1A4C8236FA9DD00D21FEB /* EWCMathTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCMathTests.m; sourceTree = "<group>"; };
-		FDC1A4CB2370C1BC00D21FEB /* Localizable.strings */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		FDC1A4CD2371349B00D21FEB /* EWCNumericField.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCNumericField.h; sourceTree = "<group>"; };
 		FDC1A4CE2371349B00D21FEB /* EWCNumericField.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCNumericField.m; sourceTree = "<group>"; };
 		FDC1A4D02372470600D21FEB /* EWCCalculatorToken.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCCalculatorToken.h; sourceTree = "<group>"; };
@@ -80,6 +79,7 @@
 		FDC1A4F623767FCF00D21FEB /* EWCCalculatorDataProtocol.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCCalculatorDataProtocol.h; sourceTree = "<group>"; };
 		FDC1A4F72376817B00D21FEB /* EWCCalculatorUserDefaultsData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCCalculatorUserDefaultsData.h; sourceTree = "<group>"; };
 		FDC1A4F82376817B00D21FEB /* EWCCalculatorUserDefaultsData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCCalculatorUserDefaultsData.m; sourceTree = "<group>"; };
+		FDC1A4FD237758C400D21FEB /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,7 +172,7 @@
 		FDC1A4CA2370C14500D21FEB /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				FDC1A4CB2370C1BC00D21FEB /* Localizable.strings */,
+				FDC1A4FE237758C400D21FEB /* Localizable.strings */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -257,7 +257,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				FDC1A4CC2370C1BC00D21FEB /* Localizable.strings in Resources */,
+				FDC1A4FC237758C400D21FEB /* Localizable.strings in Resources */,
 				FDBA3EC4236CC30500780234 /* LaunchScreen.storyboard in Resources */,
 				FDBA3EC1236CC30500780234 /* Assets.xcassets in Resources */,
 				FDBA3EBF236CC30200780234 /* Main.storyboard in Resources */,
@@ -330,6 +330,14 @@
 				FDBA3EC3236CC30500780234 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		FDC1A4FE237758C400D21FEB /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				FDC1A4FD237758C400D21FEB /* en */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */

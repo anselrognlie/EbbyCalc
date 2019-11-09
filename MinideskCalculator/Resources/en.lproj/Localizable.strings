@@ -7,35 +7,64 @@
 */
 
 "Rate Button" = "rate";
+"Rate Aria Label" = "toggle tax buttons between applying tax and store and recall";
 "Tax+ Button" = "tax+";
+"Tax+ Aria Label" = "apply tax";
 "Store Button" = "store";
+"Store Aria Label" = "store tax rate";
 "Tax- Button" = "tax-";
+"Tax- Aria Label" = "deduct tax";
 "Recall Button" = "recall";
+"Recall Aria Label" = "recall tax rate";
 
 "Clear Button" = "C";
+"Clear Aria Label" = "clear";
 "All Clear Button" = "AC";
+"All Clear Aria Label" = "clear all";
 
 "Zero Button" = "0";
+"Zero Aria Label" = "zero keypad";
 "One Button" = "1";
+"One Aria Label" = "one keypad";
 "Two Button" = "2";
+"Two Aria Label" = "two keypad";
 "Three Button" = "3";
+"Three Aria Label" = "three keypad";
 "Four Button" = "4";
+"Four Aria Label" = "four keypad";
 "Five Button" = "5";
+"Five Aria Label" = "five keypad";
 "Six Button" = "6";
+"Six Aria Label" = "six keypad";
 "Seven Button" = "7";
+"Seven Aria Label" = "seven keypad";
 "Eight Button" = "8";
+"Eight Aria Label" = "eight keypad";
 "Nine Button" = "9";
+"Nine Aria Label" = "nine keypad";
 "Decimal Button" = ".";
+"Decimal Aria Label" = "decimal point";
 "Sign Button" = "+|-";
+"Sign Aria Label" = "change sign";
 
 "Multiply Button" = "×";
+"Multiply Aria Label" = "multiply";
 "Divide Button" = "÷";
+"Divide Aria Label" = "divide";
 "Subtract Button" = "−";
+"Subtract Aria Label" = "subtract";
 "Add Button" = "+";
+"Add Aria Label" = "add";
 "Percent Button" = "%";
+"Percent Aria Label" = "percent";
 "Sqrt Button" = "√";
+"Sqrt Aria Label" = "square root";
 "Equal Button" = "=";
+"Equal Aria Label" = "equal";
 
 "Memory Button" = "mrc";
+"Memory Aria Label" = "memory recall or clear";
 "Memory- Button" = "m-";
+"Memory- Aria Label" = "memory subtract";
 "Memory+ Button" = "m+";
+"Memory+ Aria Label" = "memory add";

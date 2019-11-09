@@ -158,62 +158,74 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   CGFloat fontDim = (sWidth < sHeight) ? sWidth : sHeight;
 
   button = [self makeDigitButton:NSLocalizedString(@"Zero Button", @"label for the 0 button")
+    accessibilityLabel:NSLocalizedString(@"Zero Aria Label", @"voiceover label for the 0 button")
     action:@selector(onZeroButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"One Button", @"label for the 1 button")
+    accessibilityLabel:NSLocalizedString(@"One Aria Label", @"voiceover label for the 1 button")
     action:@selector(onOneButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"Two Button", @"label for the 2 button")
+    accessibilityLabel:NSLocalizedString(@"Two Aria Label", @"voiceover label for the 2 button")
     action:@selector(onTwoButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"Three Button", @"label for the 3 button")
+    accessibilityLabel:NSLocalizedString(@"Three Aria Label", @"voiceover label for the 3 button")
     action:@selector(onThreeButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"Four Button", @"label for the 4 button")
+    accessibilityLabel:NSLocalizedString(@"Four Aria Label", @"voiceover label for the 4 button")
     action:@selector(onFourButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"Five Button", @"label for the 5 button")
+    accessibilityLabel:NSLocalizedString(@"Five Aria Label", @"voiceover label for the 5 button")
     action:@selector(onFiveButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"Six Button", @"label for the 6 button")
+    accessibilityLabel:NSLocalizedString(@"Six Aria Label", @"voiceover label for the 6 button")
     action:@selector(onSixButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"Seven Button", @"label for the 7 button")
+    accessibilityLabel:NSLocalizedString(@"Seven Aria Label", @"voiceover label for the 7 button")
     action:@selector(onSevenButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"Eight Button", @"label for the 8 button")
+    accessibilityLabel:NSLocalizedString(@"Eight Aria Label", @"voiceover label for the 8 button")
     action:@selector(onEightButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"Nine Button", @"label for the 9 button")
+    accessibilityLabel:NSLocalizedString(@"Nine Aria Label", @"voiceover label for the 9 button")
     action:@selector(onNineButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Clear Button", "label for the button that clears the input")
+    accessibilityLabel:NSLocalizedString(@"Clear Aria Label", @"voiceover label for the button that clears the input")
     action:@selector(onClearButtonPressed:forEvent:) forWidth:fontDim];
   [_textButtons addObject:button];
   _clearButton = button;
   [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Rate Button", "label for the button that switches to tax rate management mode")
+    accessibilityLabel:NSLocalizedString(@"Rate Aria Label", @"voiceover label for the button that switches to tax rate management mode")
     action:@selector(onRateButtonPressed:forEvent:) forWidth:fontDim];
   [button setTitleColor:[ViewController shiftedTextColor]
     forState:UIControlStateNormal];
@@ -221,74 +233,88 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Tax+ Button", "label for the button that adds tax to the current value")
+    accessibilityLabel:NSLocalizedString(@"Tax+ Aria Label", @"voiceover label for the button that adds tax to the current value")
     action:@selector(onTaxPlusButtonPressed:forEvent:) forWidth:fontDim];
   [_textButtons addObject:button];
   _taxPlusButton = button;
   [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Tax- Button", "label for the button that removes tax from the current value")
+    accessibilityLabel:NSLocalizedString(@"Tax- Aria Label", @"voiceover label for the button that removes tax from the current value")
     action:@selector(onTaxMinusButtonPressed:forEvent:) forWidth:fontDim];
   [_textButtons addObject:button];
   _taxMinusButton = button;
   [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Memory Button", @"label for the button that retrieves and clears the memory")
+    accessibilityLabel:NSLocalizedString(@"Memory Aria Label", @"voiceover label for the button that retrieves and clears the memory")
     action:@selector(onMemoryButtonPressed:forEvent:) forWidth:fontDim];
   [_textButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Memory+ Button", @"label for the button that adds to the memory")
+    accessibilityLabel:NSLocalizedString(@"Memory+ Aria Label", @"voiceover label for the button that adds to the memory")
     action:@selector(onMemoryPlusButtonPressed:forEvent:) forWidth:fontDim];
   [_textButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Memory- Button", @"label for the button that subtracts from the memory")
+    accessibilityLabel:NSLocalizedString(@"Memory- Aria Label", @"voiceover label for the button that subtracts from the memory")
     action:@selector(onMemoryMinusButtonPressed:forEvent:) forWidth:fontDim];
   [_textButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeMainOperatorButton:NSLocalizedString(@"Add Button", @"label for the button that performs addition")
+    accessibilityLabel:NSLocalizedString(@"Add Aria Label", @"voiceover label for the button that performs addition")
     action:@selector(onAddButtonPressed:forEvent:) forWidth:fontDim];
   [_opButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeMainOperatorButton:NSLocalizedString(@"Subtract Button", @"label for the button that performs subtraction")
+    accessibilityLabel:NSLocalizedString(@"Subtract Aria Label", @"voiceover label for the button that performs subtraction")
     action:@selector(onSubtractButtonPressed:forEvent:) forWidth:fontDim];
   [_opButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeMainOperatorButton:NSLocalizedString(@"Multiply Button", @"label for the button that performs multiplication")
+    accessibilityLabel:NSLocalizedString(@"Multiply Aria Label", @"voiceover label for the button that performs multiplication")
     action:@selector(onMultiplyButtonPressed:forEvent:) forWidth:fontDim];
   [button setTitleEdgeInsets:UIEdgeInsetsMake(0, 0, 10, 0)];
   [_opButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeMainOperatorButton:NSLocalizedString(@"Divide Button", @"label for the button that performs division")
+    accessibilityLabel:NSLocalizedString(@"Divide Aria Label", @"voiceover label for the button that performs division")
     action:@selector(onDivideButtonPressed:forEvent:) forWidth:fontDim];
   [_opButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeSubOperatorButton:NSLocalizedString(@"Sign Button", @"label for the button that toggles the sign")
+    accessibilityLabel:NSLocalizedString(@"Sign Aria Label", @"voiceover label for the button that toggles the sign")
     action:@selector(onSignButtonPressed:forEvent:) forWidth:fontDim];
   [_textButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"Decimal Button", @"label for the button that designates the decimal point")
+    accessibilityLabel:NSLocalizedString(@"Decimal Aria Label", @"voiceover label for the button that designates the decimal point")
     action:@selector(onDecimalButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeSubOperatorButton:NSLocalizedString(@"Percent Button", @"label for the button that take percents")
+    accessibilityLabel:NSLocalizedString(@"Percent Aria Label", @"voiceover label for the button that take percents")
     action:@selector(onPercentButtonPressed:forEvent:) forWidth:fontDim];
   [_textButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeSubOperatorButton:NSLocalizedString(@"Sqrt Button", @"label for the button that performs square roots")
+    accessibilityLabel:NSLocalizedString(@"Sqrt Aria Label", @"voiceover label for the button that performs square roots")
     action:@selector(onSqrtButtonPressed:forEvent:) forWidth:fontDim];
   [_textButtons addObject:button];
   [_allButtons addObject:button];
 
   button = [self makeDigitButton:NSLocalizedString(@"Equal Button", @"label for the button that executes operations")
+    accessibilityLabel:NSLocalizedString(@"Equal Aria Label", @"voiceover label for the button that executes operations")
     action:@selector(onEqualButtonPressed:forEvent:) forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
@@ -377,28 +403,34 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 }
 
 - (EWCRoundedCornerButton *)makeMainOperatorButton:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
   action:(SEL)selector
   forWidth:(float)width {
 
   return [self makeOperatorButton:label
+    accessibilityLabel:accessibilityLabel
     action:selector
     withSize:OP_SIZE_AS_PERCENT_OF_WIDTH * width];
 }
 
 - (EWCRoundedCornerButton *)makeSubOperatorButton:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
   action:(SEL)selector
   forWidth:(float)width {
 
   return [self makeOperatorButton:label
+    accessibilityLabel:accessibilityLabel
     action:selector
     withSize:TEXT_SIZE_AS_PERCENT_OF_WIDTH * width];
 }
 
 - (EWCRoundedCornerButton *)makeOperatorButton:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
   action:(SEL)selector
   withSize:(float)points {
 
   return [self makeCalculatorButtonWithLabel:label
+    accessibilityLabel:accessibilityLabel
     action:selector
     colored:[UIColor whiteColor]
     highlightColor:[UIColor colorWithRed:1.0 green:204.0/255 blue:136.0/255 alpha:1.0]
@@ -407,10 +439,12 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 }
 
 - (EWCRoundedCornerButton *)makeDigitButton:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
   action:(SEL)selector
   forWidth:(float)width {
 
   return [self makeCalculatorButtonWithLabel:label
+    accessibilityLabel:accessibilityLabel
     action:selector
     colored:[UIColor whiteColor]
     highlightColor:[UIColor lightGrayColor]
@@ -419,10 +453,12 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 }
 
 - (EWCRoundedCornerButton *)makeTextButton:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
   action:(SEL)selector
   forWidth:(float)width {
 
   return [self makeCalculatorButtonWithLabel:label
+    accessibilityLabel:accessibilityLabel
     action:selector
     colored:[ViewController regularTextColor]
     highlightColor:[UIColor colorWithRed:204.0/255 green:204.0/255 blue:204.0/255 alpha:1.0]
@@ -431,6 +467,7 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 }
 
 - (EWCRoundedCornerButton *)makeCalculatorButtonWithLabel:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
   action:(SEL)selector
   colored:(UIColor *)color
   highlightColor:(UIColor *)highlight
@@ -440,10 +477,18 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   EWCRoundedCornerButton *button = [EWCRoundedCornerButton buttonLabeled:label
     colored:color
     backgroundColor:backgroundColor];
+  button.accessibilityLabel = accessibilityLabel;
   button.highlightedBackgroundColor = highlight;
   button.titleLabel.font = [UIFont systemFontOfSize:fontSize];
-  button.userInteractionEnabled = NO;
   [button addTarget:self action:selector forControlEvents:UIControlEventTouchUpInside];
+
+  button.customPointTest = ^BOOL (CGPoint point, UIEvent * _Nullable event, EWCRoundedCornerDefaultPointTest defaultTest) {
+    if (UIAccessibilityIsVoiceOverRunning()) {
+      return defaultTest(point, event);
+    }
+
+    return NO;
+  };
 
   return button;
 }
@@ -726,23 +771,36 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 
 - (void)updateClearLabel {
   NSString *label = (_calculator.isErrorStatusVisible)
-    ? NSLocalizedString(@"All Clear Button", @"label for the clear button when there is an error")
-    : NSLocalizedString(@"Clear Button", @"label for the clear button when there is NO error");
+    ? NSLocalizedString(@"All Clear Button", @"voiceover label for the clear button when there is an error")
+    : NSLocalizedString(@"Clear Button", @"");
+  NSString *ariaLabel = (_calculator.isErrorStatusVisible)
+    ? NSLocalizedString(@"All Clear Aria Label", @"voiceover label for the clear button when there is an error")
+    : NSLocalizedString(@"Clear Aria Label", @"");
   [_clearButton setTitle:label forState:UIControlStateNormal];
+  _clearButton.accessibilityLabel = ariaLabel;
 }
 
 - (void)updateTaxLabels {
   NSString *label;
+  NSString *ariaLabel;
 
   label = (_calculator.isRateShifted)
     ? NSLocalizedString(@"Store Button", @"label for storing a new tax rate")
-    : NSLocalizedString(@"Tax+ Button", @"label for adding in tax");
+    : NSLocalizedString(@"Tax+ Button", @"");
+  ariaLabel = (_calculator.isRateShifted)
+    ? NSLocalizedString(@"Store Aria Label", @"voiceover label for storing a new tax rate")
+    : NSLocalizedString(@"Tax+ Aria Label", @"");
   [_taxPlusButton setTitle:label forState:UIControlStateNormal];
+  _taxPlusButton.accessibilityLabel = ariaLabel;
 
   label = (_calculator.isRateShifted)
     ? NSLocalizedString(@"Recall Button", @"label for reviewing the current tax rate")
-    : NSLocalizedString(@"Tax- Button", @"label for subtracting out tax");
+    : NSLocalizedString(@"Tax- Button", @"");
+  ariaLabel = (_calculator.isRateShifted)
+    ? NSLocalizedString(@"Recall Aria Label", @"voiceover label for reviewing the current tax rate")
+    : NSLocalizedString(@"Tax- Aria Label", @"");
   [_taxMinusButton setTitle:label forState:UIControlStateNormal];
+  _taxMinusButton.accessibilityLabel = ariaLabel;
 
   UIColor *taxColor = (_calculator.isRateShifted)
     ? [ViewController shiftedTextColor]

@@ -9,6 +9,7 @@
 #import "EWCRoundedCornerButton.h"
 
 @interface EWCRoundedCornerButton() {}
+
 @property (nonatomic) UIColor *normalBackgroundColor;
 
 @end
@@ -62,6 +63,16 @@
       }];
     }
   }
+}
+
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+  if (! _customPointTest) {
+    return [super pointInside:point withEvent:event];
+  }
+
+  return _customPointTest(point, event, ^BOOL(CGPoint point, UIEvent * _Nullable event){
+    return [super pointInside:point withEvent:event];
+  });
 }
 
 //- (void)setCornerRadius:(NSInteger)value {

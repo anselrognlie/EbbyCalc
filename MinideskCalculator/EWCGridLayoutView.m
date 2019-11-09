@@ -274,6 +274,10 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
   [self clearTouches];
 }
 
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+  return YES;
+}
+
 - (void)handleTouch:(UITouch *)touch {
   CGPoint pos = [touch locationInView:self];
 

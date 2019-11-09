@@ -44,7 +44,9 @@ typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
   NSMutableArray<EWCRoundedCornerButton *> *_opButtons;
   NSMutableArray<EWCRoundedCornerButton *> *_allButtons;
   EWCCalculator *_calculator;
+  UIButton *_memoryButton;
   UIButton *_clearButton;
+  UIButton *_rateButton;
   UIButton *_taxPlusButton;
   UIButton *_taxMinusButton;
 }
@@ -225,11 +227,12 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Rate Button", "label for the button that switches to tax rate management mode")
-    accessibilityLabel:NSLocalizedString(@"Rate Aria Label", @"voiceover label for the button that switches to tax rate management mode")
+    accessibilityLabel:NSLocalizedString(@"Rate Tax Mode Aria Label", @"voiceover label for the button that switches to tax rate management mode")
     action:@selector(onRateButtonPressed:forEvent:) forWidth:fontDim];
   [button setTitleColor:[ViewController shiftedTextColor]
     forState:UIControlStateNormal];
   [_textButtons addObject:button];
+  _rateButton = button;
   [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Tax+ Button", "label for the button that adds tax to the current value")
@@ -250,6 +253,7 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
     accessibilityLabel:NSLocalizedString(@"Memory Aria Label", @"voiceover label for the button that retrieves and clears the memory")
     action:@selector(onMemoryButtonPressed:forEvent:) forWidth:fontDim];
   [_textButtons addObject:button];
+  _memoryButton = button;
   [_allButtons addObject:button];
 
   button = [self makeTextButton:NSLocalizedString(@"Memory+ Button", @"label for the button that adds to the memory")
@@ -769,7 +773,7 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   _taxPercentIndicator.hidden = ! value;
 }
 
-- (void)updateClearLabel {
+- (void)updateClearLabels {
   NSString *label = (_calculator.isErrorStatusVisible)
     ? NSLocalizedString(@"All Clear Button", @"voiceover label for the clear button when there is an error")
     : NSLocalizedString(@"Clear Button", @"");
@@ -783,6 +787,11 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 - (void)updateTaxLabels {
   NSString *label;
   NSString *ariaLabel;
+
+  ariaLabel = (_calculator.isRateShifted)
+    ? NSLocalizedString(@"Rate Store Mode Aria Label", @"voiceover label for when the rate button selected store and recall")
+    : NSLocalizedString(@"Rate Tax Mode Aria Label", @"");
+  _rateButton.accessibilityLabel = ariaLabel;
 
   label = (_calculator.isRateShifted)
     ? NSLocalizedString(@"Store Button", @"label for storing a new tax rate")
@@ -810,6 +819,13 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   [_taxMinusButton setTitleColor:taxColor forState:UIControlStateNormal];
 }
 
+- (void)updateMemoryLabels {
+  NSString *ariaLabel = (_calculator.shouldMemoryClear && _calculator.isMemoryStatusVisible)
+    ? NSLocalizedString(@"Memory Clear Aria Label", @"voiceover label for the memory button when it should clear")
+    : NSLocalizedString(@"Memory Recall Aria Label", @"voiceover label for the memory button when it should recall");
+  _memoryButton.accessibilityLabel = ariaLabel;
+}
+
 - (void)updateDisplayFromCalculator {
   self.memoryVisible = _calculator.isMemoryStatusVisible;
   self.errorVisible = _calculator.isErrorStatusVisible;
@@ -820,8 +836,9 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 
   [_displayArea setText:_calculator.displayContent];
 
-  [self updateClearLabel];
+  [self updateClearLabels];
   [self updateTaxLabels];
+  [self updateMemoryLabels];
 }
 
 @end

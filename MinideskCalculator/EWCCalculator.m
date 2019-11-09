@@ -156,6 +156,11 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   return _error;
 }
 
+// implements public accessor
+- (BOOL)shouldMemoryClear {
+  return (_lastKey == EWCCalculatorMemoryKey);
+}
+
 - (void)fullClear {
   [self clearDisplay];
   [self clearCalculation];

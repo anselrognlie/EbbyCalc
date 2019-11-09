@@ -7,7 +7,8 @@
 */
 
 "Rate Button" = "rate";
-"Rate Aria Label" = "toggle tax buttons between applying tax and store and recall";
+"Rate Tax Mode Aria Label" = "tax rate selector in tax mode";
+"Rate Store Mode Aria Label" = "tax rate selector in store mode";
 "Tax+ Button" = "tax+";
 "Tax+ Aria Label" = "apply tax";
 "Store Button" = "store";
@@ -63,7 +64,8 @@
 "Equal Aria Label" = "equal";
 
 "Memory Button" = "mrc";
-"Memory Aria Label" = "memory recall or clear";
+"Memory Recall Aria Label" = "memory recall";
+"Memory Clear Aria Label" = "memory clear";
 "Memory- Button" = "m-";
 "Memory- Aria Label" = "memory subtract";
 "Memory+ Button" = "m+";

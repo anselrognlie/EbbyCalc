@@ -24,6 +24,7 @@ typedef void(^EWCCalculatorUpdatedCallback)(void);
 @property (nonatomic, readonly, getter=isTaxMinusStatusVisible) BOOL taxMinusStatusVisible;
 @property (nonatomic, readonly, getter=isTaxPercentStatusVisible) BOOL taxPercentStatusVisible;
 @property (nonatomic, readonly, getter=isRateShifted) BOOL rateShifted;
+@property (nonatomic, readonly) BOOL shouldMemoryClear;
 
 @property (nonatomic, readonly) NSString *displayContent;
 @property (nonatomic) NSInteger maximumDigits;

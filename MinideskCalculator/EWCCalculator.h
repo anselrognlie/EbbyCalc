@@ -27,7 +27,7 @@ typedef void(^EWCCalculatorUpdatedCallback)(void);
 
 @property (nonatomic, readonly) NSString *displayContent;
 @property (nonatomic) NSInteger maximumDigits;
-@property (nonatomic) id<EWCCalculatorDataProtocol> dataProvider;
+@property (nonatomic, copy) id<EWCCalculatorDataProtocol> dataProvider;
 
 + (instancetype)calculator;
 

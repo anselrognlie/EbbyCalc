@@ -125,13 +125,12 @@
 			isa = PBXGroup;
 			children = (
 				FDC1A4CA2370C14500D21FEB /* Resources */,
+				FDC1A50223778A4A00D21FEB /* Controls */,
+				FDC1A50323778A8300D21FEB /* Calculator */,
+				FDC1A50423778AD500D21FEB /* Extensions */,
 				FDC1A4C1236D00E700D21FEB /* MinideskCalculator.entitlements */,
-				FDBA3EEF236CC36100780234 /* EWCCalculator.h */,
-				FDBA3EEE236CC36100780234 /* EWCCalculator.m */,
-				FDBA3EEA236CC36000780234 /* EWCGridLayoutView.h */,
-				FDBA3EED236CC36100780234 /* EWCGridLayoutView.m */,
-				FDBA3EEC236CC36100780234 /* EWCRoundedCornerButton.h */,
-				FDBA3EEB236CC36000780234 /* EWCRoundedCornerButton.m */,
+				FDC1A4F72376817B00D21FEB /* EWCCalculatorUserDefaultsData.h */,
+				FDC1A4F82376817B00D21FEB /* EWCCalculatorUserDefaultsData.m */,
 				FDBA3EB4236CC30200780234 /* AppDelegate.h */,
 				FDBA3EB5236CC30200780234 /* AppDelegate.m */,
 				FDBA3EB7236CC30200780234 /* SceneDelegate.h */,
@@ -143,23 +142,6 @@
 				FDBA3EC2236CC30500780234 /* LaunchScreen.storyboard */,
 				FDBA3EC5236CC30500780234 /* Info.plist */,
 				FDBA3EC6236CC30500780234 /* main.m */,
-				FDC1A4C5236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.h */,
-				FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */,
-				FDC1A4CD2371349B00D21FEB /* EWCNumericField.h */,
-				FDC1A4CE2371349B00D21FEB /* EWCNumericField.m */,
-				FDC1A4D02372470600D21FEB /* EWCCalculatorToken.h */,
-				FDC1A4D12372470600D21FEB /* EWCCalculatorToken.m */,
-				FDC1A4D32372476200D21FEB /* EWCCalculatorKey.h */,
-				FDC1A4D623726C4D00D21FEB /* EWCCalculatorKey.m */,
-				FDC1A4D42372495B00D21FEB /* EWCCalculatorOpcode.h */,
-				FDC1A4D823726CF200D21FEB /* EWCCalculatorOpcode.m */,
-				FDC1A4DA2375304200D21FEB /* NSArray+EWCAlgorithmCategory.h */,
-				FDC1A4DB2375310100D21FEB /* NSArray+EWCAlgorithmCategory.m */,
-				FDC1A4F623767FCF00D21FEB /* EWCCalculatorDataProtocol.h */,
-				FDC1A4F72376817B00D21FEB /* EWCCalculatorUserDefaultsData.h */,
-				FDC1A4F82376817B00D21FEB /* EWCCalculatorUserDefaultsData.m */,
-				FDC1A4FF237784A200D21FEB /* EWCAccessibleRoundedCornerButton.h */,
-				FDC1A500237784A200D21FEB /* EWCAccessibleRoundedCornerButton.m */,
 			);
 			path = MinideskCalculator;
 			sourceTree = "<group>";
@@ -180,6 +162,48 @@
 				FDC1A4FE237758C400D21FEB /* Localizable.strings */,
 			);
 			path = Resources;
+			sourceTree = "<group>";
+		};
+		FDC1A50223778A4A00D21FEB /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				FDBA3EEA236CC36000780234 /* EWCGridLayoutView.h */,
+				FDBA3EED236CC36100780234 /* EWCGridLayoutView.m */,
+				FDBA3EEC236CC36100780234 /* EWCRoundedCornerButton.h */,
+				FDBA3EEB236CC36000780234 /* EWCRoundedCornerButton.m */,
+				FDC1A4FF237784A200D21FEB /* EWCAccessibleRoundedCornerButton.h */,
+				FDC1A500237784A200D21FEB /* EWCAccessibleRoundedCornerButton.m */,
+			);
+			name = Controls;
+			sourceTree = "<group>";
+		};
+		FDC1A50323778A8300D21FEB /* Calculator */ = {
+			isa = PBXGroup;
+			children = (
+				FDBA3EEF236CC36100780234 /* EWCCalculator.h */,
+				FDBA3EEE236CC36100780234 /* EWCCalculator.m */,
+				FDC1A4CD2371349B00D21FEB /* EWCNumericField.h */,
+				FDC1A4CE2371349B00D21FEB /* EWCNumericField.m */,
+				FDC1A4D02372470600D21FEB /* EWCCalculatorToken.h */,
+				FDC1A4D12372470600D21FEB /* EWCCalculatorToken.m */,
+				FDC1A4D32372476200D21FEB /* EWCCalculatorKey.h */,
+				FDC1A4D623726C4D00D21FEB /* EWCCalculatorKey.m */,
+				FDC1A4D42372495B00D21FEB /* EWCCalculatorOpcode.h */,
+				FDC1A4D823726CF200D21FEB /* EWCCalculatorOpcode.m */,
+				FDC1A4F623767FCF00D21FEB /* EWCCalculatorDataProtocol.h */,
+			);
+			name = Calculator;
+			sourceTree = "<group>";
+		};
+		FDC1A50423778AD500D21FEB /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				FDC1A4C5236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.h */,
+				FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */,
+				FDC1A4DA2375304200D21FEB /* NSArray+EWCAlgorithmCategory.h */,
+				FDC1A4DB2375310100D21FEB /* NSArray+EWCAlgorithmCategory.m */,
+			);
+			name = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

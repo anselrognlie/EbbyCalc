@@ -115,6 +115,8 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   NSNumberFormatter *formatter = [NSNumberFormatter new];
 
   formatter.maximumFractionDigits = 20;
+  formatter.groupingSize = 3;
+  formatter.usesGroupingSeparator = YES;
 
   return formatter;
 }
@@ -127,6 +129,19 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 
   NSDecimalNumber *value = _display.value;
   NSString *display = [_formatter stringFromNumber:value];
+
+  display = [self processDisplay:display];
+
+  return display;
+}
+
+- (NSString *)displayAccessibleContent {
+
+  NSDecimalNumber *value = _display.value;
+  NSNumberFormatter *formatter = [self getFormatter];
+  [formatter setNumberStyle:NSNumberFormatterSpellOutStyle];
+
+  NSString *display = [formatter stringFromNumber:value];
 
   display = [self processDisplay:display];
 

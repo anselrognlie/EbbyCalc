@@ -49,14 +49,16 @@ typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
   UIButton *_rateButton;
   UIButton *_taxPlusButton;
   UIButton *_taxMinusButton;
+  BOOL _isAnnouncingStatus;
+  BOOL _suppressDispatch;
 }
 
-@property (nonatomic) BOOL memoryVisible;
-@property (nonatomic) BOOL errorVisible;
-@property (nonatomic) BOOL taxVisible;
-@property (nonatomic) BOOL taxPlusVisible;
-@property (nonatomic) BOOL taxMinusVisible;
-@property (nonatomic) BOOL taxPercentVisible;
+@property (nonatomic, getter=isMemoryVisible) BOOL memoryVisible;
+@property (nonatomic, getter=isErrorVisible) BOOL errorVisible;
+@property (nonatomic, getter=isTaxVisible) BOOL taxVisible;
+@property (nonatomic, getter=isTaxPlusVisible) BOOL taxPlusVisible;
+@property (nonatomic, getter=isTaxMinusVisible) BOOL taxMinusVisible;
+@property (nonatomic, getter=isTaxPercentVisible) BOOL taxPercentVisible;
 
 @end
 
@@ -104,7 +106,16 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   // Do any additional setup after loading the view.
   [self setupGrid];
 
+  self.memoryVisible = NO;
+  self.errorVisible = NO;
+  self.taxVisible = NO;
+  self.taxPlusVisible = NO;
+  self.taxMinusVisible = NO;
+  self.taxPercentVisible = NO;
+
+//  _suppressDispatch = YES;
   [self updateDisplayFromCalculator];
+//  _suppressDispatch = NO;
 }
 
 - (void)setupCalculator {
@@ -118,6 +129,10 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 //  _calculator.maximumDigits = 2;
   _calculator.maximumDigits = 16;
   _calculator.dataProvider = [EWCCalculatorUserDefaultsData new];
+
+  // make sure that the first item selected for accessibility is the
+//  UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, _displayArea);
+  [self dispatchAnnouncement:_displayArea];
 }
 
 - (void)setupGrid {
@@ -765,6 +780,26 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   _taxPercentIndicator.hidden = ! value;
 }
 
+- (void)dispatchAnnouncementForView:(UIView *)view {
+  [self dispatchAnnouncement:view.accessibilityLabel];
+}
+
+- (void)dispatchAnnouncement:(id)message {
+  if (_suppressDispatch) { return; }
+
+  // param is id so that NSString or NSAttributedString both can be passed
+  double delayInSeconds = (_isAnnouncingStatus) ? 0.75 : 0.2;
+  _isAnnouncingStatus = NO;
+  dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW,
+    (int64_t)(delayInSeconds * NSEC_PER_SEC));
+
+  dispatch_after(popTime, dispatch_get_main_queue(), ^(void) {
+    UIAccessibilityPostNotification(
+    UIAccessibilityAnnouncementNotification,
+    message);
+  });
+}
+
 - (void)updateClearLabels {
   NSString *label = (_calculator.isErrorStatusVisible)
     ? NSLocalizedString(@"All Clear Button", @"voiceover label for the clear button when there is an error")
@@ -818,16 +853,72 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   _memoryButton.accessibilityLabel = ariaLabel;
 }
 
-- (void)updateDisplayFromCalculator {
-  self.memoryVisible = _calculator.isMemoryStatusVisible;
+- (void)updateDisplay {
+  NSString *lastDisplay = _displayArea.text;
+  NSString *newDisplay = _calculator.displayContent;
+  [_displayArea setText:newDisplay];
+  _displayArea.accessibilityLabel = _calculator.displayAccessibleContent;
+
+  if ([lastDisplay compare:newDisplay] != NSOrderedSame) {
+
+    NSString *accesssibleDisplay = _calculator.displayAccessibleContent;
+
+    NSAttributedString *message = [[NSAttributedString alloc]
+      initWithString:accesssibleDisplay
+      attributes:@{ UIAccessibilitySpeechAttributeQueueAnnouncement: @1 }];
+
+    [self dispatchAnnouncement:message];
+  }
+}
+
+
+
+- (void)updateStatusIndicators {
+  _isAnnouncingStatus = NO;
+
   self.errorVisible = _calculator.isErrorStatusVisible;
+  BOOL oldMemory = self.isMemoryVisible;
+  self.memoryVisible = _calculator.isMemoryStatusVisible;
+  BOOL oldTax = self.isTaxVisible;
   self.taxVisible = _calculator.isTaxStatusVisible;
+  BOOL oldTaxPlus = self.isTaxPlusVisible;
   self.taxPlusVisible = _calculator.isTaxPlusStatusVisible;
+  BOOL oldTaxMinus = self.isTaxMinusVisible;
   self.taxMinusVisible = _calculator.isTaxMinusStatusVisible;
+  BOOL oldTaxPercent = self.isTaxPercentVisible;
   self.taxPercentVisible = _calculator.isTaxPercentStatusVisible;
 
-  [_displayArea setText:_calculator.displayContent];
 
+  if (_calculator.isErrorStatusVisible) {
+    [self dispatchAnnouncementForView:_errorIndicator];
+    _isAnnouncingStatus = YES;
+  } else {
+    if (self.isMemoryVisible && oldMemory != self.isMemoryVisible) {
+      [self dispatchAnnouncementForView:_memoryIndicator];
+      _isAnnouncingStatus = YES;
+    }
+    if (self.isTaxVisible && oldTax != self.isTaxVisible) {
+      [self dispatchAnnouncementForView:_taxIndicator];
+      _isAnnouncingStatus = YES;
+    }
+    if (self.isTaxPlusVisible && oldTaxPlus != self.isTaxPlusVisible) {
+      [self dispatchAnnouncementForView:_taxPlusIndicator];
+      _isAnnouncingStatus = YES;
+    }
+    if (self.isTaxMinusVisible && oldTaxMinus != self.isTaxMinusVisible) {
+      [self dispatchAnnouncementForView:_taxMinusIndicator];
+      _isAnnouncingStatus = YES;
+    }
+    if (self.isTaxPercentVisible && oldTaxPercent != self.isTaxPercentVisible) {
+      [self dispatchAnnouncementForView:_taxPercentIndicator];
+      _isAnnouncingStatus = YES;
+    }
+  }
+}
+
+- (void)updateDisplayFromCalculator {
+  [self updateStatusIndicators];
+  [self updateDisplay];
   [self updateClearLabels];
   [self updateTaxLabels];
   [self updateMemoryLabels];

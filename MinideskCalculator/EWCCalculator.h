@@ -27,6 +27,7 @@ typedef void(^EWCCalculatorUpdatedCallback)(void);
 @property (nonatomic, readonly) BOOL shouldMemoryClear;
 
 @property (nonatomic, readonly) NSString *displayContent;
+@property (nonatomic, readonly) NSString *displayAccessibleContent;
 @property (nonatomic) NSInteger maximumDigits;
 @property (nonatomic, copy) id<EWCCalculatorDataProtocol> dataProvider;
 

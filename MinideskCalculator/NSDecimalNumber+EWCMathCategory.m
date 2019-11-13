@@ -94,7 +94,11 @@ static BOOL diffWithinDelta(NSDecimalNumber *n1, NSDecimalNumber *n2, NSDecimalN
   return [n1 decimalNumberBySubtracting:aNumber];
 }
 
-- (NSDecimalNumber *)ewc_decimalNumberByRestrictingToDigits:(short)digits {
+- (NSDecimalNumber *)ewc_decimalNumberByRestrictingToDigits:(unsigned short)digits {
+
+  // check for valid number of digits
+  if (digits == 0) { return self; }
+
   NSDecimalNumber *tmp = self;
   BOOL negative = NO;
 

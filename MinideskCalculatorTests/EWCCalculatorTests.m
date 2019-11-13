@@ -97,7 +97,7 @@
     @(EWCCalculatorSignKey),
     @(EWCCalculatorNineKey),
   ]];
-  XCTAssertEqualObjects(_calculator.displayContent, @"-10234.56789");
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10,234.56789");
 }
 
 - (void)testAddOperation {
@@ -366,6 +366,33 @@
   [_calculator pressKey:EWCCalculatorClearKey];
   XCTAssertFalse(_calculator.isTaxMinusStatusVisible, @"tax minus should NOT be visible");
   XCTAssertFalse(_calculator.isTaxStatusVisible, @"tax should NOT be visible");
+}
+
+- (void)testOperandEdit {
+  [self applyKeys:@[
+    @(EWCCalculatorOneKey),
+    @(EWCCalculatorZeroKey),
+    @(EWCCalculatorSubtractKey),
+    @(EWCCalculatorOneKey),
+    @(EWCCalculatorClearKey),
+    @(EWCCalculatorTwoKey),
+    @(EWCCalculatorEqualKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"8.");
+}
+
+- (void)testOperationTerminate {
+  [self applyKeys:@[
+    @(EWCCalculatorOneKey),
+    @(EWCCalculatorZeroKey),
+    @(EWCCalculatorSubtractKey),
+    @(EWCCalculatorOneKey),
+    @(EWCCalculatorClearKey),
+    @(EWCCalculatorClearKey),
+    @(EWCCalculatorTwoKey),
+    @(EWCCalculatorEqualKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"2.");
 }
 
 @end

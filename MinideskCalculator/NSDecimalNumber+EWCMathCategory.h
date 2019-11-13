@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 -(NSDecimalNumber *)ewc_decimalNumberByAbsoluteDifferenceFrom:(NSDecimalNumber *)aNumber;
 
 // returns nil if the restriction fails
--(NSDecimalNumber *)ewc_decimalNumberByRestrictingToDigits:(short)digits;
+-(NSDecimalNumber *)ewc_decimalNumberByRestrictingToDigits:(unsigned short)digits;
 
 @end
 

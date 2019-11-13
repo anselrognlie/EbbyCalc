@@ -827,6 +827,20 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   [self parseQueue];
 }
 
+- (EWCCalculatorToken *)getLastToken {
+  if (_queue.count > 0) {
+    return _queue[_queue.count - 1];
+  }
+
+  return nil;
+}
+
+- (void)removeLastToken {
+  if (_queue.count > 0) {
+    [_queue removeObjectAtIndex:_queue.count - 1];
+  }
+}
+
 - (void)processClearKey {
   if (_error) {
     _error = NO;
@@ -834,6 +848,15 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
     return;
   }
 
+  // if we are in the middle of a calculation (last token is number)
+  // just remove it
+  EWCCalculatorToken *lastToken = [self getLastToken];
+  if (lastToken && lastToken.tokenType == EWCCalculatorDataTokenType) {
+    [self removeLastToken];
+    return;
+  }
+
+  // otherwise, terminate operation
   [self fullClear];
 }
 

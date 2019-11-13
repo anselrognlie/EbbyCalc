@@ -50,7 +50,6 @@ typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
   UIButton *_taxPlusButton;
   UIButton *_taxMinusButton;
   BOOL _isAnnouncingStatus;
-  BOOL _suppressDispatch;
 }
 
 @property (nonatomic, getter=isMemoryVisible) BOOL memoryVisible;
@@ -113,9 +112,13 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   self.taxMinusVisible = NO;
   self.taxPercentVisible = NO;
 
-//  _suppressDispatch = YES;
   [self updateDisplayFromCalculator];
-//  _suppressDispatch = NO;
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+  if ([_displayArea canBecomeFirstResponder]) {
+    [_displayArea becomeFirstResponder];
+  }
 }
 
 - (void)setupCalculator {
@@ -131,7 +134,6 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   _calculator.dataProvider = [EWCCalculatorUserDefaultsData new];
 
   // make sure that the first item selected for accessibility is the
-//  UIAccessibilityPostNotification(UIAccessibilityLayoutChangedNotification, _displayArea);
   [self dispatchAnnouncement:_displayArea];
 }
 
@@ -785,7 +787,7 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 }
 
 - (void)dispatchAnnouncement:(id)message {
-  if (_suppressDispatch) { return; }
+  if (! UIAccessibilityIsVoiceOverRunning()) { return; }
 
   // param is id so that NSString or NSAttributedString both can be passed
   double delayInSeconds = (_isAnnouncingStatus) ? 0.75 : 0.2;

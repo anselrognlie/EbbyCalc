@@ -853,6 +853,7 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   EWCCalculatorToken *lastToken = [self getLastToken];
   if (lastToken && lastToken.tokenType == EWCCalculatorDataTokenType) {
     [self removeLastToken];
+    [self clearDisplay];
     return;
   }
 

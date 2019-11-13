@@ -375,6 +375,9 @@
     @(EWCCalculatorSubtractKey),
     @(EWCCalculatorOneKey),
     @(EWCCalculatorClearKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.");
+  [self applyKeys:@[
     @(EWCCalculatorTwoKey),
     @(EWCCalculatorEqualKey),
   ]];

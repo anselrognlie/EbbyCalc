@@ -115,12 +115,6 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   [self updateDisplayFromCalculator];
 }
 
-- (void)viewDidAppear:(BOOL)animated {
-  if ([_displayArea canBecomeFirstResponder]) {
-    [_displayArea becomeFirstResponder];
-  }
-}
-
 - (void)setupCalculator {
   _calculator = [EWCCalculator new];
   

@@ -72,9 +72,10 @@
       __weak UIColor *hbg = _highlightedBackgroundColor;
       __weak UIColor *bg = _normalBackgroundColor;
       [self.layer removeAllAnimations];
-      [UIView animateWithDuration:0.25 animations:^{
+      [UIView animateWithDuration:0.25 delay:0.0
+        options:UIViewAnimationOptionAllowUserInteraction animations:^{
         button.backgroundColor = (highlighted) ? hbg : bg;
-      }];
+      } completion:nil];
     }
   }
 }

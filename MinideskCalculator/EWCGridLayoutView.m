@@ -280,6 +280,7 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
 
 - (void)handleTouch:(UITouch *)touch {
   CGPoint pos = [touch locationInView:self];
+  BOOL buttonFound = NO;
 
   for (UIView *view in _layoutProps.keyEnumerator) {
     if ([view isKindOfClass:[UIButton class]]) {
@@ -295,13 +296,16 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
         }
 
         // done processing buttons
+        buttonFound = YES;
         break;
       }
     }
   }
 
   // no button found
-  [ self clearCurrentButton];
+  if (! buttonFound) {
+    [ self clearCurrentButton];
+  }
 }
 
 - (void)handleTouchEnded:(UITouch *)touch {

@@ -13,28 +13,40 @@ static const char s_memoryKey[] = "EWCCalculatorMemoryKey";
 
 @implementation EWCCalculatorUserDefaultsData
 
+- (NSNumberFormatter *)getFormatter {
+  NSNumberFormatter *formatter = [NSNumberFormatter new];
+
+  // use en_US as a constant formatter style
+  formatter.locale = [NSLocale localeWithLocaleIdentifier:@"en_US"];
+  [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
+  formatter.generatesDecimalNumbers = YES;
+
+  return formatter;
+}
+
 - (void)setDecimalNumber:(NSDecimalNumber *)value forKey:(NSString *)key {
-  NSDecimal dec = value.decimalValue;
-  NSData *data = [NSData dataWithBytes:&dec length:sizeof(dec)];
-  [[NSUserDefaults standardUserDefaults] setObject:data forKey:key];
+  NSNumberFormatter *formatter = [self getFormatter];
+  [[NSUserDefaults standardUserDefaults]
+    setObject:[formatter stringFromNumber:value]
+    forKey:key];
 }
 
 - (NSDecimalNumber *)getDecimalNumberForKey:(NSString *)key
   withDefault:(NSDecimalNumber *)defaultValue {
 
-  NSDecimal dec;
-  NSObject *obj = [[NSUserDefaults standardUserDefaults] objectForKey:key];
-  if (! [obj isKindOfClass:[NSData class]]) {
+  NSString *str = [[NSUserDefaults standardUserDefaults] stringForKey:key];
+  if (! str) {
     return defaultValue;
   }
 
-  NSData *data = (NSData *)obj;
-  if (data) {
-    [data getBytes:&dec length:sizeof(dec)];
-    return [NSDecimalNumber decimalNumberWithDecimal:dec];
-  } else {
+  NSNumberFormatter *formatter = [self getFormatter];
+  NSDecimalNumber *num = (NSDecimalNumber *)[formatter numberFromString:str];
+  
+  if ([num isEqualToNumber:[NSDecimalNumber notANumber]]) {
     return defaultValue;
   }
+
+  return num;
 }
 
 - (NSDecimalNumber *)taxRate {

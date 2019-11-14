@@ -31,6 +31,7 @@ typedef void(^EWCCalculatorUpdatedCallback)(void);
 @property (nonatomic, readonly) NSString *displayAccessibleContent;
 @property (nonatomic) NSInteger maximumDigits;
 @property (nonatomic, copy) id<EWCCalculatorDataProtocol> dataProvider;
+@property (nonatomic, copy) NSLocale *locale;
 
 + (instancetype)calculator;
 

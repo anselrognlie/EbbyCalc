@@ -132,6 +132,8 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 
 //  _calculator.maximumDigits = 2;
   _calculator.maximumDigits = 16;
+//  _calculator.locale = [NSLocale localeWithLocaleIdentifier:@"fr_FR"];
+//  _calculator.locale = [NSLocale localeWithLocaleIdentifier:@"ja_JP"];
   _calculator.dataProvider = [EWCCalculatorUserDefaultsData new];
 
   // make sure that the first item selected for accessibility is the

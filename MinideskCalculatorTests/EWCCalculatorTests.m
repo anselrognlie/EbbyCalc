@@ -71,7 +71,12 @@
 }
 
 - (void)setUp {
-    _calculator = [EWCCalculator new];
+  _calculator = [EWCCalculator new];
+
+  // make sure we test in en_US
+  _calculator.locale = [NSLocale localeWithLocaleIdentifier:@"en_US"];
+//  _calculator.locale = [NSLocale localeWithLocaleIdentifier:@"ja_JP"];
+//  _calculator.locale = [NSLocale localeWithLocaleIdentifier:@"fr_FR"];
 }
 
 - (void)tearDown {

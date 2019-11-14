@@ -30,13 +30,13 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   EWCNumericField *_memory;
   EWCNumericField *_operand;
   EWCCalculatorOpcode _operation;
-  NSNumberFormatter *_formatter;
   EWCCalculatorInputMode _inputMode;
   short _fractionPower;
   short _sign;
   short _numDigits;
   EWCCalculatorKey _lastKey;
   BOOL _showingJustTax;
+  NSLocale *_locale;
 
   NSDecimalNumber *_taxResultWithTax;
   NSDecimalNumber *_taxResultJustTax;
@@ -51,6 +51,8 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 @property (nonatomic, getter=isTaxPercentStatusVisible) BOOL taxPercentStatusVisible;
 
 @end
+
+static int s_maximumFractionDigits = 20;
 
 @implementation EWCCalculator
 
@@ -92,8 +94,6 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   _taxRate = [EWCNumericField new];
   _memory = [EWCNumericField new];
 
-  _formatter = [self getFormatter];
-
   _lastKey = EWCCalculatorNoKey;
 
   _queue = [NSMutableArray<EWCCalculatorToken *> new];
@@ -114,11 +114,26 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 - (NSNumberFormatter *)getFormatter {
   NSNumberFormatter *formatter = [NSNumberFormatter new];
 
-  formatter.maximumFractionDigits = 20;
-  formatter.groupingSize = 3;
-  formatter.usesGroupingSeparator = YES;
+  formatter.maximumFractionDigits = (_maximumDigits > 0)
+    ? _maximumDigits
+    : s_maximumFractionDigits;
+  formatter.minimumFractionDigits = -_fractionPower;
+  formatter.locale = self.locale;
+  [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
 
   return formatter;
+}
+
+- (void)setLocale:(NSLocale *)locale {
+  _locale = locale;
+}
+
+- (NSLocale *)locale {
+  if (! _locale) {
+    _locale = [NSLocale currentLocale];
+  }
+
+  return _locale;
 }
 
 - (void)registerUpdateCallbackWithBlock:(EWCCalculatorUpdatedCallback)callback {
@@ -128,7 +143,7 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 - (NSString *)displayContent {
 
   NSDecimalNumber *value = _display.value;
-  NSString *display = [_formatter stringFromNumber:value];
+  NSString *display = [[self getFormatter] stringFromNumber:value];
 
   display = [self processDisplay:display];
 
@@ -143,8 +158,6 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 
   NSString *display = [formatter stringFromNumber:value];
 
-  display = [self processDisplay:display];
-
   return display;
 }
 
@@ -153,7 +166,7 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 }
 
 - (NSString *)processDisplay:(NSString *)display {
-  NSString *separator = [[NSLocale currentLocale] decimalSeparator];
+  NSString *separator = [self.locale decimalSeparator];
 
   // append decimal separator if needed
   if (! [display containsString:separator]) {
@@ -203,7 +216,6 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   _inputMode = EWCCalculatorInputModeRegular;
   _fractionPower = 0;
   _sign = 1;
-  _formatter.minimumFractionDigits = 0;
   _numDigits = 0;
   _editingDisplay = NO;
   _displayAvailable = NO;
@@ -352,7 +364,6 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
       }
 
       _fractionPower--;
-      _formatter.minimumFractionDigits = -_fractionPower;
       NSDecimalNumber *decimalDigit = [[NSDecimalNumber alloc] initWithInt:digit];
       decimalDigit = [decimalDigit decimalNumberByMultiplyingByPowerOf10:_fractionPower];
       _display.value = [_display.value decimalNumberByAdding:decimalDigit];

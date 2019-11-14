@@ -9,6 +9,21 @@
 /* Begin PBXBuildFile section */
 		FD22A99F237CE0E9003E2C74 /* EWCLabelEditManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FD22A99E237CE0E8003E2C74 /* EWCLabelEditManager.m */; };
 		FD22A9A2237CE767003E2C74 /* EWCCopyableLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = FD22A9A1237CE767003E2C74 /* EWCCopyableLabel.m */; };
+		FD22A9A7237D1158003E2C74 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9A6237D1158003E2C74 /* Media.xcassets */; };
+		FD22A9D4237D1BBE003E2C74 /* icon167.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9C6237D1BBE003E2C74 /* icon167.png */; };
+		FD22A9D5237D1BBE003E2C74 /* icon29.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9C7237D1BBE003E2C74 /* icon29.png */; };
+		FD22A9D6237D1BBE003E2C74 /* icon1024.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9C8237D1BBE003E2C74 /* icon1024.png */; };
+		FD22A9D7237D1BBE003E2C74 /* icon60.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9C9237D1BBE003E2C74 /* icon60.png */; };
+		FD22A9D8237D1BBE003E2C74 /* icon76.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9CA237D1BBE003E2C74 /* icon76.png */; };
+		FD22A9D9237D1BBE003E2C74 /* icon.svg in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9CB237D1BBE003E2C74 /* icon.svg */; };
+		FD22A9DA237D1BBE003E2C74 /* icon58.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9CC237D1BBE003E2C74 /* icon58.png */; };
+		FD22A9DB237D1BBE003E2C74 /* icon40.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9CD237D1BBE003E2C74 /* icon40.png */; };
+		FD22A9DC237D1BBE003E2C74 /* icon80.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9CE237D1BBE003E2C74 /* icon80.png */; };
+		FD22A9DD237D1BBE003E2C74 /* icon87.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9CF237D1BBE003E2C74 /* icon87.png */; };
+		FD22A9DE237D1BBE003E2C74 /* icon120.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9D0237D1BBE003E2C74 /* icon120.png */; };
+		FD22A9DF237D1BBE003E2C74 /* icon152.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9D1237D1BBE003E2C74 /* icon152.png */; };
+		FD22A9E0237D1BBE003E2C74 /* icon20.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9D2237D1BBE003E2C74 /* icon20.png */; };
+		FD22A9E1237D1BBE003E2C74 /* icon180.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9D3237D1BBE003E2C74 /* icon180.png */; };
 		FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB5236CC30200780234 /* AppDelegate.m */; };
 		FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB8236CC30200780234 /* SceneDelegate.m */; };
 		FDBA3EBC236CC30200780234 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EBB236CC30200780234 /* ViewController.m */; };
@@ -49,7 +64,22 @@
 		FD22A9A0237CE767003E2C74 /* EWCCopyableLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCCopyableLabel.h; sourceTree = "<group>"; };
 		FD22A9A1237CE767003E2C74 /* EWCCopyableLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCCopyableLabel.m; sourceTree = "<group>"; };
 		FD22A9A3237D0304003E2C74 /* EWCEditDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCEditDelegate.h; sourceTree = "<group>"; };
-		FDBA3EB1236CC30200780234 /* MinideskCalculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MinideskCalculator.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD22A9A6237D1158003E2C74 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
+		FD22A9C6237D1BBE003E2C74 /* icon167.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon167.png; sourceTree = "<group>"; };
+		FD22A9C7237D1BBE003E2C74 /* icon29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon29.png; sourceTree = "<group>"; };
+		FD22A9C8237D1BBE003E2C74 /* icon1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon1024.png; sourceTree = "<group>"; };
+		FD22A9C9237D1BBE003E2C74 /* icon60.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon60.png; sourceTree = "<group>"; };
+		FD22A9CA237D1BBE003E2C74 /* icon76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon76.png; sourceTree = "<group>"; };
+		FD22A9CB237D1BBE003E2C74 /* icon.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = icon.svg; sourceTree = "<group>"; };
+		FD22A9CC237D1BBE003E2C74 /* icon58.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon58.png; sourceTree = "<group>"; };
+		FD22A9CD237D1BBE003E2C74 /* icon40.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon40.png; sourceTree = "<group>"; };
+		FD22A9CE237D1BBE003E2C74 /* icon80.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon80.png; sourceTree = "<group>"; };
+		FD22A9CF237D1BBE003E2C74 /* icon87.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon87.png; sourceTree = "<group>"; };
+		FD22A9D0237D1BBE003E2C74 /* icon120.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon120.png; sourceTree = "<group>"; };
+		FD22A9D1237D1BBE003E2C74 /* icon152.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon152.png; sourceTree = "<group>"; };
+		FD22A9D2237D1BBE003E2C74 /* icon20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon20.png; sourceTree = "<group>"; };
+		FD22A9D3237D1BBE003E2C74 /* icon180.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon180.png; sourceTree = "<group>"; };
+		FDBA3EB1236CC30200780234 /* Home Calculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Home Calculator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDBA3EB4236CC30200780234 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		FDBA3EB5236CC30200780234 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		FDBA3EB7236CC30200780234 /* SceneDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SceneDelegate.h; sourceTree = "<group>"; };
@@ -110,6 +140,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		FD22A9C5237D1BBE003E2C74 /* img */ = {
+			isa = PBXGroup;
+			children = (
+				FD22A9CB237D1BBE003E2C74 /* icon.svg */,
+				FD22A9D2237D1BBE003E2C74 /* icon20.png */,
+				FD22A9C7237D1BBE003E2C74 /* icon29.png */,
+				FD22A9CD237D1BBE003E2C74 /* icon40.png */,
+				FD22A9CC237D1BBE003E2C74 /* icon58.png */,
+				FD22A9C9237D1BBE003E2C74 /* icon60.png */,
+				FD22A9CA237D1BBE003E2C74 /* icon76.png */,
+				FD22A9CE237D1BBE003E2C74 /* icon80.png */,
+				FD22A9CF237D1BBE003E2C74 /* icon87.png */,
+				FD22A9D0237D1BBE003E2C74 /* icon120.png */,
+				FD22A9D1237D1BBE003E2C74 /* icon152.png */,
+				FD22A9C6237D1BBE003E2C74 /* icon167.png */,
+				FD22A9D3237D1BBE003E2C74 /* icon180.png */,
+				FD22A9C8237D1BBE003E2C74 /* icon1024.png */,
+			);
+			path = img;
+			sourceTree = "<group>";
+		};
 		FDBA3EA8236CC30200780234 = {
 			isa = PBXGroup;
 			children = (
@@ -122,7 +173,7 @@
 		FDBA3EB2236CC30200780234 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				FDBA3EB1236CC30200780234 /* MinideskCalculator.app */,
+				FDBA3EB1236CC30200780234 /* Home Calculator.app */,
 				FDBA3ECC236CC30500780234 /* MinideskCalculatorTests.xctest */,
 			);
 			name = Products;
@@ -166,7 +217,9 @@
 		FDC1A4CA2370C14500D21FEB /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				FD22A9C5237D1BBE003E2C74 /* img */,
 				FDC1A4FE237758C400D21FEB /* Localizable.strings */,
+				FD22A9A6237D1158003E2C74 /* Media.xcassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -235,7 +288,7 @@
 			);
 			name = MinideskCalculator;
 			productName = MinideskCalculator;
-			productReference = FDBA3EB1236CC30200780234 /* MinideskCalculator.app */;
+			productReference = FDBA3EB1236CC30200780234 /* Home Calculator.app */;
 			productType = "com.apple.product-type.application";
 		};
 		FDBA3ECB236CC30500780234 /* MinideskCalculatorTests */ = {
@@ -298,10 +351,25 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FD22A9DC237D1BBE003E2C74 /* icon80.png in Resources */,
+				FD22A9D7237D1BBE003E2C74 /* icon60.png in Resources */,
+				FD22A9D5237D1BBE003E2C74 /* icon29.png in Resources */,
+				FD22A9A7237D1158003E2C74 /* Media.xcassets in Resources */,
+				FD22A9DD237D1BBE003E2C74 /* icon87.png in Resources */,
+				FD22A9DA237D1BBE003E2C74 /* icon58.png in Resources */,
 				FDC1A4FC237758C400D21FEB /* Localizable.strings in Resources */,
 				FDBA3EC4236CC30500780234 /* LaunchScreen.storyboard in Resources */,
+				FD22A9E0237D1BBE003E2C74 /* icon20.png in Resources */,
+				FD22A9DB237D1BBE003E2C74 /* icon40.png in Resources */,
 				FDBA3EC1236CC30500780234 /* Assets.xcassets in Resources */,
+				FD22A9DE237D1BBE003E2C74 /* icon120.png in Resources */,
 				FDBA3EBF236CC30200780234 /* Main.storyboard in Resources */,
+				FD22A9D9237D1BBE003E2C74 /* icon.svg in Resources */,
+				FD22A9D4237D1BBE003E2C74 /* icon167.png in Resources */,
+				FD22A9DF237D1BBE003E2C74 /* icon152.png in Resources */,
+				FD22A9D6237D1BBE003E2C74 /* icon1024.png in Resources */,
+				FD22A9E1237D1BBE003E2C74 /* icon180.png in Resources */,
+				FD22A9D8237D1BBE003E2C74 /* icon76.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -511,7 +579,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculator;
-				PRODUCT_NAME = MinideskCalculator;
+				PRODUCT_NAME = "Home Calculator";
 				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -531,7 +599,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculator;
-				PRODUCT_NAME = MinideskCalculator;
+				PRODUCT_NAME = "Home Calculator";
 				SUPPORTS_MACCATALYST = YES;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -553,7 +621,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculatorTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MinideskCalculator.app/MinideskCalculator";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Home Calculator.app/Home Calculator";
 			};
 			name = Debug;
 		};
@@ -573,7 +641,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.MinideskCalculatorTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/MinideskCalculator.app/MinideskCalculator";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Home Calculator.app/Home Calculator";
 			};
 			name = Release;
 		};

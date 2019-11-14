@@ -27,6 +27,7 @@ typedef void(^EWCCalculatorUpdatedCallback)(void);
 @property (nonatomic, readonly) BOOL shouldMemoryClear;
 
 @property (nonatomic, readonly) NSString *displayContent;
+@property (nonatomic, readonly) NSDecimalNumber *displayValue;
 @property (nonatomic, readonly) NSString *displayAccessibleContent;
 @property (nonatomic) NSInteger maximumDigits;
 @property (nonatomic, copy) id<EWCCalculatorDataProtocol> dataProvider;
@@ -34,7 +35,7 @@ typedef void(^EWCCalculatorUpdatedCallback)(void);
 + (instancetype)calculator;
 
 - (void)registerUpdateCallbackWithBlock:(EWCCalculatorUpdatedCallback)callback;
-
+- (void)setInput:(NSDecimalNumber *)value;
 - (void)pressKey:(EWCCalculatorKey)key;
 
 @end

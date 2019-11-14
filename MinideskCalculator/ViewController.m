@@ -12,6 +12,8 @@
 #import "EWCAccessibleRoundedCornerButton.h"
 #import "EWCCalculator.h"
 #import "EWCCalculatorUserDefaultsData.h"
+#import "EWCLabelEditManager.h"
+#import "EWCCopyableLabel.h"
 
 typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
   EWCApplicationRegularDefaultLayout = 0,
@@ -23,7 +25,7 @@ typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
 
 @interface ViewController () {
   IBOutlet EWCGridLayoutView *_grid;
-  IBOutlet UILabel *_displayArea;
+  IBOutlet EWCCopyableLabel *_displayArea;
   IBOutlet NSLayoutConstraint *_gridTopConstraint;
   IBOutlet NSLayoutConstraint *_gridBottomConstraint;
   EWCApplicationLayout _layout;
@@ -50,6 +52,7 @@ typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
   UIButton *_taxPlusButton;
   UIButton *_taxMinusButton;
   BOOL _isAnnouncingStatus;
+  EWCLabelEditManager *_labelManager;
 }
 
 @property (nonatomic, getter=isMemoryVisible) BOOL memoryVisible;
@@ -113,6 +116,10 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   self.taxPercentVisible = NO;
 
   [self updateDisplayFromCalculator];
+
+  _labelManager = [EWCLabelEditManager new];
+  _displayArea.editDelegate = self;
+  _labelManager.managedLabel = _displayArea;
 }
 
 - (void)setupCalculator {
@@ -160,7 +167,28 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
     _taxMinusIndicator,
     _taxPercentIndicator,
   ] mutableCopy];
+}
 
+- (nonnull NSString *)viewWillCopyText:(nonnull NSString *)text {
+  // ignore the passed text, and just get the raw value
+  NSDecimalNumber *num = _calculator.displayValue;
+  text = [NSString stringWithFormat:@"%@", num];
+
+  return text;
+}
+
+- (nonnull NSString *)viewWillPasteText:(nonnull NSString *)text {
+  // try to interpret the text as a number
+  NSDecimalNumber *num = [NSDecimalNumber decimalNumberWithString:text
+    locale:[NSLocale currentLocale]];
+
+  if ([num compare:[NSDecimalNumber notANumber]] != NSOrderedSame) {
+    // we got some kind of number, so update the display
+    [_calculator setInput:num];
+  }
+
+  // this will set the display value directly, so always return nil
+  return nil;
 }
 
 - (void)addButtons {
@@ -348,6 +376,13 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   if (_layout == EWCApplicationRegularTallLayout) {
     // tall
 
+    if (UIAccessibilityIsVoiceOverRunning()) {
+      UIAccessibilityPostNotification(
+        UIAccessibilityLayoutChangedNotification,
+        NSLocalizedString(@"Tall Layout",
+          @"Description to announce when the calculator is in tall mode"));
+    }
+
     // configure grid layout
     _grid.rows = @[@1.0, @1.0, @1.0, @1.0, @1.0, @1.0, @1.0, @1.0, @1.0];
     _grid.columns = @[@1.0, @1.0, @1.0];
@@ -382,6 +417,13 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 
   } else {
     // wide
+
+    if (UIAccessibilityIsVoiceOverRunning()) {
+      UIAccessibilityPostNotification(
+        UIAccessibilityLayoutChangedNotification,
+        NSLocalizedString(@"Wide Layout",
+          @"Description to announce when the calculator is in wide mode"));
+    }
 
     // configure grid layout
     _grid.rows = @[@1.0, @1.0, @1.0, @1.0, @1.0];

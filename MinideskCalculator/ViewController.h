@@ -7,9 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "EWCEditDelegate.h"
 
-@interface ViewController : UIViewController
+@interface ViewController : UIViewController <EWCEditDelegate>
 
+- (nonnull NSString *)viewWillCopyText:(nonnull NSString *)text;
+- (nonnull NSString *)viewWillPasteText:(nonnull NSString *)text;
 
 @end
 

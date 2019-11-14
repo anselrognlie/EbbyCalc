@@ -70,3 +70,7 @@
 "Memory- Aria Label" = "memory subtract";
 "Memory+ Button" = "m+";
 "Memory+ Aria Label" = "memory add";
+
+"Tall Layout" = "buttons in tall layout";
+"Wide Layout" = "buttons in wide layout";
+

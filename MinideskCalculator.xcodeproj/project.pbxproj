@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FD22A99F237CE0E9003E2C74 /* EWCLabelEditManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FD22A99E237CE0E8003E2C74 /* EWCLabelEditManager.m */; };
+		FD22A9A2237CE767003E2C74 /* EWCCopyableLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = FD22A9A1237CE767003E2C74 /* EWCCopyableLabel.m */; };
 		FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB5236CC30200780234 /* AppDelegate.m */; };
 		FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB8236CC30200780234 /* SceneDelegate.m */; };
 		FDBA3EBC236CC30200780234 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EBB236CC30200780234 /* ViewController.m */; };
@@ -42,6 +44,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		FD22A99D237CE0E8003E2C74 /* EWCLabelEditManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCLabelEditManager.h; sourceTree = "<group>"; };
+		FD22A99E237CE0E8003E2C74 /* EWCLabelEditManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCLabelEditManager.m; sourceTree = "<group>"; };
+		FD22A9A0237CE767003E2C74 /* EWCCopyableLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCCopyableLabel.h; sourceTree = "<group>"; };
+		FD22A9A1237CE767003E2C74 /* EWCCopyableLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCCopyableLabel.m; sourceTree = "<group>"; };
+		FD22A9A3237D0304003E2C74 /* EWCEditDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCEditDelegate.h; sourceTree = "<group>"; };
 		FDBA3EB1236CC30200780234 /* MinideskCalculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MinideskCalculator.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDBA3EB4236CC30200780234 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		FDBA3EB5236CC30200780234 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -173,6 +180,11 @@
 				FDBA3EEB236CC36000780234 /* EWCRoundedCornerButton.m */,
 				FDC1A4FF237784A200D21FEB /* EWCAccessibleRoundedCornerButton.h */,
 				FDC1A500237784A200D21FEB /* EWCAccessibleRoundedCornerButton.m */,
+				FD22A99D237CE0E8003E2C74 /* EWCLabelEditManager.h */,
+				FD22A99E237CE0E8003E2C74 /* EWCLabelEditManager.m */,
+				FD22A9A0237CE767003E2C74 /* EWCCopyableLabel.h */,
+				FD22A9A1237CE767003E2C74 /* EWCCopyableLabel.m */,
+				FD22A9A3237D0304003E2C74 /* EWCEditDelegate.h */,
 			);
 			name = Controls;
 			sourceTree = "<group>";
@@ -310,6 +322,7 @@
 				FDBA3EF1236CC36100780234 /* EWCGridLayoutView.m in Sources */,
 				FDC1A4D22372470600D21FEB /* EWCCalculatorToken.m in Sources */,
 				FDBA3EBC236CC30200780234 /* ViewController.m in Sources */,
+				FD22A9A2237CE767003E2C74 /* EWCCopyableLabel.m in Sources */,
 				FDC1A4CF2371349B00D21FEB /* EWCNumericField.m in Sources */,
 				FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */,
 				FDBA3EF0236CC36100780234 /* EWCRoundedCornerButton.m in Sources */,
@@ -320,6 +333,7 @@
 				FDC1A4C7236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m in Sources */,
 				FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */,
 				FDC1A4D923726CF200D21FEB /* EWCCalculatorOpcode.m in Sources */,
+				FD22A99F237CE0E9003E2C74 /* EWCLabelEditManager.m in Sources */,
 				FDC1A4D52372495B00D21FEB /* EWCCalculatorOpcode.h in Sources */,
 				FDBA3EF2236CC36100780234 /* EWCCalculator.m in Sources */,
 				FDC1A4D723726C4D00D21FEB /* EWCCalculatorKey.m in Sources */,

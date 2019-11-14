@@ -148,10 +148,16 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   return display;
 }
 
+- (NSDecimalNumber *)displayValue {
+  return _display.value;
+}
+
 - (NSString *)processDisplay:(NSString *)display {
-  // append decimal if needed
-  if (! [display containsString:@"."]) {
-    display = [display stringByAppendingString:@"."];
+  NSString *separator = [[NSLocale currentLocale] decimalSeparator];
+
+  // append decimal separator if needed
+  if (! [display containsString:separator]) {
+    display = [display stringByAppendingString:separator];
   }
 
   return display;
@@ -228,6 +234,17 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   _taxPlusStatusVisible = NO;
   _taxMinusStatusVisible = NO;
   _taxPercentStatusVisible = NO;
+}
+
+// not to be called from within regular calculation
+// this is intended for an outside agent to change the value in
+// the input field.  As such, it must raise a change notification
+// so that any display client can update itself
+- (void)setInput:(NSDecimalNumber *)value {
+  [self setDisplay:value];
+  _displayAvailable = YES;
+
+  [self safeCallback];
 }
 
 - (void)setAccumulator:(NSDecimalNumber *)number {
@@ -1063,15 +1080,19 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   }
 }
 
+- (void)safeCallback {
+  if (_callback) {
+    _callback();
+  }
+}
+
 - (void)pressKey:(EWCCalculatorKey)key {
 
   [self processKey:key];
 
   _lastKey = key;
 
-  if (_callback) {
-    _callback();
-  }
+  [self safeCallback];
 }
 
 @end

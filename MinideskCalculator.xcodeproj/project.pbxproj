@@ -79,6 +79,7 @@
 		FD22A9D1237D1BBE003E2C74 /* icon152.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon152.png; sourceTree = "<group>"; };
 		FD22A9D2237D1BBE003E2C74 /* icon20.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon20.png; sourceTree = "<group>"; };
 		FD22A9D3237D1BBE003E2C74 /* icon180.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon180.png; sourceTree = "<group>"; };
+		FD22A9E2237E14B5003E2C74 /* Home Calculator.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Home Calculator.entitlements"; sourceTree = "<group>"; };
 		FDBA3EB1236CC30200780234 /* Home Calculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Home Calculator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDBA3EB4236CC30200780234 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		FDBA3EB5236CC30200780234 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -100,7 +101,6 @@
 		FDBA3EEE236CC36100780234 /* EWCCalculator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EWCCalculator.m; sourceTree = "<group>"; };
 		FDBA3EEF236CC36100780234 /* EWCCalculator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = EWCCalculator.h; sourceTree = "<group>"; };
 		FDBA3EF3236CC3CF00780234 /* EWCCalculatorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = EWCCalculatorTests.m; sourceTree = "<group>"; };
-		FDC1A4C1236D00E700D21FEB /* MinideskCalculator.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = MinideskCalculator.entitlements; sourceTree = "<group>"; };
 		FDC1A4C5236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "NSDecimalNumber+EWCMathCategory.h"; sourceTree = "<group>"; };
 		FDC1A4C6236F8FED00D21FEB /* NSDecimalNumber+EWCMathCategory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "NSDecimalNumber+EWCMathCategory.m"; sourceTree = "<group>"; };
 		FDC1A4C8236FA9DD00D21FEB /* EWCMathTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCMathTests.m; sourceTree = "<group>"; };
@@ -182,11 +182,11 @@
 		FDBA3EB3236CC30200780234 /* MinideskCalculator */ = {
 			isa = PBXGroup;
 			children = (
+				FD22A9E2237E14B5003E2C74 /* Home Calculator.entitlements */,
 				FDC1A4CA2370C14500D21FEB /* Resources */,
 				FDC1A50223778A4A00D21FEB /* Controls */,
 				FDC1A50323778A8300D21FEB /* Calculator */,
 				FDC1A50423778AD500D21FEB /* Extensions */,
-				FDC1A4C1236D00E700D21FEB /* MinideskCalculator.entitlements */,
 				FDC1A4F72376817B00D21FEB /* EWCCalculatorUserDefaultsData.h */,
 				FDC1A4F82376817B00D21FEB /* EWCCalculatorUserDefaultsData.m */,
 				FDBA3EB4236CC30200780234 /* AppDelegate.h */,
@@ -459,6 +459,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -517,6 +518,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -569,7 +571,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = MinideskCalculator/MinideskCalculator.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "MinideskCalculator/Home Calculator.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = RU9C9DUDK9;
@@ -589,7 +591,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				CODE_SIGN_ENTITLEMENTS = MinideskCalculator/MinideskCalculator.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "MinideskCalculator/Home Calculator.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = RU9C9DUDK9;

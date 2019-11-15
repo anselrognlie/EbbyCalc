@@ -9,7 +9,7 @@
 /* Begin PBXBuildFile section */
 		FD22A99F237CE0E9003E2C74 /* EWCLabelEditManager.m in Sources */ = {isa = PBXBuildFile; fileRef = FD22A99E237CE0E8003E2C74 /* EWCLabelEditManager.m */; };
 		FD22A9A2237CE767003E2C74 /* EWCCopyableLabel.m in Sources */ = {isa = PBXBuildFile; fileRef = FD22A9A1237CE767003E2C74 /* EWCCopyableLabel.m */; };
-		FD22A9A7237D1158003E2C74 /* Media.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9A6237D1158003E2C74 /* Media.xcassets */; };
+		FD22A9A7237D1158003E2C74 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9A6237D1158003E2C74 /* Assets.xcassets */; };
 		FD22A9D4237D1BBE003E2C74 /* icon167.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9C6237D1BBE003E2C74 /* icon167.png */; };
 		FD22A9D5237D1BBE003E2C74 /* icon29.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9C7237D1BBE003E2C74 /* icon29.png */; };
 		FD22A9D6237D1BBE003E2C74 /* icon1024.png in Resources */ = {isa = PBXBuildFile; fileRef = FD22A9C8237D1BBE003E2C74 /* icon1024.png */; };
@@ -28,7 +28,6 @@
 		FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB8236CC30200780234 /* SceneDelegate.m */; };
 		FDBA3EBC236CC30200780234 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EBB236CC30200780234 /* ViewController.m */; };
 		FDBA3EBF236CC30200780234 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FDBA3EBD236CC30200780234 /* Main.storyboard */; };
-		FDBA3EC1236CC30500780234 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = FDBA3EC0236CC30500780234 /* Assets.xcassets */; };
 		FDBA3EC4236CC30500780234 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = FDBA3EC2236CC30500780234 /* LaunchScreen.storyboard */; };
 		FDBA3EC7236CC30500780234 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EC6236CC30500780234 /* main.m */; };
 		FDBA3EF0236CC36100780234 /* EWCRoundedCornerButton.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EEB236CC36000780234 /* EWCRoundedCornerButton.m */; };
@@ -64,7 +63,7 @@
 		FD22A9A0237CE767003E2C74 /* EWCCopyableLabel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCCopyableLabel.h; sourceTree = "<group>"; };
 		FD22A9A1237CE767003E2C74 /* EWCCopyableLabel.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCCopyableLabel.m; sourceTree = "<group>"; };
 		FD22A9A3237D0304003E2C74 /* EWCEditDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCEditDelegate.h; sourceTree = "<group>"; };
-		FD22A9A6237D1158003E2C74 /* Media.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Media.xcassets; sourceTree = "<group>"; };
+		FD22A9A6237D1158003E2C74 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FD22A9C6237D1BBE003E2C74 /* icon167.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon167.png; sourceTree = "<group>"; };
 		FD22A9C7237D1BBE003E2C74 /* icon29.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon29.png; sourceTree = "<group>"; };
 		FD22A9C8237D1BBE003E2C74 /* icon1024.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon1024.png; sourceTree = "<group>"; };
@@ -88,7 +87,6 @@
 		FDBA3EBA236CC30200780234 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		FDBA3EBB236CC30200780234 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		FDBA3EBE236CC30200780234 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		FDBA3EC0236CC30500780234 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		FDBA3EC3236CC30500780234 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		FDBA3EC5236CC30500780234 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		FDBA3EC6236CC30500780234 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -196,7 +194,6 @@
 				FDBA3EBA236CC30200780234 /* ViewController.h */,
 				FDBA3EBB236CC30200780234 /* ViewController.m */,
 				FDBA3EBD236CC30200780234 /* Main.storyboard */,
-				FDBA3EC0236CC30500780234 /* Assets.xcassets */,
 				FDBA3EC2236CC30500780234 /* LaunchScreen.storyboard */,
 				FDBA3EC5236CC30500780234 /* Info.plist */,
 				FDBA3EC6236CC30500780234 /* main.m */,
@@ -219,7 +216,7 @@
 			children = (
 				FD22A9C5237D1BBE003E2C74 /* img */,
 				FDC1A4FE237758C400D21FEB /* Localizable.strings */,
-				FD22A9A6237D1158003E2C74 /* Media.xcassets */,
+				FD22A9A6237D1158003E2C74 /* Assets.xcassets */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -354,14 +351,13 @@
 				FD22A9DC237D1BBE003E2C74 /* icon80.png in Resources */,
 				FD22A9D7237D1BBE003E2C74 /* icon60.png in Resources */,
 				FD22A9D5237D1BBE003E2C74 /* icon29.png in Resources */,
-				FD22A9A7237D1158003E2C74 /* Media.xcassets in Resources */,
+				FD22A9A7237D1158003E2C74 /* Assets.xcassets in Resources */,
 				FD22A9DD237D1BBE003E2C74 /* icon87.png in Resources */,
 				FD22A9DA237D1BBE003E2C74 /* icon58.png in Resources */,
 				FDC1A4FC237758C400D21FEB /* Localizable.strings in Resources */,
 				FDBA3EC4236CC30500780234 /* LaunchScreen.storyboard in Resources */,
 				FD22A9E0237D1BBE003E2C74 /* icon20.png in Resources */,
 				FD22A9DB237D1BBE003E2C74 /* icon40.png in Resources */,
-				FDBA3EC1236CC30500780234 /* Assets.xcassets in Resources */,
 				FD22A9DE237D1BBE003E2C74 /* icon120.png in Resources */,
 				FDBA3EBF236CC30200780234 /* Main.storyboard in Resources */,
 				FD22A9D9237D1BBE003E2C74 /* icon.svg in Resources */,

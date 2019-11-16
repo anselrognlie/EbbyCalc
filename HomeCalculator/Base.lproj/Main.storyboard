@@ -145,6 +145,7 @@
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                         <constraints>
                             <constraint firstItem="eQX-k5-GOp" firstAttribute="top" secondItem="o6F-UZ-pgr" secondAttribute="bottom" id="0II-nX-FEh"/>
+                            <constraint firstItem="2mN-90-zxk" firstAttribute="trailing" secondItem="1Ef-AT-CBs" secondAttribute="trailing" constant="426" id="3Vm-gO-fg0"/>
                             <constraint firstItem="o6F-UZ-pgr" firstAttribute="leading" secondItem="2mN-90-zxk" secondAttribute="leading" constant="20" id="88B-Sw-VRT"/>
                             <constraint firstItem="o6F-UZ-pgr" firstAttribute="top" secondItem="2mN-90-zxk" secondAttribute="top" constant="20" id="EaX-ji-McE"/>
                             <constraint firstItem="1Ef-AT-CBs" firstAttribute="leading" secondItem="2mN-90-zxk" secondAttribute="leading" constant="66" id="MXl-Q2-vky"/>
@@ -164,8 +165,8 @@
                         <outlet property="_gridBottomConstraint" destination="aVp-ND-dbJ" id="0m3-wp-jM6"/>
                         <outlet property="_gridTopConstraint" destination="ucd-ed-T3W" id="bTe-4r-RUS"/>
                         <outlet property="_memoryIndicator" destination="dKw-bb-V7C" id="4sk-VV-5kM"/>
-                        <outlet property="_statusDisplay" destination="1Ef-AT-CBs" id="yO1-QP-BM2"/>
                         <outlet property="_statusLeftConstraint" destination="MXl-Q2-vky" id="mMC-e8-bF7"/>
+                        <outlet property="_statusRightConstraint" destination="3Vm-gO-fg0" id="8Lp-aZ-pIM"/>
                         <outlet property="_taxIndicator" destination="fLT-tG-ppR" id="KiS-Ju-sQs"/>
                         <outlet property="_taxMinusIndicator" destination="hDC-Xd-GUb" id="BgD-OF-bph"/>
                         <outlet property="_taxPercentIndicator" destination="dYj-NQ-zYy" id="qxh-49-h64"/>

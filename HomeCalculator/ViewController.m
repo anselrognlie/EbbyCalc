@@ -28,45 +28,48 @@
 #import "EWCLabelEditManager.h"
 #import "EWCCopyableLabel.h"
 
+/**
+  `EWCApplicationLayout` represents the orientation of the application layout.
+*/
 typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
   EWCApplicationRegularDefaultLayout = 0,
   EWCApplicationRegularWideLayout = 1,
   EWCApplicationRegularTallLayout,
-  EWCApplicationCompactWideLayout,
-  EWCApplicationCompactTallLayout,
 };
 
 @interface ViewController () {
-  IBOutlet EWCGridLayoutView *_grid;
-  IBOutlet EWCCopyableLabel *_displayArea;
-  IBOutlet NSLayoutConstraint *_gridTopConstraint;
-  IBOutlet NSLayoutConstraint *_gridBottomConstraint;
-  EWCApplicationLayout _layout;
-  CGFloat _layoutWidth;
-  CGFloat _layoutHeight;
-  IBOutlet UIStackView *_statusDisplay;
-  IBOutlet UILabel *_memoryIndicator;
-  IBOutlet UILabel *_errorIndicator;
-  IBOutlet UILabel *_taxIndicator;
-  IBOutlet UILabel *_taxPlusIndicator;
-  IBOutlet UILabel *_taxMinusIndicator;
-  IBOutlet UILabel *_taxPercentIndicator;
-  IBOutlet NSLayoutConstraint *_statusLeftConstraint;
-  NSLayoutConstraint *_statusRightConstraint;
-  NSMutableArray<UILabel *> *_statusLabels;
-  NSMutableArray<EWCRoundedCornerButton *> *_textButtons;
-  NSMutableArray<EWCRoundedCornerButton *> *_digitButtons;
-  NSMutableArray<EWCRoundedCornerButton *> *_opButtons;
-  NSMutableArray<EWCRoundedCornerButton *> *_allButtons;
-  EWCCalculator *_calculator;
-  UIButton *_memoryButton;
-  UIButton *_clearButton;
-  UIButton *_rateButton;
-  UIButton *_taxPlusButton;
-  UIButton *_taxMinusButton;
-  BOOL _isAnnouncingStatus;
-  EWCLabelEditManager *_labelManager;
+  IBOutlet EWCGridLayoutView *_grid;  // the control the performs the grid layout logic
+  IBOutlet EWCCopyableLabel *_displayArea;  // the control presenting the calculator display, enabled for copy and paste
+  IBOutlet NSLayoutConstraint *_gridTopConstraint;  // the constraint used to set the top of the grid
+  IBOutlet NSLayoutConstraint *_gridBottomConstraint;  // used to read the constraint constant of the bottom of the grid
+  EWCApplicationLayout _layout;  // tracks the layout orientation
+  CGFloat _layoutWidth;  // stores the last width
+  CGFloat _layoutHeight;  // stores the last height
+  IBOutlet UILabel *_memoryIndicator;  // used to control the visibility and font size of the memory indicator
+  IBOutlet UILabel *_errorIndicator;  // used to control the visibility and font size of the error indicator
+  IBOutlet UILabel *_taxIndicator;  // used to control the visibility and font size of the tax indicator
+  IBOutlet UILabel *_taxPlusIndicator;  // used to control the visibility and font size of the tax included indicator
+  IBOutlet UILabel *_taxMinusIndicator;  // used to control the visibility and font size of the tax deducted indicator
+  IBOutlet UILabel *_taxPercentIndicator;  // used to control the visibility and font size of the tax percent indicator
+  IBOutlet NSLayoutConstraint *_statusLeftConstraint;  // used to adjust the constraint constant at run time
+  IBOutlet NSLayoutConstraint *_statusRightConstraint;  // used to adjust the constraint constant at run time
+  NSArray<UILabel *> *_statusLabels;  // iterable collection of all the status labels
+  NSMutableArray<EWCRoundedCornerButton *> *_textButtons;  // iterable collection of all the "text" (e.g. mrc) buttons
+  NSMutableArray<EWCRoundedCornerButton *> *_digitButtons;  // iterable collection of all the digit buttons
+  NSMutableArray<EWCRoundedCornerButton *> *_opButtons;  // iterable collection of all the operator (e.g. +) buttons
+  NSMutableArray<EWCRoundedCornerButton *> *_allButtons;  // iterable collection of all buttons.
+  EWCCalculator *_calculator;  // our calculator model
+  UIButton *_memoryButton;  // reference to the memory button so the (accessibility) label can be updated
+  UIButton *_clearButton;  // reference to the clear button so the labels can be updated
+  UIButton *_rateButton;  // reference to the rate button so the (accessibility) label can be updated
+  UIButton *_taxPlusButton;  // reference to the tax+ button so the labels can be updated
+  UIButton *_taxMinusButton;  // reference to the tax- button so the labels can be updated
+  EWCLabelEditManager *_labelManager;  // provides the logic for attaching the edit menu to a copy/paste-enabled label
 }
+
+///------------------------------------------------------
+/// @name Internal Status Indicator Property Declarations
+///------------------------------------------------------
 
 @property (nonatomic, getter=isMemoryVisible) BOOL memoryVisible;
 @property (nonatomic, getter=isErrorVisible) BOOL errorVisible;
@@ -77,28 +80,118 @@ typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
 
 @end
 
-static const float TEXT_SIZE_AS_PERCENT_OF_WIDTH = 0.049;
-static const float STATUS_SIZE_AS_PERCENT_OF_WIDTH = 0.024;
-static const float DIGIT_SIZE_AS_PERCENT_OF_WIDTH = 0.049 * 2;
-static const float OP_SIZE_AS_PERCENT_OF_WIDTH = 0.049 * 2;
-static const float DISPLAY_FONT_SIZE_AS_PERCENT_OF_WIDE = 0.126;
-static const float DISPLAY_FONT_SIZE_AS_PERCENT_OF_TALL = 0.180;
-//static const float DISPLAY_HEIGHT_FROM_FONT = 1.390;
-static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;
-static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
+///-----------------------
+/// @name Layout Constants
+///-----------------------
+
+static const float TEXT_SIZE_AS_PERCENT_OF_WIDTH = 0.049;  // used to calculate the text button font size using the current mimum dimension
+static const float STATUS_SIZE_AS_PERCENT_OF_WIDTH = 0.024;  // used to calculate the status font size using the current mimum dimension
+static const float DIGIT_SIZE_AS_PERCENT_OF_WIDTH = 0.049 * 2;  // used to calculate the digit button font size using the current mimum dimension
+static const float OP_SIZE_AS_PERCENT_OF_WIDTH = 0.049 * 2;  // used to calculate the operator button font size using the current mimum dimension
+static const float DISPLAY_FONT_SIZE_AS_PERCENT_OF_WIDE = 0.126;  // used to calculate the display font size using the current mimum dimension when in landscape
+static const float DISPLAY_FONT_SIZE_AS_PERCENT_OF_TALL = 0.180;  // used to calculate the display font size using the current mimum dimension when in portrait
+static const float DISPLAY_HEIGHT_FROM_FONT = 1.500;  // used to calculate the display height as a factor of its font size
+static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;  // the aspect ratio that determines whether to layout the buttons in tall or wide mode
 
 @implementation ViewController
 
+///---------------------------------------------------------
+/// @name Internal Status Indicator Property Implementations
+///---------------------------------------------------------
+
+/**
+  Returns the display state of the memory status indicator
+ */
+- (BOOL)isMemoryVisible {
+  return ! _memoryIndicator.hidden;
+}
+
+/**
+ Sets the display state of the memory status indicator
+*/
+- (void)setMemoryVisible:(BOOL)value {
+  _memoryIndicator.hidden = ! value;
+}
+
+/**
+ Returns the display state of the error status indicator
+*/
+- (BOOL)isErrorVisible {
+  return ! _errorIndicator.hidden;
+}
+
+/**
+ Sets the display state of the error status indicator
+*/
+- (void)setErrorVisible:(BOOL)value {
+  _errorIndicator.hidden = ! value;
+}
+
+/**
+ Returns the display state of the tax status indicator
+*/
+- (BOOL)isTaxVisible {
+  return ! _taxIndicator.hidden;
+}
+
+/**
+ Sets the display state of the tax status indicator
+*/
+- (void)setTaxVisible:(BOOL)value {
+  _taxIndicator.hidden = ! value;
+}
+
+/**
+ Returns the display state of the tax added status indicator
+*/
+- (BOOL)isTaxPlusVisible {
+  return ! _taxPlusIndicator.hidden;
+}
+
+/**
+ Sets the display state of the tax added status indicator
+*/
+- (void)setTaxPlusVisible:(BOOL)value {
+  _taxPlusIndicator.hidden = ! value;
+}
+
+/**
+ Returns the display state of the tax deducted status indicator
+*/
+- (BOOL)isTaxMinusVisible {
+  return ! _taxMinusIndicator.hidden;
+}
+
+/**
+ Sets the display state of the tax deducted status indicator
+*/
+- (void)setTaxMinusVisible:(BOOL)value {
+  _taxMinusIndicator.hidden = ! value;
+}
+
+/**
+ Returns the display state of the tax percent status indicator
+*/
+- (BOOL)isTaxPercentVisible {
+  return ! _taxPercentIndicator.hidden;
+}
+
+/**
+ Sets the display state of the tax percent status indicator
+*/
+- (void)setTaxPercentVisible:(BOOL)value {
+  _taxPercentIndicator.hidden = ! value;
+}
+
+///---------------------------------
+/// @name UIViewController Overrides
+///---------------------------------
+
+/**
+  Informs iOS to use light content in the status bar, since our app is dark
+ */
 - (UIStatusBarStyle)preferredStatusBarStyle {
   return UIStatusBarStyleLightContent;
-}
-
-+ (UIColor *)regularTextColor {
-  return [UIColor darkGrayColor];
-}
-
-+ (UIColor *)shiftedTextColor {
-  return [UIColor colorWithRed:.1 green:.5 blue:.7 alpha:1];
 }
 
 - (void)viewDidLoad {
@@ -135,9 +228,17 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   _labelManager.managedLabel = _displayArea;
 }
 
+- (void)viewWillLayoutSubviews {
+  [self applyRegularLayout];
+}
+
+///-------------------------
+/// @name View Setup Methods
+///-------------------------
+
 - (void)setupCalculator {
   _calculator = [EWCCalculator new];
-  
+
   __weak ViewController *controller = self;
   [_calculator registerUpdateCallbackWithBlock:^{
     [controller updateDisplayFromCalculator];
@@ -166,23 +267,206 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   [self addButtons];
 
   // constrain status trailing to rate button
-  _statusRightConstraint = [NSLayoutConstraint
-    constraintWithItem:_statusDisplay attribute:NSLayoutAttributeTrailing
-    relatedBy:NSLayoutRelationEqual
-    toItem:self.view attribute:NSLayoutAttributeTrailing
-    multiplier:1.0 constant:[self getTrailingStatusConstant:width]];
-  [self.view addConstraint:_statusRightConstraint];
+  _statusRightConstraint.constant = [self getTrailingStatusConstant:width];
   _statusLeftConstraint.constant = [self getLeadingStatusConstant:width];
 
-  _statusLabels = [@[
+  _statusLabels = @[
     _memoryIndicator,
     _errorIndicator,
     _taxIndicator,
     _taxPlusIndicator,
     _taxMinusIndicator,
     _taxPercentIndicator,
-  ] mutableCopy];
+  ];
 }
+
+- (void)addButtons {
+  EWCRoundedCornerButton *button = nil;
+
+  CGRect screen = self.view.bounds;
+  CGFloat sWidth = screen.size.width, sHeight = screen.size.height;
+  CGFloat fontDim = (sWidth < sHeight) ? sWidth : sHeight;
+
+  button = [self makeDigitButton:NSLocalizedString(@"Zero Button", @"label for the 0 button")
+    accessibilityLabel:NSLocalizedString(@"Zero Aria Label", @"voiceover label for the 0 button")
+    tag:EWCCalculatorZeroKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"One Button", @"label for the 1 button")
+    accessibilityLabel:NSLocalizedString(@"One Aria Label", @"voiceover label for the 1 button")
+    tag:EWCCalculatorOneKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Two Button", @"label for the 2 button")
+    accessibilityLabel:NSLocalizedString(@"Two Aria Label", @"voiceover label for the 2 button")
+    tag:EWCCalculatorTwoKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Three Button", @"label for the 3 button")
+    accessibilityLabel:NSLocalizedString(@"Three Aria Label", @"voiceover label for the 3 button")
+    tag:EWCCalculatorThreeKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Four Button", @"label for the 4 button")
+    accessibilityLabel:NSLocalizedString(@"Four Aria Label", @"voiceover label for the 4 button")
+    tag:EWCCalculatorFourKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Five Button", @"label for the 5 button")
+    accessibilityLabel:NSLocalizedString(@"Five Aria Label", @"voiceover label for the 5 button")
+    tag:EWCCalculatorFiveKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Six Button", @"label for the 6 button")
+    accessibilityLabel:NSLocalizedString(@"Six Aria Label", @"voiceover label for the 6 button")
+    tag:EWCCalculatorSixKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Seven Button", @"label for the 7 button")
+    accessibilityLabel:NSLocalizedString(@"Seven Aria Label", @"voiceover label for the 7 button")
+    tag:EWCCalculatorSevenKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Eight Button", @"label for the 8 button")
+    accessibilityLabel:NSLocalizedString(@"Eight Aria Label", @"voiceover label for the 8 button")
+    tag:EWCCalculatorEightKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Nine Button", @"label for the 9 button")
+    accessibilityLabel:NSLocalizedString(@"Nine Aria Label", @"voiceover label for the 9 button")
+    tag:EWCCalculatorNineKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeTextButton:NSLocalizedString(@"Clear Button", "label for the button that clears the input")
+    accessibilityLabel:NSLocalizedString(@"Clear Aria Label", @"voiceover label for the button that clears the input")
+    tag:EWCCalculatorClearKey forWidth:fontDim];
+  [_textButtons addObject:button];
+  _clearButton = button;
+  [_allButtons addObject:button];
+
+  button = [self makeTextButton:NSLocalizedString(@"Rate Button", "label for the button that switches to tax rate management mode")
+    accessibilityLabel:NSLocalizedString(@"Rate Tax Mode Aria Label", @"voiceover label for the button that switches to tax rate management mode")
+    tag:EWCCalculatorRateKey forWidth:fontDim];
+  [button setTitleColor:[ViewController shiftedTextColor]
+    forState:UIControlStateNormal];
+  [_textButtons addObject:button];
+  _rateButton = button;
+  [_allButtons addObject:button];
+
+  button = [self makeTextButton:NSLocalizedString(@"Tax+ Button", "label for the button that adds tax to the current value")
+    accessibilityLabel:NSLocalizedString(@"Tax+ Aria Label", @"voiceover label for the button that adds tax to the current value")
+    tag:EWCCalculatorTaxPlusKey forWidth:fontDim];
+  [_textButtons addObject:button];
+  _taxPlusButton = button;
+  [_allButtons addObject:button];
+
+  button = [self makeTextButton:NSLocalizedString(@"Tax- Button", "label for the button that removes tax from the current value")
+    accessibilityLabel:NSLocalizedString(@"Tax- Aria Label", @"voiceover label for the button that removes tax from the current value")
+    tag:EWCCalculatorTaxMinusKey forWidth:fontDim];
+  [_textButtons addObject:button];
+  _taxMinusButton = button;
+  [_allButtons addObject:button];
+
+  button = [self makeTextButton:NSLocalizedString(@"Memory Button", @"label for the button that retrieves and clears the memory")
+    accessibilityLabel:NSLocalizedString(@"Memory Aria Label", @"voiceover label for the button that retrieves and clears the memory")
+    tag:EWCCalculatorMemoryKey forWidth:fontDim];
+  [_textButtons addObject:button];
+  _memoryButton = button;
+  [_allButtons addObject:button];
+
+  button = [self makeTextButton:NSLocalizedString(@"Memory+ Button", @"label for the button that adds to the memory")
+    accessibilityLabel:NSLocalizedString(@"Memory+ Aria Label", @"voiceover label for the button that adds to the memory")
+    tag:EWCCalculatorMemoryPlusKey forWidth:fontDim];
+  [_textButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeTextButton:NSLocalizedString(@"Memory- Button", @"label for the button that subtracts from the memory")
+    accessibilityLabel:NSLocalizedString(@"Memory- Aria Label", @"voiceover label for the button that subtracts from the memory")
+    tag:EWCCalculatorMemoryMinusKey forWidth:fontDim];
+  [_textButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeMainOperatorButton:NSLocalizedString(@"Add Button", @"label for the button that performs addition")
+    accessibilityLabel:NSLocalizedString(@"Add Aria Label", @"voiceover label for the button that performs addition")
+    tag:EWCCalculatorAddKey forWidth:fontDim];
+  [_opButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeMainOperatorButton:NSLocalizedString(@"Subtract Button", @"label for the button that performs subtraction")
+    accessibilityLabel:NSLocalizedString(@"Subtract Aria Label", @"voiceover label for the button that performs subtraction")
+    tag:EWCCalculatorSubtractKey forWidth:fontDim];
+  [_opButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeMainOperatorButton:NSLocalizedString(@"Multiply Button", @"label for the button that performs multiplication")
+    accessibilityLabel:NSLocalizedString(@"Multiply Aria Label", @"voiceover label for the button that performs multiplication")
+    tag:EWCCalculatorMultiplyKey forWidth:fontDim];
+  [button setTitleEdgeInsets:UIEdgeInsetsMake(0, 0, 10, 0)];
+  [_opButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeMainOperatorButton:NSLocalizedString(@"Divide Button", @"label for the button that performs division")
+    accessibilityLabel:NSLocalizedString(@"Divide Aria Label", @"voiceover label for the button that performs division")
+    tag:EWCCalculatorDivideKey forWidth:fontDim];
+  [_opButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeSubOperatorButton:NSLocalizedString(@"Sign Button", @"label for the button that toggles the sign")
+    accessibilityLabel:NSLocalizedString(@"Sign Aria Label", @"voiceover label for the button that toggles the sign")
+    tag:EWCCalculatorSignKey forWidth:fontDim];
+  [_textButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Decimal Button", @"label for the button that designates the decimal point")
+    accessibilityLabel:NSLocalizedString(@"Decimal Aria Label", @"voiceover label for the button that designates the decimal point")
+    tag:EWCCalculatorDecimalKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeSubOperatorButton:NSLocalizedString(@"Percent Button", @"label for the button that take percents")
+    accessibilityLabel:NSLocalizedString(@"Percent Aria Label", @"voiceover label for the button that take percents")
+    tag:EWCCalculatorPercentKey forWidth:fontDim];
+  [_textButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeSubOperatorButton:NSLocalizedString(@"Sqrt Button", @"label for the button that performs square roots")
+    accessibilityLabel:NSLocalizedString(@"Sqrt Aria Label", @"voiceover label for the button that performs square roots")
+    tag:EWCCalculatorSqrtKey forWidth:fontDim];
+  [_textButtons addObject:button];
+  [_allButtons addObject:button];
+
+  button = [self makeDigitButton:NSLocalizedString(@"Equal Button", @"label for the button that executes operations")
+    accessibilityLabel:NSLocalizedString(@"Equal Aria Label", @"voiceover label for the button that executes operations")
+    tag:EWCCalculatorEqualKey forWidth:fontDim];
+  [_digitButtons addObject:button];
+  [_allButtons addObject:button];
+}
+
+///---------------------------
+/// @name Color Helper Methods
+///---------------------------
+
++ (UIColor *)regularTextColor {
+  return [UIColor darkGrayColor];
+}
+
++ (UIColor *)shiftedTextColor {
+  return [UIColor colorWithRed:.1 green:.5 blue:.7 alpha:1];
+}
+
+///------------------------------------------------
+/// @name `EWCEditDelegate` Protocol Implementation
+///------------------------------------------------
 
 - (nonnull NSString *)viewWillCopyText:(nonnull NSString *)text {
   // ignore the passed text, and just get the raw value
@@ -206,177 +490,9 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   return nil;
 }
 
-- (void)addButtons {
-  EWCRoundedCornerButton *button = nil;
-
-  CGRect screen = self.view.bounds;
-  CGFloat sWidth = screen.size.width, sHeight = screen.size.height;
-  CGFloat fontDim = (sWidth < sHeight) ? sWidth : sHeight;
-
-  button = [self makeDigitButton:NSLocalizedString(@"Zero Button", @"label for the 0 button")
-    accessibilityLabel:NSLocalizedString(@"Zero Aria Label", @"voiceover label for the 0 button")
-    action:@selector(onZeroButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"One Button", @"label for the 1 button")
-    accessibilityLabel:NSLocalizedString(@"One Aria Label", @"voiceover label for the 1 button")
-    action:@selector(onOneButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Two Button", @"label for the 2 button")
-    accessibilityLabel:NSLocalizedString(@"Two Aria Label", @"voiceover label for the 2 button")
-    action:@selector(onTwoButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Three Button", @"label for the 3 button")
-    accessibilityLabel:NSLocalizedString(@"Three Aria Label", @"voiceover label for the 3 button")
-    action:@selector(onThreeButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Four Button", @"label for the 4 button")
-    accessibilityLabel:NSLocalizedString(@"Four Aria Label", @"voiceover label for the 4 button")
-    action:@selector(onFourButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Five Button", @"label for the 5 button")
-    accessibilityLabel:NSLocalizedString(@"Five Aria Label", @"voiceover label for the 5 button")
-    action:@selector(onFiveButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Six Button", @"label for the 6 button")
-    accessibilityLabel:NSLocalizedString(@"Six Aria Label", @"voiceover label for the 6 button")
-    action:@selector(onSixButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Seven Button", @"label for the 7 button")
-    accessibilityLabel:NSLocalizedString(@"Seven Aria Label", @"voiceover label for the 7 button")
-    action:@selector(onSevenButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Eight Button", @"label for the 8 button")
-    accessibilityLabel:NSLocalizedString(@"Eight Aria Label", @"voiceover label for the 8 button")
-    action:@selector(onEightButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Nine Button", @"label for the 9 button")
-    accessibilityLabel:NSLocalizedString(@"Nine Aria Label", @"voiceover label for the 9 button")
-    action:@selector(onNineButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeTextButton:NSLocalizedString(@"Clear Button", "label for the button that clears the input")
-    accessibilityLabel:NSLocalizedString(@"Clear Aria Label", @"voiceover label for the button that clears the input")
-    action:@selector(onClearButtonPressed:forEvent:) forWidth:fontDim];
-  [_textButtons addObject:button];
-  _clearButton = button;
-  [_allButtons addObject:button];
-
-  button = [self makeTextButton:NSLocalizedString(@"Rate Button", "label for the button that switches to tax rate management mode")
-    accessibilityLabel:NSLocalizedString(@"Rate Tax Mode Aria Label", @"voiceover label for the button that switches to tax rate management mode")
-    action:@selector(onRateButtonPressed:forEvent:) forWidth:fontDim];
-  [button setTitleColor:[ViewController shiftedTextColor]
-    forState:UIControlStateNormal];
-  [_textButtons addObject:button];
-  _rateButton = button;
-  [_allButtons addObject:button];
-
-  button = [self makeTextButton:NSLocalizedString(@"Tax+ Button", "label for the button that adds tax to the current value")
-    accessibilityLabel:NSLocalizedString(@"Tax+ Aria Label", @"voiceover label for the button that adds tax to the current value")
-    action:@selector(onTaxPlusButtonPressed:forEvent:) forWidth:fontDim];
-  [_textButtons addObject:button];
-  _taxPlusButton = button;
-  [_allButtons addObject:button];
-
-  button = [self makeTextButton:NSLocalizedString(@"Tax- Button", "label for the button that removes tax from the current value")
-    accessibilityLabel:NSLocalizedString(@"Tax- Aria Label", @"voiceover label for the button that removes tax from the current value")
-    action:@selector(onTaxMinusButtonPressed:forEvent:) forWidth:fontDim];
-  [_textButtons addObject:button];
-  _taxMinusButton = button;
-  [_allButtons addObject:button];
-
-  button = [self makeTextButton:NSLocalizedString(@"Memory Button", @"label for the button that retrieves and clears the memory")
-    accessibilityLabel:NSLocalizedString(@"Memory Aria Label", @"voiceover label for the button that retrieves and clears the memory")
-    action:@selector(onMemoryButtonPressed:forEvent:) forWidth:fontDim];
-  [_textButtons addObject:button];
-  _memoryButton = button;
-  [_allButtons addObject:button];
-
-  button = [self makeTextButton:NSLocalizedString(@"Memory+ Button", @"label for the button that adds to the memory")
-    accessibilityLabel:NSLocalizedString(@"Memory+ Aria Label", @"voiceover label for the button that adds to the memory")
-    action:@selector(onMemoryPlusButtonPressed:forEvent:) forWidth:fontDim];
-  [_textButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeTextButton:NSLocalizedString(@"Memory- Button", @"label for the button that subtracts from the memory")
-    accessibilityLabel:NSLocalizedString(@"Memory- Aria Label", @"voiceover label for the button that subtracts from the memory")
-    action:@selector(onMemoryMinusButtonPressed:forEvent:) forWidth:fontDim];
-  [_textButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeMainOperatorButton:NSLocalizedString(@"Add Button", @"label for the button that performs addition")
-    accessibilityLabel:NSLocalizedString(@"Add Aria Label", @"voiceover label for the button that performs addition")
-    action:@selector(onAddButtonPressed:forEvent:) forWidth:fontDim];
-  [_opButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeMainOperatorButton:NSLocalizedString(@"Subtract Button", @"label for the button that performs subtraction")
-    accessibilityLabel:NSLocalizedString(@"Subtract Aria Label", @"voiceover label for the button that performs subtraction")
-    action:@selector(onSubtractButtonPressed:forEvent:) forWidth:fontDim];
-  [_opButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeMainOperatorButton:NSLocalizedString(@"Multiply Button", @"label for the button that performs multiplication")
-    accessibilityLabel:NSLocalizedString(@"Multiply Aria Label", @"voiceover label for the button that performs multiplication")
-    action:@selector(onMultiplyButtonPressed:forEvent:) forWidth:fontDim];
-  [button setTitleEdgeInsets:UIEdgeInsetsMake(0, 0, 10, 0)];
-  [_opButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeMainOperatorButton:NSLocalizedString(@"Divide Button", @"label for the button that performs division")
-    accessibilityLabel:NSLocalizedString(@"Divide Aria Label", @"voiceover label for the button that performs division")
-    action:@selector(onDivideButtonPressed:forEvent:) forWidth:fontDim];
-  [_opButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeSubOperatorButton:NSLocalizedString(@"Sign Button", @"label for the button that toggles the sign")
-    accessibilityLabel:NSLocalizedString(@"Sign Aria Label", @"voiceover label for the button that toggles the sign")
-    action:@selector(onSignButtonPressed:forEvent:) forWidth:fontDim];
-  [_textButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Decimal Button", @"label for the button that designates the decimal point")
-    accessibilityLabel:NSLocalizedString(@"Decimal Aria Label", @"voiceover label for the button that designates the decimal point")
-    action:@selector(onDecimalButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeSubOperatorButton:NSLocalizedString(@"Percent Button", @"label for the button that take percents")
-    accessibilityLabel:NSLocalizedString(@"Percent Aria Label", @"voiceover label for the button that take percents")
-    action:@selector(onPercentButtonPressed:forEvent:) forWidth:fontDim];
-  [_textButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeSubOperatorButton:NSLocalizedString(@"Sqrt Button", @"label for the button that performs square roots")
-    accessibilityLabel:NSLocalizedString(@"Sqrt Aria Label", @"voiceover label for the button that performs square roots")
-    action:@selector(onSqrtButtonPressed:forEvent:) forWidth:fontDim];
-  [_textButtons addObject:button];
-  [_allButtons addObject:button];
-
-  button = [self makeDigitButton:NSLocalizedString(@"Equal Button", @"label for the button that executes operations")
-    accessibilityLabel:NSLocalizedString(@"Equal Aria Label", @"voiceover label for the button that executes operations")
-    action:@selector(onEqualButtonPressed:forEvent:) forWidth:fontDim];
-  [_digitButtons addObject:button];
-  [_allButtons addObject:button];
-}
+///---------------------
+/// @name Layout Methods
+///---------------------
 
 - (void)layoutGrid {
 
@@ -474,110 +590,8 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   }
 }
 
-- (EWCRoundedCornerButton *)makeMainOperatorButton:(NSString *)label
-  accessibilityLabel:(NSString *)accessibilityLabel
-  action:(SEL)selector
-  forWidth:(float)width {
-
-  return [self makeOperatorButton:label
-    accessibilityLabel:accessibilityLabel
-    action:selector
-    withSize:OP_SIZE_AS_PERCENT_OF_WIDTH * width];
-}
-
-- (EWCRoundedCornerButton *)makeSubOperatorButton:(NSString *)label
-  accessibilityLabel:(NSString *)accessibilityLabel
-  action:(SEL)selector
-  forWidth:(float)width {
-
-  return [self makeOperatorButton:label
-    accessibilityLabel:accessibilityLabel
-    action:selector
-    withSize:TEXT_SIZE_AS_PERCENT_OF_WIDTH * width];
-}
-
-- (EWCRoundedCornerButton *)makeOperatorButton:(NSString *)label
-  accessibilityLabel:(NSString *)accessibilityLabel
-  action:(SEL)selector
-  withSize:(float)points {
-
-  return [self makeCalculatorButtonWithLabel:label
-    accessibilityLabel:accessibilityLabel
-    action:selector
-    colored:[UIColor whiteColor]
-    highlightColor:[UIColor colorWithRed:1.0 green:204.0/255 blue:136.0/255 alpha:1.0]
-    backgroundColor:[UIColor orangeColor]
-    fontSize:points];
-}
-
-- (EWCRoundedCornerButton *)makeDigitButton:(NSString *)label
-  accessibilityLabel:(NSString *)accessibilityLabel
-  action:(SEL)selector
-  forWidth:(float)width {
-
-  return [self makeCalculatorButtonWithLabel:label
-    accessibilityLabel:accessibilityLabel
-    action:selector
-    colored:[UIColor whiteColor]
-    highlightColor:[UIColor lightGrayColor]
-    backgroundColor:[UIColor darkGrayColor]
-    fontSize:DIGIT_SIZE_AS_PERCENT_OF_WIDTH * width];
-}
-
-- (EWCRoundedCornerButton *)makeTextButton:(NSString *)label
-  accessibilityLabel:(NSString *)accessibilityLabel
-  action:(SEL)selector
-  forWidth:(float)width {
-
-  return [self makeCalculatorButtonWithLabel:label
-    accessibilityLabel:accessibilityLabel
-    action:selector
-    colored:[ViewController regularTextColor]
-    highlightColor:[UIColor colorWithRed:204.0/255 green:204.0/255 blue:204.0/255 alpha:1.0]
-    backgroundColor:[UIColor lightGrayColor]
-    fontSize:TEXT_SIZE_AS_PERCENT_OF_WIDTH * width];
-}
-
-- (EWCRoundedCornerButton *)makeCalculatorButtonWithLabel:(NSString *)label
-  accessibilityLabel:(NSString *)accessibilityLabel
-  action:(SEL)selector
-  colored:(UIColor *)color
-  highlightColor:(UIColor *)highlight
-  backgroundColor:(UIColor *)backgroundColor
-  fontSize:(CGFloat)fontSize {
-
-  EWCRoundedCornerButton *button = [EWCAccessibleRoundedCornerButton buttonLabeled:label
-    colored:color
-    backgroundColor:backgroundColor];
-  button.accessibilityLabel = accessibilityLabel;
-  button.highlightedBackgroundColor = highlight;
-  button.titleLabel.font = [UIFont systemFontOfSize:fontSize];
-  [button addTarget:self action:selector forControlEvents:UIControlEventTouchUpInside];
-
-  return button;
-}
-
-- (void)viewWillLayoutSubviews {
-  UIUserInterfaceSizeClass hClass = self.traitCollection.horizontalSizeClass;
-//  UIUserInterfaceSizeClass vClass = self.traitCollection.verticalSizeClass;
-
-  switch (hClass) {
-    case UIUserInterfaceSizeClassUnspecified:
-    case UIUserInterfaceSizeClassRegular:
-      [self applyRegularLayout];
-      break;
-
-    case UIUserInterfaceSizeClassCompact:
-      [self applyRegularLayout];
-      break;
-  }
-}
-
--(void)viewDidLayoutSubviews {
-}
-
 - (float)getTrailingStatusConstant:(CGFloat)width {
-  return -20 - width * _grid.minColumnGutter;
+  return 20 + width * _grid.minColumnGutter;
 }
 
 - (float)getLeadingStatusConstant:(CGFloat)width {
@@ -596,7 +610,7 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   float aspectRatio = height / width;
   _layout = (aspectRatio >= TWO_GRID_HEIGHT_WIDTH_RATIO)
     ? EWCApplicationRegularTallLayout
-    : EWCApplicationCompactWideLayout;
+    : EWCApplicationRegularWideLayout;
 
   if (_layout != oldLayout) {
     [self layoutGrid];
@@ -650,7 +664,8 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   // don't update if the buttons haven't been registered yet
   if (buttons.count == 0) { return; }
 
-  UIFont *font = [buttons[0].titleLabel.font fontWithSize:points];
+  UIButton *button = buttons[0];
+  UIFont *font = [button.titleLabel.font fontWithSize:points];
   for (UIButton *button in buttons) {
     [button.titleLabel setFont:font];
   }
@@ -675,182 +690,159 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
 }
 
 - (void)setStatusFontSize:(CGFloat)points {
-  UIFont *font = [_statusLabels[0].font fontWithSize:points];
+  UILabel *label = _statusLabels[0];
+  UIFont *font = [label.font fontWithSize:points];
   for (UILabel *label in _statusLabels) {
     label.font = font;
   }
 }
 
-- (void)onRateButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorRateKey];
+///-----------------------------------------
+/// @name Button Construction Helper Methods
+///-----------------------------------------
+
+- (EWCRoundedCornerButton *)makeMainOperatorButton:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
+  tag:(NSInteger)tag
+  forWidth:(float)width {
+
+  return [self makeOperatorButton:label
+    accessibilityLabel:accessibilityLabel
+    tag:tag
+    withSize:OP_SIZE_AS_PERCENT_OF_WIDTH * width];
 }
 
-- (void)onTaxPlusButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorTaxPlusKey];
+- (EWCRoundedCornerButton *)makeSubOperatorButton:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
+  tag:(NSInteger)tag
+  forWidth:(float)width {
+
+  return [self makeOperatorButton:label
+    accessibilityLabel:accessibilityLabel
+    tag:tag
+    withSize:TEXT_SIZE_AS_PERCENT_OF_WIDTH * width];
 }
 
-- (void)onTaxMinusButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorTaxMinusKey];
+- (EWCRoundedCornerButton *)makeOperatorButton:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
+  tag:(NSInteger)tag
+  withSize:(float)points {
+
+  return [self makeCalculatorButtonWithLabel:label
+    accessibilityLabel:accessibilityLabel
+    tag:tag
+    colored:[UIColor whiteColor]
+    highlightColor:[UIColor colorWithRed:1.0 green:204.0/255 blue:136.0/255 alpha:1.0]
+    backgroundColor:[UIColor orangeColor]
+    fontSize:points];
 }
 
-- (void)onClearButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorClearKey];
+- (EWCRoundedCornerButton *)makeDigitButton:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
+  tag:(NSInteger)tag
+  forWidth:(float)width {
+
+  return [self makeCalculatorButtonWithLabel:label
+    accessibilityLabel:accessibilityLabel
+    tag:tag
+    colored:[UIColor whiteColor]
+    highlightColor:[UIColor lightGrayColor]
+    backgroundColor:[UIColor darkGrayColor]
+    fontSize:DIGIT_SIZE_AS_PERCENT_OF_WIDTH * width];
 }
 
-- (void)onSevenButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorSevenKey];
+- (EWCRoundedCornerButton *)makeTextButton:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
+  tag:(NSInteger)tag
+  forWidth:(float)width {
+
+  return [self makeCalculatorButtonWithLabel:label
+    accessibilityLabel:accessibilityLabel
+    tag:tag
+    colored:[ViewController regularTextColor]
+    highlightColor:[UIColor colorWithRed:204.0/255 green:204.0/255 blue:204.0/255 alpha:1.0]
+    backgroundColor:[UIColor lightGrayColor]
+    fontSize:TEXT_SIZE_AS_PERCENT_OF_WIDTH * width];
 }
 
-- (void)onEightButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorEightKey];
+- (EWCRoundedCornerButton *)makeCalculatorButtonWithLabel:(NSString *)label
+  accessibilityLabel:(NSString *)accessibilityLabel
+  tag:(NSInteger)tag
+  colored:(UIColor *)color
+  highlightColor:(UIColor *)highlight
+  backgroundColor:(UIColor *)backgroundColor
+  fontSize:(CGFloat)fontSize {
+
+  EWCRoundedCornerButton *button = [EWCAccessibleRoundedCornerButton buttonLabeled:label
+    colored:color
+    backgroundColor:backgroundColor];
+  button.accessibilityLabel = accessibilityLabel;
+  button.highlightedBackgroundColor = highlight;
+  button.titleLabel.font = [UIFont systemFontOfSize:fontSize];
+  button.tag = tag;
+  [button addTarget:self
+    action:@selector(onCalculatorButtonPressed:forEvent:)
+    forControlEvents:UIControlEventTouchUpInside];
+
+  return button;
 }
 
-- (void)onNineButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorNineKey];
+///---------------------------
+/// @name Button Press Handler
+///---------------------------
+
+- (void)onCalculatorButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
+  [_calculator pressKey:(EWCCalculatorKey)sender.tag];
 }
 
-- (void)onMultiplyButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorMultiplyKey];
-}
+///---------------------------------
+/// @name VoiceOver Dispatch Helpers
+///---------------------------------
 
-- (void)onDivideButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorDivideKey];
-}
+/**
+  Performs a VoiceOver announcement using the accessibility label in the supplied `UIView`.
 
-- (void)onSignButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorSignKey];
-}
+  Since we use this for status indicator announcements it won't queue the announcment, since we want it to interrupt reannouncing the current control to draw attention to itself.
 
-- (void)onFourButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorFourKey];
-}
-
-- (void)onFiveButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorFiveKey];
-}
-
-- (void)onSixButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorSixKey];
-}
-
-- (void)onSubtractButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorSubtractKey];
-}
-
-- (void)onMemoryButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorMemoryKey];
-}
-
-- (void)onPercentButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorPercentKey];
-}
-
-- (void)onOneButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorOneKey];
-}
-
-- (void)onTwoButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorTwoKey];
-}
-
-- (void)onThreeButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorThreeKey];
-}
-
-- (void)onAddButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorAddKey];
-}
-
-- (void)onMemoryMinusButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorMemoryMinusKey];
-}
-
-- (void)onSqrtButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorSqrtKey];
-}
-
-- (void)onZeroButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorZeroKey];
-}
-
-- (void)onDecimalButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorDecimalKey];
-}
-
-- (void)onEqualButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorEqualKey];
-}
-
-- (void)onMemoryPlusButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:EWCCalculatorMemoryPlusKey];
-}
-
-- (BOOL)isMemoryVisible {
-  return ! _memoryIndicator.hidden;
-}
-
-- (void)setMemoryVisible:(BOOL)value {
-  _memoryIndicator.hidden = ! value;
-}
-
-- (BOOL)isErrorVisible {
-  return ! _errorIndicator.hidden;
-}
-
-- (void)setErrorVisible:(BOOL)value {
-  _errorIndicator.hidden = ! value;
-}
-
-- (BOOL)isTaxVisible {
-  return ! _taxIndicator.hidden;
-}
-
-- (void)setTaxVisible:(BOOL)value {
-  _taxIndicator.hidden = ! value;
-}
-
-- (BOOL)isTaxPlusVisible {
-  return ! _taxPlusIndicator.hidden;
-}
-
-- (void)setTaxPlusVisible:(BOOL)value {
-  _taxPlusIndicator.hidden = ! value;
-}
-
-- (BOOL)isTaxMinusVisible {
-  return ! _taxMinusIndicator.hidden;
-}
-
-- (void)setTaxMinusVisible:(BOOL)value {
-  _taxMinusIndicator.hidden = ! value;
-}
-
-- (BOOL)isTaxPercentVisible {
-  return ! _taxPercentIndicator.hidden;
-}
-
-- (void)setTaxPercentVisible:(BOOL)value {
-  _taxPercentIndicator.hidden = ! value;
-}
-
+  @param view The view from which to get the announcement label.  Generally, a status indicator.
+ */
 - (void)dispatchAnnouncementForView:(UIView *)view {
   [self dispatchAnnouncement:view.accessibilityLabel];
 }
 
+/**
+  Performs a VoiceOver announcement using the supplied message.
+
+  @param message The message to announce.  Either a `NSString` or `NSAttributedString` which can carry information about queuing.
+ */
 - (void)dispatchAnnouncement:(id)message {
+
+  // don't do anything is VoiceOver isn't active
   if (! UIAccessibilityIsVoiceOverRunning()) { return; }
 
-  // param is id so that NSString or NSAttributedString both can be passed
-  double delayInSeconds = (_isAnnouncingStatus) ? 0.75 : 0.2;
-  _isAnnouncingStatus = NO;
+  double delayInSeconds = 0.75;
   dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW,
     (int64_t)(delayInSeconds * NSEC_PER_SEC));
 
+  // dispatch to announce after a brief delay so that we don't get cut off by
+  // the system reannouncing the currently selected button
   dispatch_after(popTime, dispatch_get_main_queue(), ^(void) {
     UIAccessibilityPostNotification(
     UIAccessibilityAnnouncementNotification,
     message);
   });
+}
+
+///------------------------------------------------------
+/// @name Methods to Update Display State from Calculator
+///------------------------------------------------------
+
+- (void)updateDisplayFromCalculator {
+  [self updateStatusIndicators];
+  [self updateDisplay];
+  [self updateClearLabels];
+  [self updateTaxLabels];
+  [self updateMemoryLabels];
 }
 
 - (void)updateClearLabels {
@@ -906,16 +898,28 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   _memoryButton.accessibilityLabel = ariaLabel;
 }
 
+/**
+  Updates the displayed value based on the calculator model state.  State changes also trigger VoiceOver announcements.
+ */
 - (void)updateDisplay {
+
+  // get the values from the calculator
   NSString *lastDisplay = _displayArea.text;
   NSString *newDisplay = _calculator.displayContent;
+
+  // update the display and accessibility labels
   [_displayArea setText:newDisplay];
   _displayArea.accessibilityLabel = _calculator.displayAccessibleContent;
 
+  // if there was a change, make an announcement
   if ([lastDisplay compare:newDisplay] != NSOrderedSame) {
 
     NSString *accesssibleDisplay = _calculator.displayAccessibleContent;
 
+    // add an attribute to the message to not interrupt the current announcement.
+    // this doesn't maintain a full queue, it only applies to the current message,
+    // so we still have to try to avoid starting another message before this
+    // one gets a chance to play
     NSAttributedString *message = [[NSAttributedString alloc]
       initWithString:accesssibleDisplay
       attributes:@{ UIAccessibilitySpeechAttributeQueueAnnouncement: @1 }];
@@ -924,10 +928,10 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   }
 }
 
-
-
+/**
+  Updates the visibility of the status indicators based on the calculator model state.  State changes also trigger VoiceOver announcements.
+ */
 - (void)updateStatusIndicators {
-  _isAnnouncingStatus = NO;
 
   self.errorVisible = _calculator.isErrorStatusVisible;
   BOOL oldMemory = self.isMemoryVisible;
@@ -941,40 +945,30 @@ static const float TWO_GRID_HEIGHT_WIDTH_RATIO = 1.900;
   BOOL oldTaxPercent = self.isTaxPercentVisible;
   self.taxPercentVisible = _calculator.isTaxPercentStatusVisible;
 
+  // an error status trumps everything else.
+  // only check for other status changes if there is no error.
+  // the other checks should also only announce if there was a change,
+  // while error announces whenever it is visibile.
 
   if (_calculator.isErrorStatusVisible) {
     [self dispatchAnnouncementForView:_errorIndicator];
-    _isAnnouncingStatus = YES;
   } else {
     if (self.isMemoryVisible && oldMemory != self.isMemoryVisible) {
       [self dispatchAnnouncementForView:_memoryIndicator];
-      _isAnnouncingStatus = YES;
     }
     if (self.isTaxVisible && oldTax != self.isTaxVisible) {
       [self dispatchAnnouncementForView:_taxIndicator];
-      _isAnnouncingStatus = YES;
     }
     if (self.isTaxPlusVisible && oldTaxPlus != self.isTaxPlusVisible) {
       [self dispatchAnnouncementForView:_taxPlusIndicator];
-      _isAnnouncingStatus = YES;
     }
     if (self.isTaxMinusVisible && oldTaxMinus != self.isTaxMinusVisible) {
       [self dispatchAnnouncementForView:_taxMinusIndicator];
-      _isAnnouncingStatus = YES;
     }
     if (self.isTaxPercentVisible && oldTaxPercent != self.isTaxPercentVisible) {
       [self dispatchAnnouncementForView:_taxPercentIndicator];
-      _isAnnouncingStatus = YES;
     }
   }
-}
-
-- (void)updateDisplayFromCalculator {
-  [self updateStatusIndicators];
-  [self updateDisplay];
-  [self updateClearLabels];
-  [self updateTaxLabels];
-  [self updateMemoryLabels];
 }
 
 @end

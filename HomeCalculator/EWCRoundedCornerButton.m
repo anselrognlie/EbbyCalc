@@ -93,4 +93,12 @@
   }
 }
 
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+  if (UIAccessibilityIsVoiceOverRunning()) {
+    return [super pointInside:point withEvent:event];
+  }
+
+  return NO;
+}
+
 @end

@@ -37,6 +37,51 @@ typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
   EWCApplicationTallLayout,
 };
 
+/**
+  `EWCLayoutConstants` groups several values used for UI layout that can change according to the layout
+ */
+typedef struct {
+  /**
+    Used to calculate the text button font size using the current minimum dimension.
+   */
+  const float textSizeAsPercentOfNarrowDimension;
+
+  /**
+    Used to calculate the status indicator font size using the current minimum dimension.
+   */
+  const float statusSizeAsPercentOfNarrowDimension;
+
+  /**
+    Used to calculate the digit button font size using the current minimum dimension.
+   */
+  const float digitSizeAsPercentOfNarrowDimension;
+
+  /**
+    Used to calculate the text button font size using the current minimum dimension.
+   */
+  const float operatorSizeAsPercentOfNarrowDimension;
+
+  /**
+    Used to calculate the display font size using the current minimum dimension.
+   */
+  const float displaySizeAsPercentOfNarrowDimension;
+
+  /**
+    Used to calculate the display height from the font size it will need to display.
+   */
+  const float displayHeightFromFontSize;
+
+  /**
+    The minimum spacing between button rows as a percentage of height.
+   */
+  const float minimumRowGutter;
+
+  /**
+    The minimum spacing between button columns as a percentage of width.
+   */
+  const float minimumColumnGutter;
+} EWCLayoutConstants;
+
 @interface ViewController () {
   IBOutlet EWCGridLayoutView *_grid;  // the control the performs the grid layout logic
   IBOutlet EWCCopyableLabel *_displayArea;  // the control presenting the calculator display, enabled for copy and paste
@@ -65,6 +110,7 @@ typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
   UIButton *_taxPlusButton;  // reference to the tax+ button so the labels can be updated
   UIButton *_taxMinusButton;  // reference to the tax- button so the labels can be updated
   EWCLabelEditManager *_labelManager;  // provides the logic for attaching the edit menu to a copy/paste-enabled label
+  EWCLayoutConstants const *_currentLayout;  // points to the currently configured layout constants
 }
 
 ///------------------------------------------------------
@@ -84,19 +130,56 @@ typedef NS_ENUM(NSInteger, EWCApplicationLayout) {
 /// @name Layout Constants
 ///-----------------------
 
-static const float s_textSizeAsPercentOfNarrowDimension = 0.049;  // used to calculate the text button font size using the current mimum dimension
-static const float s_statusSizeAsPercentOfNarrowDimension = 0.024;  // used to calculate the status font size using the current mimum dimension
-static const float s_digitSizeAsPercentOfNarrowDimension = 0.049 * 2;  // used to calculate the digit button font size using the current mimum dimension
-static const float s_operatorSizeAsPercentOfNarrowDimension = 0.049 * 2;  // used to calculate the operator button font size using the current mimum dimension
-static const float s_displayFontSizeForWideLayoutAsPercentOfNarrowDimension = 0.126;  // used to calculate the display font size using the current mimum dimension when in landscape
-static const float s_displayFontSizeForTallLayoutAsPercentOfNarrowDimension = 0.180;  // used to calculate the display font size using the current mimum dimension when in portrait
-static const float s_displayHeightFromFontSize = 1.500;  // used to calculate the display height as a factor of its font size
 static const float s_tallGridHeightWidthRatio = 1.900;  // the aspect ratio that determines whether to layout the buttons in tall or wide mode
 
 static const float s_minimumDisplayScaleFactor = 0.25;  // the minimum scale font that can be applied to the display to fit the contents on screen
 static const int s_maximumDigits = 16;  // the number of digits we will support
-static const float s_minimumRowGutter = 0.02;  // the minimum spacing between button rows as a percentage of height
-static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between button columns as a percentage of width
+
+static const float s_wideLayoutBase = 0.049;  // base layout value for narrow and wide layout
+static const float s_tallLayoutBase = 0.060;  // base layout value for tall layout
+
+/**
+  Layout constants for the narrow layout (wide layout, but width is smaller than height).
+ */
+static const EWCLayoutConstants s_narrowLayoutConstants = {
+  s_wideLayoutBase,  // textSizeAsPercentOfNarrowDimension
+  s_wideLayoutBase / 2,  // statusSizeAsPercentOfNarrowDimension
+  s_wideLayoutBase * 2,  // digitSizeAsPercentOfNarrowDimension
+  s_wideLayoutBase * 2,  // operatorSizeAsPercentOfNarrowDimension
+  s_wideLayoutBase * 3.7,  // displaySizeAsPercentOfNarrowDimension
+  1.500,  // displayHeightFromFontSize
+  0.020,  // minimumRowGutter
+  0.020,  // minimumColumnGutter
+};
+
+/**
+ Layout constants for the wide layout (wide layout, and width is larger than height).
+*/
+static const EWCLayoutConstants s_wideLayoutConstants = {
+  s_wideLayoutBase,  // textSizeAsPercentOfNarrowDimension
+  s_wideLayoutBase / 2,  // statusSizeAsPercentOfNarrowDimension
+  s_wideLayoutBase * 2,  // digitSizeAsPercentOfNarrowDimension
+  s_wideLayoutBase * 2,  // operatorSizeAsPercentOfNarrowDimension
+  s_wideLayoutBase * 2.6,  // displaySizeAsPercentOfNarrowDimension
+  1.500,  // displayHeightFromFontSize
+  0.030,  // minimumRowGutter
+  0.010,  // minimumColumnGutter
+};
+
+/**
+ Layout constants for the tall layout (greater than tall aspect ratio).
+*/
+static const EWCLayoutConstants s_tallLayoutConstants = {
+  s_tallLayoutBase,  // textSizeAsPercentOfNarrowDimension
+  s_tallLayoutBase / 2,  // statusSizeAsPercentOfNarrowDimension
+  s_tallLayoutBase * 1.8,  // digitSizeAsPercentOfNarrowDimension
+  s_tallLayoutBase * 1.7,  // operatorSizeAsPercentOfNarrowDimension
+  s_tallLayoutBase * 2.8,  // displaySizeAsPercentOfNarrowDimension
+  1.500,  // displayHeightFromFontSize
+  0.020,  // minimumRowGutter
+  0.030,  // minimumColumnGutter
+};
+
 
 @implementation ViewController
 
@@ -209,6 +292,7 @@ static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between
   _layout = EWCApplicationDefaultLayout;
   _layoutWidth = 0;
   _layoutHeight = 0;
+  _currentLayout = &s_wideLayoutConstants;
 
   _textButtons = [NSMutableArray<EWCRoundedCornerButton *> new];
   _digitButtons = [NSMutableArray<EWCRoundedCornerButton *> new];
@@ -219,7 +303,7 @@ static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between
   _displayArea.minimumScaleFactor = s_minimumDisplayScaleFactor;
 
   [self setupCalculator];
-  [self setupGrid];
+  [self allocateButtons];
 
   // trun off all status indicators
   self.memoryVisible = NO;
@@ -280,19 +364,6 @@ static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between
 
   // make sure that we announce the initial displayed valued
   [self dispatchAnnouncement:_displayArea];
-}
-
-/**
-  Sets up the grid gutter spacing and the buttons that the grid will host.
- */
-- (void)setupGrid {
-
-  // set the gutters
-  _grid.minRowGutter = s_minimumRowGutter;
-  _grid.minColumnGutter = s_minimumColumnGutter;
-
-  // add buttons
-  [self allocateButtons];
 }
 
 /**
@@ -542,6 +613,10 @@ static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between
     button.cornerRadius = radius;
   };
 
+  // set the gutters
+  _grid.minRowGutter = _currentLayout->minimumRowGutter;
+  _grid.minColumnGutter = _currentLayout->minimumColumnGutter;
+
   if (_layout == EWCApplicationTallLayout) {
     // tall
 
@@ -673,6 +748,12 @@ static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between
     ? EWCApplicationTallLayout
     : EWCApplicationWideLayout;
 
+  if (_layout == EWCApplicationWideLayout) {
+    _currentLayout = (width < height) ? &s_narrowLayoutConstants : &s_wideLayoutConstants;
+  } else {
+    _currentLayout = &s_tallLayoutConstants;
+  }
+
   // apply the layout if needed
   if (_layout != oldLayout) {
     [self layoutGrid];
@@ -682,22 +763,20 @@ static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between
   CGFloat fontDim = (width < height) ? width : height;
 
   // the display font scale factor depends on the orientation as well
-  CGFloat fontHeight = fontDim * ((width > height)
-    ? s_displayFontSizeForWideLayoutAsPercentOfNarrowDimension
-    : s_displayFontSizeForTallLayoutAsPercentOfNarrowDimension);
+  CGFloat fontHeight = fontDim * _currentLayout->displaySizeAsPercentOfNarrowDimension;
 
   // use it to update the display font size
   [_displayArea setFont:[_displayArea.font fontWithSize:fontHeight]];
 
   // calculate the layout properties that depend on the display font height
-  CGFloat displayHeight = fontHeight * s_displayHeightFromFontSize;
+  CGFloat displayHeight = fontHeight * _currentLayout->displayHeightFromFontSize;
   _gridTopConstraint.constant = -height + displayHeight + _gridBottomConstraint.constant;
 
   // update the remaining font sizes
-  [self setTextButtonsFontSize:fontDim * s_textSizeAsPercentOfNarrowDimension];
-  [self setDigitButtonsFontSize:fontDim * s_digitSizeAsPercentOfNarrowDimension];
-  [self setOperatorButtonsFontSize:fontDim * s_operatorSizeAsPercentOfNarrowDimension];
-  [self setStatusFontSize:fontDim * s_statusSizeAsPercentOfNarrowDimension];
+  [self setTextButtonsFontSize:fontDim * _currentLayout->textSizeAsPercentOfNarrowDimension];
+  [self setDigitButtonsFontSize:fontDim * _currentLayout->digitSizeAsPercentOfNarrowDimension];
+  [self setOperatorButtonsFontSize:fontDim * _currentLayout->operatorSizeAsPercentOfNarrowDimension];
+  [self setStatusFontSize:fontDim * _currentLayout->statusSizeAsPercentOfNarrowDimension];
 
   // adjust the status constraints
   _statusRightConstraint.constant = [self getTrailingStatusConstant:width];
@@ -794,7 +873,7 @@ static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between
   return [self makeOperatorButton:label
     accessibilityLabel:accessibilityLabel
     tag:tag
-    withSize:s_operatorSizeAsPercentOfNarrowDimension * width];
+    withSize:_currentLayout->operatorSizeAsPercentOfNarrowDimension * width];
 }
 
 /**
@@ -815,7 +894,7 @@ static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between
   return [self makeOperatorButton:label
     accessibilityLabel:accessibilityLabel
     tag:tag
-    withSize:s_textSizeAsPercentOfNarrowDimension * width];
+    withSize:_currentLayout->textSizeAsPercentOfNarrowDimension * width];
 }
 
 /**
@@ -863,7 +942,7 @@ static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between
     colored:[UIColor whiteColor]
     highlightColor:[UIColor lightGrayColor]
     backgroundColor:[UIColor darkGrayColor]
-    fontSize:s_digitSizeAsPercentOfNarrowDimension * width];
+    fontSize:_currentLayout->digitSizeAsPercentOfNarrowDimension * width];
 }
 
 /**
@@ -887,7 +966,7 @@ static const float s_minimumColumnGutter = 0.02;  // the minimum spacing between
     colored:[ViewController regularTextColor]
     highlightColor:[UIColor colorWithRed:204.0/255 green:204.0/255 blue:204.0/255 alpha:1.0]
     backgroundColor:[UIColor lightGrayColor]
-    fontSize:s_textSizeAsPercentOfNarrowDimension * width];
+    fontSize:_currentLayout->textSizeAsPercentOfNarrowDimension * width];
 }
 
 /**

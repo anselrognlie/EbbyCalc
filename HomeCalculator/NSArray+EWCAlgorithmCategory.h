@@ -23,9 +23,23 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+  `NSArray+EWCAlgorithmCategory` contains category methods for working with arrays of doubles (as `NSNumber` instances).
+ */
 @interface NSArray (EWCAlgorithmCategory)
 
+/**
+  Given an array of doubles, this will calculate the sum.
+
+  @return The sum of the doubles in the array.
+ */
 - (CGFloat)ewc_totalDouble;
+
+/**
+ Given an array of doubles, this will find the minimum value.
+
+ @return The minimum value or 0 if the array is empty.
+*/
 - (CGFloat)ewc_minDouble;
 
 @end

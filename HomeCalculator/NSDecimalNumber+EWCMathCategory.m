@@ -119,12 +119,13 @@ static BOOL diffWithinDelta(NSDecimalNumber *n1, NSDecimalNumber *n2, NSDecimalN
     negative = YES;
   }
 
-  // first check for underflow, which just returns 0
+  // first check for underflow, which will just return 0
   NSDecimalNumber *minimum = [NSDecimalNumber decimalNumberWithMantissa:1 exponent:-(digits - 1) isNegative:NO];
   if ([tmp compare:minimum] == NSOrderedAscending) {
     return [NSDecimalNumber zero];
   }
 
+  // next check whether the number is too large, which will return nil
   NSDecimalNumber *maximum = [NSDecimalNumber decimalNumberWithMantissa:1 exponent:digits isNegative:NO];
   maximum = [maximum decimalNumberBySubtracting:[NSDecimalNumber one]];
   if ([tmp compare:maximum] == NSOrderedDescending) {
@@ -134,10 +135,10 @@ static BOOL diffWithinDelta(NSDecimalNumber *n1, NSDecimalNumber *n2, NSDecimalN
 
   // number will fit, but we may need to round the decimal portion
 
-  // fix out how many fractional digits to allow
+  // figure out how many fractional digits to allow
   // with no whole portion, we can fit up to max - 1 (must show zero before decimal)
   // and we may reduce all the way down to zero if the whole portion is max digits
-  // so if num < 1, round to max - 1, otherwise round to max - whole digits
+  // so if num < 1, round to (digits - 1), otherwise round to (digits - wholeDigits)
 
   short scale;
   if ([tmp compare:[NSDecimalNumber one]] == NSOrderedAscending) {
@@ -146,6 +147,12 @@ static BOOL diffWithinDelta(NSDecimalNumber *n1, NSDecimalNumber *n2, NSDecimalN
     NSDecimalNumber *scaleTmp = tmp;
     short exp = 0;
     do {
+      // the number of whole digist is the number of times we can divide by 10
+      // (decimal shift right) while remaining at or above 1
+      // this is really the integer part of log10 of the number, but we don't have
+      // a good way to get the log10 without introducing enough error for large
+      // values as to become an issue, so just count the shifts.
+
       ++exp;
       scaleTmp = [scaleTmp decimalNumberByMultiplyingByPowerOf10:-1];
     } while ([scaleTmp compare:[NSDecimalNumber one]] != NSOrderedAscending);
@@ -153,6 +160,7 @@ static BOOL diffWithinDelta(NSDecimalNumber *n1, NSDecimalNumber *n2, NSDecimalN
     scale = digits - exp;
   }
 
+  // create a formatter according to the calculated scale, and apply it to our value
   NSDecimalNumberHandler *formatter = [NSDecimalNumberHandler
     decimalNumberHandlerWithRoundingMode:NSRoundPlain
     scale:scale
@@ -162,6 +170,7 @@ static BOOL diffWithinDelta(NSDecimalNumber *n1, NSDecimalNumber *n2, NSDecimalN
     raiseOnDivideByZero:NO];
   tmp = [tmp decimalNumberByRoundingAccordingToBehavior:formatter];
 
+  // if the number originally was negative, flip the sign back
   if (negative) {
     tmp = [[NSDecimalNumber zero] decimalNumberBySubtracting:tmp];
   }

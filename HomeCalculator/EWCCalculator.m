@@ -695,10 +695,15 @@ static int s_maximumFractionDigits = 20;
   if (! o1) {
     eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
     if (eq) {
-      // d= - assign d to acc, and perform last if present
-      [self setAccumulator:d1.data];
+      // d= - if there is a last op, assign d to acc, and perform it
       if (_operation != EWCCalculatorNoOpcode) {
+        [self setAccumulator:d1.data];
         [self performLastOperation];
+      } else {
+        // there was no operation, user just entered a number and hit enter
+        // just don't clear the display, mark the that it is available, and let
+        // the queue be cleared
+        _displayAvailable = YES;
       }
       return YES;
     }

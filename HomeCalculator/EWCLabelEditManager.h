@@ -25,8 +25,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+  `EWCLabelEditManager` provides gesture recognition management for a UILabel that supports edit operations.
+ */
 @interface EWCLabelEditManager : NSObject
 
+/**
+  The UILabel to which to provide gesture recognition.
+ */
 @property (nonatomic, weak) UILabel *managedLabel;
 
 @end

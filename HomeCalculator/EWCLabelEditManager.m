@@ -23,14 +23,21 @@
 #import <UIKit/UIKit.h>
 
 @interface EWCLabelEditManager () {
-  UIGestureRecognizer *_tapRecognizer;
-  UIGestureRecognizer *_pressRecognizer;
+  UIGestureRecognizer *_pressRecognizer;  // gesture recognizer to handle long presses
 }
 @end
 
 @implementation EWCLabelEditManager
 
+/**
+  Property setter for managedLabel.
+
+  Cleans up the gestures recognizer for any previous label, then registers it on the new one.
+
+  @param managedLabel The `UILabel` for which to provide gesture recognition functionality.
+ */
 - (void)setManagedLabel:(UILabel *)managedLabel {
+  // do nothing if this is the same label
   if (managedLabel == _managedLabel) { return; }
 
   [self cleanupLabel];
@@ -38,29 +45,44 @@
   [self setupLabel];
 }
 
+/**
+  Creates a gesture recognizer if needed, and configures it on the managed label.
+
+  Does nothing if the managed label is not set.
+ */
 - (void)setupLabel {
-  if (! _tapRecognizer) {
-    _tapRecognizer = [[UITapGestureRecognizer alloc]
-      initWithTarget:self action:@selector(labelTapped:)];
-  }
+  // do nothing if we have no current label
+  if (! _managedLabel) { return; }
 
   if (! _pressRecognizer) {
     _pressRecognizer = [[UILongPressGestureRecognizer alloc]
       initWithTarget:self action:@selector(labelPressed:)];
   }
 
-  [_managedLabel addGestureRecognizer:_tapRecognizer];
   [_managedLabel addGestureRecognizer:_pressRecognizer];
   [_managedLabel setUserInteractionEnabled:YES];
 }
 
+/**
+ Removes gesture recognition handling from the current managed label.
+
+ Does nothing if the managed label is not set.
+*/
 - (void)cleanupLabel {
-  [_managedLabel removeGestureRecognizer:_tapRecognizer];
+  // do nothing if we have no current label
+  if (! _managedLabel) { return; }
+
+  [_managedLabel setUserInteractionEnabled:NO];
   [_managedLabel removeGestureRecognizer:_pressRecognizer];
 }
 
-- (void)labelTapped:(UITapGestureRecognizer *)sender {}
+/**
+  Brings up the edit menu in response to a long press.
 
+  The menu uses the informal `UIResponderStandardEditActions` in order to query the supplied control for, and to carry out supported operations.
+
+  @param sender The source of the press gesture.  Ignored.
+ */
 - (void)labelPressed:(UITapGestureRecognizer *)sender {
   if (sender.state == UIGestureRecognizerStateBegan) {
     // setup up copy paste menu for the label

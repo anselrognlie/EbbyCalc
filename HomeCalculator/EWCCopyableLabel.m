@@ -29,9 +29,9 @@
 
 @implementation EWCCopyableLabel
 
-///
+///----------------------------------------------------------------------
 /// @name UIResponderStandardEditActions Informal Protocol Implementation
-///
+///----------------------------------------------------------------------
 
 /**
   Indicate that this control can receive focus.

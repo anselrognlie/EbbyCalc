@@ -52,7 +52,7 @@
   NSString *text = self.text;
 
   if (_editDelegate) {
-    text = [_editDelegate viewWillCopyText:text];
+    text = [_editDelegate willCopyText:text sender:self];
   }
 
   if (text) {
@@ -63,7 +63,7 @@
 - (void)paste:(id)sender {
   NSString *text = [UIPasteboard generalPasteboard].string;
   if (_editDelegate) {
-    text = [_editDelegate viewWillPasteText:text];
+    text = [_editDelegate willPasteText:text sender:self];
   }
 
   if (text) {

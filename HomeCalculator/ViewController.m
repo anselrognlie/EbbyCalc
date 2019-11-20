@@ -564,7 +564,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
 /// @name `EWCEditDelegate` Protocol Implementation
 ///------------------------------------------------
 
-- (nonnull NSString *)viewWillCopyText:(nonnull NSString *)text {
+- (nullable NSString *)willCopyText:(NSString *)text sender:(UIView *)view {
   // ignore the passed text, and just get the raw value
   NSDecimalNumber *num = _calculator.displayValue;
   text = [NSString stringWithFormat:@"%@", num];
@@ -572,7 +572,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   return text;
 }
 
-- (nonnull NSString *)viewWillPasteText:(nonnull NSString *)text {
+- (nullable NSString *)willPasteText:(NSString *)text sender:(UIView *)view {
   // try to interpret the text as a number
   NSDecimalNumber *num = [NSDecimalNumber decimalNumberWithString:text
     locale:[NSLocale currentLocale]];

@@ -23,13 +23,43 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+  A filled button with rounded corners that works nicely with the EWCGridLayout.
+ */
 @interface EWCRoundedCornerButton : UIButton
 
+/**
+  Color to use when the user presses or passes over the button.
+ */
 @property (nonatomic) UIColor *highlightedBackgroundColor;
+
+/**
+  Radius of the corner rounding in points.
+
+  If no corner radius is set, it will automatically pick a radius equal to half the shortest layout dimension.
+*/
 @property (nonatomic) NSInteger cornerRadius;
 
+/**
+  Create a new button with the supplied options.
+
+  @param label The text label for the button.
+  @param color The color of the text label.
+  @param backgroundColor The normal background color of the button.
+
+  @return New button instance.
+ */
 + (instancetype)buttonLabeled:(NSString *)label colored:(UIColor *)color backgroundColor:(UIColor *)backgroundColor;
 
+/**
+ Designated initializer for the rounded button, configuring an allocated button according to the supplied options.
+
+ @param label The text label for the button.
+ @param color The color of the text label.
+ @param backgroundColor The normal background color of the button.
+
+ @return New button instance.
+*/
 - (instancetype)initWithLabel:(NSString *)label color:(UIColor *)color backgroundColor:(UIColor *)backgroundColor;
 
 @end

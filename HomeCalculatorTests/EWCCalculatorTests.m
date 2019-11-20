@@ -416,4 +416,33 @@
   XCTAssertEqualObjects(_calculator.displayContent, @"2.");
 }
 
+-(void)testUnaryAfterEqual {
+  [self applyKeys:@[
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorEqualKey),
+    @(EWCCalculatorAddKey),
+    @(EWCCalculatorEqualKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"3.");
+  [_calculator pressKey:EWCCalculatorEqualKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"6.");
+  [_calculator pressKey:EWCCalculatorEqualKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"9.");
+}
+
+-(void)testBinaryAfterEqual {
+  [self applyKeys:@[
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorEqualKey),
+    @(EWCCalculatorAddKey),
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorEqualKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"6.");
+  [_calculator pressKey:EWCCalculatorEqualKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"9.");
+  [_calculator pressKey:EWCCalculatorEqualKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"12.");
+}
+
 @end

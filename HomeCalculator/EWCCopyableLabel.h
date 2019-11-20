@@ -25,8 +25,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+  Extends UILabel to implement the informal `UIResponderStandardEditActions` protocol, with support for a delegate to customize the behavior.
+ */
 @interface EWCCopyableLabel : UILabel
 
+/**
+  A delegate to customize response to copy and paste operations.
+ */
 @property (nonatomic, weak) id<EWCEditDelegate> editDelegate;
 
 @end

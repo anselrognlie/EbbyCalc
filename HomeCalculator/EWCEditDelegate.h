@@ -34,21 +34,21 @@ NS_ASSUME_NONNULL_BEGIN
  This message is received just before text from the sending view will be added to the clipboard.  The delegate can intercept this message and modify the string to be copied, or return nil to halt the copy operation entirely.
 
  @param text The string to be placed on the clipboard.
- @param view The view that is the source of the copy operation.
+ @param sender The entity that is the source of the copy operation.
 
  @return The text that should be placed on the clipboard.  Return nil to halt the copy entirely.
 */
-- (nullable NSString *)willCopyText:(NSString *)text sender:(UIView *)view;
+- (nullable NSString *)willCopyText:(NSString *)text withSender:(id)sender;
 
 /**
  This message is received just before text from the clipboard is written to a view.  The delegate can intercept this message and modify the string to be pasted, or return nil to halt the paste operation entirely.
 
  @param text The string from the clipboard that will be written to the view.
- @param view The view that is the target of the paste operation.
+ @param sender The entity that is the target of the paste operation.
 
  @return The text that should be written to the target.  Return nil to halt the paste entirely.
 */
-- (nullable NSString *)willPasteText:(NSString *)text sender:(UIView *)view;
+- (nullable NSString *)willPasteText:(NSString *)text withSender:(id)sender;
 
 @end
 

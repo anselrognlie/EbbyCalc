@@ -37,21 +37,21 @@ NS_ASSUME_NONNULL_BEGIN
   Handles notifications that the contents of the numeric display should be copied.
 
   @param text The text contents of the numeric display. Note that we will actually ignore this value and just take the undecorated numeric value directly.
-  @param view The view from which we will will copy.  Unused in this implementation.
+  @param sender The control from which we will copy.  Unused in this implementation.
 
   @return The text that should be placed on the clipboard.  We will return a generically serialized version of the calculator display contents, rather than the decorated display content.
  */
-- (nullable NSString *)willCopyText:(NSString *)text sender:(UIView *)view ;
+- (nullable NSString *)willCopyText:(NSString *)text withSender:(id)sender;
 
 /**
  Handles notifications that the contents of the numeric display should be replaced with the clipboard contents.
 
  @param text The text from the clipboard.
- @param view The view into which we will paste.  Unused in this implementation.
+ @param sender The control into which we will paste.  Unused in this implementation.
 
  @return We always return nil, as we will attempt to interpret the text as a number, and then update the calculator input directly.  Nil will prevent the display label from updating its contents directly.
 */
-- (nullable NSString *)willPasteText:(NSString *)text sender:(UIView *)view ;
+- (nullable NSString *)willPasteText:(NSString *)text withSender:(id)sender;
 
 @end
 

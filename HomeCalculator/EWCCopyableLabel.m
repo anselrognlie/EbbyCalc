@@ -29,11 +29,25 @@
 
 @implementation EWCCopyableLabel
 
+///
+/// @name UIResponderStandardEditActions Informal Protocol Implementation
+///
+
+/**
+  Indicate that this control can receive focus.
+ */
 - (BOOL)canBecomeFirstResponder {
   return YES;
 }
 
-// report the UIResponderStandardEditActions that are supported
+/**
+  Report that this control supports copy and paster operations.
+
+  @param action The action being queried for as a selector.
+  @param sender The entity making the query.  Ignored.
+
+  @return YES if the action is `copy:` or `paste:`.  NO otherwise.
+ */
 - (BOOL)canPerformAction:(SEL)action withSender:(id)sender {
   if (action == @selector(copy:)) {
     return YES;
@@ -46,13 +60,18 @@
   return [super canPerformAction:action withSender:sender];
 }
 
-// implementation of UIResponderStandardEditActions
+/**
+  Tells the control to perform a copy operation.
 
+  The default implementation just takes the displayed text, then gives a registered delegate the opportunity to customize the behavior before writing the value to the clipboard.
+
+  @param sender The entity initiating the copy operation.  Ignored.
+ */
 - (void)copy:(id)sender {
   NSString *text = self.text;
 
   if (_editDelegate) {
-    text = [_editDelegate willCopyText:text sender:self];
+    text = [_editDelegate willCopyText:text withSender:self];
   }
 
   if (text) {
@@ -60,10 +79,18 @@
   }
 }
 
+
+/**
+  Tells the control to perform a paste operation.
+
+  The default implementation just reads the clipboard, then gives a registered delegate the opportunity to customize the behavior before updating the displayed text.
+
+  @param sender The entity initiating the copy operation.  Ignored.
+ */
 - (void)paste:(id)sender {
   NSString *text = [UIPasteboard generalPasteboard].string;
   if (_editDelegate) {
-    text = [_editDelegate willPasteText:text sender:self];
+    text = [_editDelegate willPasteText:text withSender:self];
   }
 
   if (text) {

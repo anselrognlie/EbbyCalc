@@ -23,9 +23,19 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+  `EWCCalculatorDataProtocol` provides methods the `EWCCalculator` can use to store persistent state.
+ */
 @protocol EWCCalculatorDataProtocol <NSObject>
 
+/**
+  The tax rate for tax add and deduct calculations.  This should persiste between app launches.
+*/
 @property (nonatomic) NSDecimalNumber *taxRate;
+
+/**
+  The single general-purpose memory value.  This should persiste between app launches.
+*/
 @property (nonatomic) NSDecimalNumber *memory;
 
 @end

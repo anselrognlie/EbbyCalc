@@ -23,15 +23,33 @@
 
 @interface EWCCalculatorToken ()
 
+// redeclare readonly properties as writable for internal access
 @property (nonatomic, readwrite) EWCCalculatorTokenType tokenType;
 @property (nonatomic, readwrite) NSDecimalNumber *data;
 @property (nonatomic, readwrite) EWCCalculatorOpcode opcode;
 
 @end
 
+// holds a shared static instance of an empty token
 static EWCCalculatorToken *s_empty = nil;
 
 @implementation EWCCalculatorToken
+
+///-------------------------
+/// @name Static initializer
+///-------------------------
+
+/**
+  Called the first time a message is sent to this class (more or less).  Initialize statics.
+ */
++ (void)initialize {
+  s_empty = [EWCCalculatorToken new];
+}
+
+
+///---------------------------------------------------------------------------
+/// @name Public Creation and Initialization Methods (documentation in header)
+///---------------------------------------------------------------------------
 
 + (instancetype)tokenWithData:(NSDecimalNumber *)data {
   return [[EWCCalculatorToken alloc] initWithData:data];
@@ -43,10 +61,6 @@ static EWCCalculatorToken *s_empty = nil;
 
 + (instancetype)tokenWithEqual:(EWCCalculatorOpcode)opcode {
   return [[EWCCalculatorToken alloc] initWithEqual:opcode];
-}
-
-+ (void)initialize {
-  s_empty = [EWCCalculatorToken new];
 }
 
 + (instancetype)empty {
@@ -86,17 +100,6 @@ static EWCCalculatorToken *s_empty = nil;
     self.opcode = opcode;
   }
   return self;
-}
-
-- (nonnull instancetype)copyWithZone:(nullable NSZone *)zone {
-  EWCCalculatorToken *newToken = [[EWCCalculatorToken allocWithZone:zone] init];
-  if (newToken) {
-    newToken.tokenType = _tokenType;
-    newToken.opcode = _opcode;
-    newToken.data = [_data copyWithZone:zone];
-  }
-
-  return newToken;
 }
 
 @end

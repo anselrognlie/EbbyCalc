@@ -21,6 +21,9 @@
 
 #import <Foundation/Foundation.h>
 
+/**
+  `EWCCalculatorKey` represents each of the keys of the `EWCCalculator`.
+ */
 typedef NS_ENUM(NSInteger, EWCCalculatorKey) {
   EWCCalculatorNoKey = -1,
   EWCCalculatorZeroKey,
@@ -51,5 +54,20 @@ typedef NS_ENUM(NSInteger, EWCCalculatorKey) {
   EWCCalculatorEqualKey,
 };
 
+/**
+ Determines whether a key represents a binary operation.
+
+ @param key The key to examine.
+
+ @return YES if the key is a binary operation, otherwise NO.
+*/
 BOOL EWCCalculatorKeyIsBinaryOp(EWCCalculatorKey key);
+
+/**
+ Determines whether a key is related to setting the tax rate.
+
+ @param key The key to examine.
+
+ @return YES if the key is related to setting the tax rate.
+ */
 BOOL EWCCalculatorKeyIsRateKey(EWCCalculatorKey key);

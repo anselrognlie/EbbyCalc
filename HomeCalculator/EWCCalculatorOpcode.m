@@ -23,6 +23,9 @@
 #import "EWCCalculatorOpcode.h"
 
 BOOL EWCCalculatorOpcodeIsBinaryOp(EWCCalculatorOpcode opcode) {
+  // the usual add, subtract, multiply, and divide are considered binary operations.
+  // the percent variations are not considered so, as the will not appear in the
+  // conditions this check is used.
   switch (opcode) {
     case EWCCalculatorAddOpcode:
     case EWCCalculatorSubtractOpcode:
@@ -40,9 +43,10 @@ EWCCalculatorOpcode
   EWCCalculatorOpcode opcode,
   EWCCalculatorOpcode mode) {
 
-  if (mode == EWCCalculatorEqualOpcode) {
-    return opcode;
+  // only modify the opcode if the mode is percent
+  if (mode == EWCCalculatorPercentOpcode) {
+    return opcode + (EWCCalculatorAddPercentOpcode - EWCCalculatorAddOpcode);
   }
 
-  return opcode + (EWCCalculatorAddPercentOpcode - EWCCalculatorAddOpcode);
+  return opcode;
 }

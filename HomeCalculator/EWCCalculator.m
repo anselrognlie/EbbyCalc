@@ -190,7 +190,7 @@ static int s_maximumFractionDigits = 20;
 }
 
 - (BOOL)isMemoryStatusVisible {
-  return ! _memory.empty;
+  return ! _memory.isEmpty;
 }
 
 // implements public accessor

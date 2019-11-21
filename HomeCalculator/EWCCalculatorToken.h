@@ -25,6 +25,9 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+  `EWCCalculatorTokenType` categorizes the type of data stored in a `EWCCalculatorToken`.
+ */
 typedef NS_ENUM(NSInteger, EWCCalculatorTokenType) {
   EWCCalculatorEmptyTokenType = 0,
   EWCCalculatorBinOpTokenType,
@@ -32,24 +35,101 @@ typedef NS_ENUM(NSInteger, EWCCalculatorTokenType) {
   EWCCalculatorEqualTokenType,
 };
 
-@interface EWCCalculatorToken : NSObject <NSCopying>
+/**
+  `EWCCalculatorToken` represents an input in the calculator's operation key.
+ */
+@interface EWCCalculatorToken : NSObject
 
+///-----------------
+/// @name Properties
+///-----------------
+
+/**
+  The type of token content
+ */
 @property (nonatomic, readonly) EWCCalculatorTokenType tokenType;
+
+/**
+  The numeric value for a token holding data.
+ */
 @property (nonatomic, readonly) NSDecimalNumber *data;
+
+/**
+  The opcode for a token holding a binary or equal operation.
+ */
 @property (nonatomic, readonly) EWCCalculatorOpcode opcode;
 
+///------------------------------------------
+/// @name Creation and Initialization Methods
+///------------------------------------------
+
+/**
+  Creates a token holding numeric data.
+
+  @param data The numeric data to store in the token.
+
+  @return The new token instance.
+ */
 + (instancetype)tokenWithData:(NSDecimalNumber *)data;
+
+/**
+ Creates a token holding a binary operation.
+
+ @param opcode The opcode to store in the token.
+
+ @return The new token instance.
+*/
 + (instancetype)tokenWithBinOp:(EWCCalculatorOpcode)opcode;
+
+/**
+ Creates a token holding an equal operation.
+
+ @param opcode The opcode to store in the token.
+
+ @return The new token instance.
+*/
 + (instancetype)tokenWithEqual:(EWCCalculatorOpcode)opcode;
 
+/**
+ Creates an empty token.
+
+ @return The new token instance.
+*/
 + (instancetype)empty;
 
-- (instancetype)init;
-- (instancetype)initWithData:(NSDecimalNumber *)data;
-- (instancetype)initWithBinOp:(EWCCalculatorOpcode)opcode;
-- (instancetype)initWithEqual:(EWCCalculatorOpcode)opcode;
+/**
+ Initializes an empty token.
 
-- (nonnull instancetype)copyWithZone:(nullable NSZone *)zone;
+ @return The new token instance.
+*/
+- (instancetype)init;
+
+/**
+ Initializes a token holding numeric data.
+
+ @param data The numeric data to store in the token.
+
+ @return The initialized token instance.
+*/
+- (instancetype)initWithData:(NSDecimalNumber *)data;
+
+/**
+ Initializes a token holding a binary operation opcode.
+
+ @param opcode The opcode to store in the token.
+
+ @return The initialized token instance.
+*/
+- (instancetype)initWithBinOp:(EWCCalculatorOpcode)opcode;
+
+/**
+ Initializes a token holding numeric data.
+
+ @param opcode The opcode to store in the token.
+
+ @return The initialized token instance.
+*/
+- (instancetype)initWithEqual:(EWCCalculatorOpcode)opcode;
 
 @end
 

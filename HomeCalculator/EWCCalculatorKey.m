@@ -24,6 +24,7 @@
 
 BOOL EWCCalculatorKeyIsBinaryOp(EWCCalculatorKey key) {
   switch (key) {
+    // the binary op keys are add, subtract, multiply, and divide
     case EWCCalculatorAddKey:
     case EWCCalculatorSubtractKey:
     case EWCCalculatorMultiplyKey:
@@ -37,6 +38,7 @@ BOOL EWCCalculatorKeyIsBinaryOp(EWCCalculatorKey key) {
 
 BOOL EWCCalculatorKeyIsRateKey(EWCCalculatorKey key) {
   switch (key) {
+    // the tax rate keys are rate, tax plus, and tax minus
     case EWCCalculatorRateKey:
     case EWCCalculatorTaxPlusKey:
     case EWCCalculatorTaxMinusKey:

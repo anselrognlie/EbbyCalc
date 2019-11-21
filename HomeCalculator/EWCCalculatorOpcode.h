@@ -21,6 +21,9 @@
 
 #import <Foundation/Foundation.h>
 
+/**
+  `EWCCalculatorOpcode` represents an operation (stored in an `EWCCalculatorToken`) that is placed in the calculator operation queue.
+ */
 typedef NS_ENUM(NSInteger, EWCCalculatorOpcode) {
   EWCCalculatorNoOpcode = 0,
   EWCCalculatorAddOpcode,
@@ -35,7 +38,23 @@ typedef NS_ENUM(NSInteger, EWCCalculatorOpcode) {
   EWCCalculatorEqualOpcode,
 };
 
+/**
+  Determines whether an opcode represents a binary operation.
+
+  @param opcode The opcode to examine.
+
+  @return YES if the opcode is a binary operation, otherwise NO.
+ */
 BOOL EWCCalculatorOpcodeIsBinaryOp(EWCCalculatorOpcode opcode);
+
+/**
+  Modifies an opcode to a percent operation if the supplied equal mode is a percent calculation.
+
+  @param opcode The operation to potentially modify.
+  @param mode The calculation mode, expected to be either equal or percent.
+
+  @return Returns a modified opcode if the supplied mode is percent, otherwise it just gives back the same opcode.
+ */
 EWCCalculatorOpcode
   EWCCalculatorOpcodeModifyForEqualMode(
   EWCCalculatorOpcode opcode,

@@ -23,12 +23,33 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+  `EWCNumericField` represents a storage area in the calculator for a numeric value.
+
+  In practice, this idea was under-developed, but it's not bad enough to rip out.
+ */
 @interface EWCNumericField : NSObject
 
+/**
+  Whether the field is empty.  If the field reports itself as empty, the value must be ignored.
+ */
 @property (nonatomic, getter=isEmpty) BOOL empty;
+
+/**
+  The data value stored in the field.
+ */
 @property (nonatomic) NSDecimalNumber *value;
 
+/**
+  Initializes an empty field.
+
+  @return The initialized instance.
+ */
 - (instancetype)init;
+
+/**
+  Clears the field, rendering it empty.
+ */
 - (void)clear;
 
 @end

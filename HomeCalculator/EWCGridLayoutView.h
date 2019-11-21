@@ -20,43 +20,95 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #import <UIKit/UIKit.h>
+#import "EWCGridCustomLayoutCallback.m"
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef NS_ENUM(NSInteger, EWCGridLayoutCellStyle) {
-  EWCGridLayoutCellAspectRatioStyle = 1,
-  EWCGridLayoutCellFillStyle,
-};
+/**
+  `EWCGridLayoutView` lays out its child controls on a regular grid.
 
-typedef void(^EWCGridCustomLayoutCallback)(UIView *view, CGRect frame, CGFloat minWidth, CGFloat minHeight);
-
+  Child controls may span multiple cells, and must be able to be positioned according to their frame rather than AutoLayout constraints.  That is, the should not use an instrinsic size, but receive their size from their container.
+ */
 @interface EWCGridLayoutView : UIView
 
-@property (nonatomic, strong) NSArray<NSNumber *> *rows;
-@property (nonatomic, strong) NSArray<NSNumber *> *columns;
-@property (nonatomic) float minRowGutter;  // provided as percent of total dimension
-@property (nonatomic) float minColumnGutter;
-@property (nonatomic) float maxRowGutter;  // provided as percent of total dimension
-@property (nonatomic) float maxColumnGutter;
-@property (nonatomic) EWCGridLayoutCellStyle cellStyle;
-@property (nonatomic) float cellAspectRatio;  // w:h
-@property (nonatomic, readonly) float calculatedRowGutter;
-@property (nonatomic, readonly) float calculatedColumnGutter;
+///--------------------------------------
+/// @name Layout Configuration Properties
+///--------------------------------------
 
-- (float)columnWidth:(NSInteger)column;
-- (float)rowHeight:(NSInteger)row;
+/**
+  The number of rows in the grid.
+ */
+@property (nonatomic) NSInteger rows;
 
+/**
+  The number of columns in the grid.
+ */
+@property (nonatomic) NSInteger columns;
+
+/**
+  The gutter size between rows as a percentage of height.
+ */
+@property (nonatomic) float rowGutter;
+
+/**
+ The gutter size between columns as a percentage of width.
+*/
+@property (nonatomic) float columnGutter;
+
+/**
+ Whether to display debug draw output.
+*/
+@property (nonatomic) BOOL showDebugDraw;
+
+///----------------------------------
+/// @name Methods for Adding Children
+///----------------------------------
+
+/**
+ Adds the supplied view to the grid for layout management.
+
+ @param subView The child view instance to add to the grid.
+ @param row The row to be occupied by the managed view.
+ @param column The column to be occupied by the managed view.
+*/
 - (void)addSubView:(UIView *)subView
   inRow:(NSInteger)row column:(NSInteger)column;
 
+/**
+ Adds the supplied view to the grid for layout management.
+
+ @param subView The child view instance to add to the grid.
+ @param startRow The first row to be occupied by the managed view.
+ @param startColumn The first column to be occupied by the managed view.
+ @param endRow The last row to be occupied by the managed view.
+ @param endColumn The last column to be occupied by the managed view.
+*/
 - (void)addSubView:(UIView *)subView
   startingInRow:(NSInteger)startRow column:(NSInteger)startColumn
   endingInRow:(NSInteger)endRow column:(NSInteger)endColumn;
 
+/**
+ Adds the supplied view to the grid for layout management.
+
+ @param subView The child view instance to add to the grid.
+ @param row The row to be occupied by the managed view.
+ @param column The column to be occupied by the managed view.
+ @param callback An optional callback that can be used to customize the view layout.  Pass nil to use the default layout.
+*/
 - (void)addSubView:(UIView *)subView
   inRow:(NSInteger)row column:(NSInteger)column
   withLayout:(nullable EWCGridCustomLayoutCallback)callback;
 
+/**
+  Adds the supplied view to the grid for layout management.
+
+  @param subView The child view instance to add to the grid.
+  @param startRow The first row to be occupied by the managed view.
+  @param startColumn The first column to be occupied by the managed view.
+  @param endRow The last row to be occupied by the managed view.
+  @param endColumn The last column to be occupied by the managed view.
+  @param callback An optional callback that can be used to customize the view layout.  Pass nil to use the default layout.
+ */
 - (void)addSubView:(UIView *)subView
   startingInRow:(NSInteger)startRow column:(NSInteger)startColumn
   endingInRow:(NSInteger)endRow column:(NSInteger)endColumn

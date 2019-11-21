@@ -597,10 +597,10 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
 
   // custom callback for laying out the add key, since it it double tall.
   // it uses the same corner radius as the smaller buttons
-  EWCGridCustomLayoutCallback callback = ^(UIView *view, CGRect frame, CGFloat minWidth, CGFloat minHeight) {
+  EWCGridCustomLayoutCallback callback = ^(UIView *view, CGRect frame, CGFloat cellWidth, CGFloat cellHeight) {
 
     // pick the minimum overall dimension to use for the radius calculation
-    NSInteger radius = (NSInteger)((minWidth < minHeight) ? minWidth : minHeight) / 2;
+    NSInteger radius = (NSInteger)((cellWidth < cellHeight) ? cellWidth : cellHeight) / 2;
 
     // we specifically apply this function only to the add button, so we know this
     // cast is safe to do, since it is an EWCRoundedCornerButton
@@ -614,8 +614,8 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   };
 
   // set the gutters
-  _grid.minRowGutter = _currentLayout->minimumRowGutter;
-  _grid.minColumnGutter = _currentLayout->minimumColumnGutter;
+  _grid.rowGutter = _currentLayout->minimumRowGutter;
+  _grid.columnGutter = _currentLayout->minimumColumnGutter;
 
   if (_layout == EWCApplicationTallLayout) {
     // tall
@@ -629,8 +629,8 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
     }
 
     // configure grid layout
-    _grid.rows = @[@1.0, @1.0, @1.0, @1.0, @1.0, @1.0, @1.0, @1.0, @1.0];
-    _grid.columns = @[@1.0, @1.0, @1.0];
+    _grid.rows = 9;
+    _grid.columns = 3;
 
     // rehome buttons
     [_grid addSubView:_allButtons[EWCCalculatorZeroKey] inRow:8 column:0];
@@ -672,8 +672,8 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
     }
 
     // configure grid layout
-    _grid.rows = @[@1.0, @1.0, @1.0, @1.0, @1.0];
-    _grid.columns = @[@1.0, @1.0, @1.0, @1.0, @1.0, @1.0];
+    _grid.rows = 5;
+    _grid.columns = 6;
 
     // rehome buttons
     [_grid addSubView:_allButtons[EWCCalculatorZeroKey] inRow:4 column:1];
@@ -709,7 +709,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   Calculates the leading spacing for the status indicators.
  */
 - (float)getLeadingStatusConstant:(CGFloat)width {
-  return 20 + width * _grid.minColumnGutter;
+  return 20 + width * _grid.columnGutter;
 }
 
 /**

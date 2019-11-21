@@ -20,340 +20,33 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #import "EWCGridLayoutView.h"
-#import "NSArray+EWCAlgorithmCategory.h"
+#import "EWCGridLayoutProps.h"
 
-typedef struct {
-  NSInteger startRow;
-  NSInteger startColumn;
-  NSInteger endRow;
-  NSInteger endColumn;
-  EWCGridCustomLayoutCallback layoutCallback;
-} EWCRowColumnBounds;
+/**
+  Static helper to assign the current stroke color
 
-@interface EWCGridLayoutProps : NSObject
-@property (nonatomic, weak) UIView *view;
-@property (nonatomic) EWCRowColumnBounds bounds;
-
-+ (instancetype)propsForView:(UIView *)view
-  withStartingRow:(NSInteger)startRow column:(NSInteger)startColumn
-  endingRow:(NSInteger)endRow column:(NSInteger)endColumn
-  withLayout:(nullable EWCGridCustomLayoutCallback)callback;
-
-@end
-
-@implementation EWCGridLayoutProps
-+ (instancetype)propsForView:(UIView *)view
-  withStartingRow:(NSInteger)startRow column:(NSInteger)startColumn
-  endingRow:(NSInteger)endRow column:(NSInteger)endColumn
-  withLayout:(nullable EWCGridCustomLayoutCallback)callback {
-
-  EWCGridLayoutProps *props = [EWCGridLayoutProps new];
-  props.view = view;
-  props.bounds = (EWCRowColumnBounds){
-    startRow, startColumn, endRow, endColumn, [callback copy]
-  };
-
-  return props;
+  @param context The current graphics context.
+  @param color The color to use for the stroke color.
+ */
+static void setStrokeColor(CGContextRef context, UIColor *color)
+{
+  CGFloat r, g, b, a;
+  [color getRed:&r green:&g blue:&b alpha:&a];
+  CGContextSetRGBStrokeColor(context, r, g, b, a);
 }
-@end
 
 @interface EWCGridLayoutView() {
-  NSMapTable<UIView *, EWCGridLayoutProps *> *_layoutProps;
-  CGFloat _totalColumnWidths;
-  CGFloat _totalRowWidths;
-  __weak UIButton *_currentButton;
+  NSMapTable<UIView *, EWCGridLayoutProps *> *_layoutProps;  // track the configurations of the child views
+  __weak UIButton *_currentChild;  // track the last child that was the target of a touch event
 }
 
 @end
-
-static void setStrokeColor(CGContextRef context, UIColor *color);
-//static void setFillColor(CGContextRef context, UIColor *color);
 
 @implementation EWCGridLayoutView
 
-- (instancetype)initWithFrame:(CGRect)frame {
-  self = [super initWithFrame:frame];
-  if (self) {
-    [self internalInit];
-  }
-  return self;
-}
-
-- (instancetype)initWithCoder:(NSCoder *)coder {
-  self = [super initWithCoder:coder];
-  if (self) {
-    [self internalInit];
-  }
-  return self;
-}
-
-- (void)internalInit {
-  self.translatesAutoresizingMaskIntoConstraints = NO;
-  self.multipleTouchEnabled = NO;
-  _rows = @[];
-  _columns = @[];
-  _minRowGutter = 0;
-  _minColumnGutter = 0;
-  _maxRowGutter = 0;
-  _maxColumnGutter = 0;
-  _cellAspectRatio = 1.0;
-  _cellStyle = EWCGridLayoutCellFillStyle;
-  _layoutProps = [NSMapTable<UIView *, EWCGridLayoutProps *> weakToStrongObjectsMapTable];
-  _currentButton = nil;
-}
-
-- (float)calculatedRowGutter {
-  return self.bounds.size.height * _minRowGutter;
-}
-
-- (float)calculatedColumnGutter {
-  return self.bounds.size.width * _minColumnGutter;
-}
-
-- (float)columnWidth:(NSInteger)column {
-  return _columns[column].doubleValue / [self totalColumnWeight] * self.bounds.size.width;
-}
-
-- (float)rowHeight:(NSInteger)row {
-  return _rows[row].doubleValue / [self totalRowWeight] * self.bounds.size.height;
-}
-
-- (void)dealloc {
-}
-
-- (CGRect)makeChildRectForGridHeight:(CGFloat)gridHeight
-  gridWidth:(CGFloat)gridWidth
-  rowTop:(CGFloat)rowTop
-  rowSpan:(CGFloat)rowSpan
-  rowGutter:(CGFloat)rowGutter
-  rowTotal:(CGFloat)rowTotal
-  columnLeft:(CGFloat)columnLeft
-  columnSpan:(CGFloat)columnSpan
-  columnGutter:(CGFloat)columnGutter
-  columnTotal:(CGFloat)columnTotal {
-
-  CGFloat top, right, bottom, left, width, height;
-  top = gridHeight * (rowTop / rowTotal);
-  height = gridHeight * (rowSpan / rowTotal);
-  bottom = top + height;
-  left = gridWidth * (columnLeft / columnTotal);
-  width = gridWidth * (columnSpan / columnTotal);
-  right = left + width;
-
-  CGFloat gutterWidth = columnGutter * gridWidth / 2.0;
-  CGFloat gutterHeight = rowGutter * gridHeight / 2.0;
-
-  CGRect frame = CGRectMake(
-    left + gutterWidth,
-    top + gutterHeight,
-    width - (2 * gutterWidth),
-    height - (2 * gutterHeight));
-
-  return frame;
-}
-
-- (void)layoutSubviews {
-
-  [super layoutSubviews];
-
-  CGFloat rowTotal = self.totalRowWeight;
-  CGFloat columnTotal = self.totalColumnWeight;
-  CGFloat gridWidth = self.frame.size.width;
-  CGFloat gridHeight = self.frame.size.height;
-  CGFloat rowGutter = self.minRowGutter;
-  CGFloat columnGutter = self.minColumnGutter;
-
-  // if managing corners, calculate the minimum dimension
-//  NSInteger radius = -1;
-  CGFloat minWidth = 0, minHeight = 0;
-  {
-    CGFloat minColumn = [_columns ewc_minDouble];
-    CGFloat minRow = [_rows ewc_minDouble];
-
-    CGRect minFrame = [self makeChildRectForGridHeight:gridHeight
-      gridWidth:gridWidth
-      rowTop:0
-      rowSpan:minRow
-      rowGutter:rowGutter
-      rowTotal:rowTotal
-      columnLeft:0
-      columnSpan:minColumn
-      columnGutter:columnGutter
-      columnTotal:columnTotal];
-
-    minHeight = minFrame.size.height;
-    minWidth = minFrame.size.width;
-//    radius = (w < h) ? w / 2.0 : h / 2.0;
-  }
-
-  // layout any child objects based on the props
-  for (EWCGridLayoutProps *props in [_layoutProps objectEnumerator]) {
-    UIView *view = props.view;
-    EWCRowColumnBounds bounds = props.bounds;
-
-    // sum the rows and columns spanned by this view
-    CGFloat rowSpan = 0, rowTop = 0, columnSpan = 0, columnLeft = 0;
-    for (NSInteger r = 0; r <= bounds.endRow; ++r) {
-      if (r < bounds.startRow) {
-        rowTop += _rows[r].doubleValue;
-      } else {
-        rowSpan += _rows[r].doubleValue;
-      }
-    }
-    for (NSInteger c = 0; c <= bounds.endColumn; ++c) {
-      if (c < bounds.startColumn) {
-        columnLeft += _columns[c].doubleValue;
-      } else {
-        columnSpan += _columns[c].doubleValue;
-      }
-    }
-
-    CGRect childFrame = [self makeChildRectForGridHeight:gridHeight
-      gridWidth:gridWidth
-      rowTop:rowTop
-      rowSpan:rowSpan
-      rowGutter:rowGutter
-      rowTotal:rowTotal
-      columnLeft:columnLeft
-      columnSpan:columnSpan
-      columnGutter:columnGutter
-      columnTotal:columnTotal];
-
-    if (bounds.layoutCallback != nil) {
-      bounds.layoutCallback(view, childFrame, minWidth, minHeight);
-//      if ([view isMemberOfClass:[EWCRoundedCornerButton class]]) {
-//        ((EWCRoundedCornerButton *)view).cornerRadius = radius;
-//      }
-    } else {
-      view.frame = childFrame;
-    }
-
-    [view layoutIfNeeded];
-  }
-
-  [super layoutSubviews];
-}
-
-- (void)awakeFromNib {
-  [super awakeFromNib];
-}
-
-- (CGFloat)totalRowWeight {
-  return [self totalWeight:_rows];
-}
-
-- (CGFloat)totalWeight:(NSArray<NSNumber *> *)array {
-  CGFloat total = [array ewc_totalDouble];
-
-  if (total == 0.0) {
-    total = 1.0;
-  }
-
-  return total;
-}
-
-- (CGFloat)totalColumnWeight {
-  return [self totalWeight:_columns];
-}
-
-- (CGFloat)minColumnWidth {
-  return [_columns ewc_minDouble];
-}
-
-- (CGFloat)minRowHeight {
-  return [_rows ewc_minDouble];
-}
-
-//- (void)drawRect:(CGRect)rect {
-//  [self debugDraw];
-//}
-
-- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-  UITouch *touch = [touches anyObject];
-  [self handleTouch:touch];
-}
-
-- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-  UITouch *touch = [touches anyObject];
-  [self handleTouch:touch];
-}
-
-- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-  UITouch *touch = [touches anyObject];
-  [self handleTouchEnded:touch];
-}
-
-- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
-  [self clearTouches];
-}
-
-- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
-  return YES;
-}
-
-- (void)handleTouch:(UITouch *)touch {
-  CGPoint pos = [touch locationInView:self];
-  BOOL buttonFound = NO;
-
-  for (UIView *view in _layoutProps.keyEnumerator) {
-    if ([view isKindOfClass:[UIButton class]]) {
-      UIButton *button = (UIButton *)view;
-
-      // is the touch in the ui element?
-      if (CGRectContainsPoint(button.frame, pos)) {
-        // if not the current button, unhighlight the old and highlight the new
-        if (button != _currentButton) {
-          [self clearCurrentButton];
-          _currentButton = button;
-          [button setHighlighted:YES];
-        }
-
-        // done processing buttons
-        buttonFound = YES;
-        break;
-      }
-    }
-  }
-
-  // no button found
-  if (! buttonFound) {
-    [ self clearCurrentButton];
-  }
-}
-
-- (void)handleTouchEnded:(UITouch *)touch {
-
-  CGPoint pos = [touch locationInView:self];
-
-  for (UIView *view in _layoutProps.keyEnumerator) {
-    if ([view isKindOfClass:[UIButton class]]) {
-      UIButton *button = (UIButton *)view;
-
-      // is the touch in the ui element?
-      if (CGRectContainsPoint(button.frame, pos)) {
-        // clear the current (which should be this, but doesn't matter if not)
-        [self clearCurrentButton];
-
-        // handle the current button
-        [button sendActionsForControlEvents:UIControlEventTouchUpInside];
-
-        // done processing buttons
-        break;
-      }
-    }
-  }
-}
-
-- (void)clearTouches {
-  [self clearCurrentButton];
-}
-
-- (void)clearCurrentButton {
-  if (_currentButton) {
-    [_currentButton setHighlighted:NO];
-    _currentButton = nil;
-  }
-}
+///--------------------------------------------
+/// @name Public Methods (documented in header)
+///--------------------------------------------
 
 - (void)addSubView:(UIView *)subView
   inRow:(NSInteger)row column:(NSInteger)column {
@@ -391,23 +84,387 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
     endingRow:endRow column:endColumn withLayout:callback] forKey:subView];
 }
 
-- (void)debugDraw {
-  CGContextRef ctx = UIGraphicsGetCurrentContext();
+///-------------------
+/// @name Initializers
+///-------------------
+
+/**
+ Initializer typically used when declared in code.
+
+ @param frame The display dimensions of the view.
+
+ @return The initialized instance.
+*/
+- (instancetype)initWithFrame:(CGRect)frame {
+  self = [super initWithFrame:frame];
+  if (self) {
+    [self internalInit];
+  }
+  return self;
+}
+
+/**
+  Initializer used when loaded from a xib file.
+
+  @param coder An unarchiver object.
+
+  @return The initialized instance.
+ */
+- (instancetype)initWithCoder:(NSCoder *)coder {
+  self = [super initWithCoder:coder];
+  if (self) {
+    [self internalInit];
+  }
+  return self;
+}
+
+/**
+  Shared initialization logic.  Just sets state to reasonable defaults and allocates containers.
+ */
+- (void)internalInit {
+  self.translatesAutoresizingMaskIntoConstraints = NO;
+  self.multipleTouchEnabled = NO;
+  _rows = 0;
+  _columns = 0;
+  _rowGutter = 0;
+  _columnGutter = 0;
+  _layoutProps = [NSMapTable<UIView *, EWCGridLayoutProps *> weakToStrongObjectsMapTable];
+  _currentChild = nil;
+  _showDebugDraw = NO;
+}
+
+///--------------------------------
+/// @name Overridden UIView Methods
+///--------------------------------
+
+/**
+  Lays out subviews.
+
+  Called once the view's own dimensions have been established, so it is now safe to use them in laying out any children.
+
+  Our implementation examines the configuration for each registered child, calculates a suitable frame, and sets it.  If the child has a layout callback, we pass that data along with the calculated minimum cell dimensions and leave it to the callback to handle the layout.
+ */
+- (void)layoutSubviews {
+
+  CGFloat rowTotal = _rows;
+  CGFloat columnTotal = _columns;
+  CGFloat gridWidth = self.frame.size.width;
+  CGFloat gridHeight = self.frame.size.height;
+  CGFloat rowGutter = self.rowGutter;
+  CGFloat columnGutter = self.columnGutter;
+
+  // determine the minimum width and height in case a control requests
+  // custom layout
+  CGFloat minWidth = 0, minHeight = 0;
+  {
+    CGRect minFrame = [self makeChildRectForGridHeight:gridHeight
+      gridWidth:gridWidth
+      rowTop:0
+      rowSpan:1.0
+      rowGutter:rowGutter
+      rowTotal:rowTotal
+      columnLeft:0
+      columnSpan:1.0
+      columnGutter:columnGutter
+      columnTotal:columnTotal];
+
+    minHeight = minFrame.size.height;
+    minWidth = minFrame.size.width;
+  }
+
+  // layout any child objects based on the props
+  for (EWCGridLayoutProps *props in [_layoutProps objectEnumerator]) {
+    UIView *view = props.view;
+    EWCRowColumnBounds bounds = props.bounds;
+
+    // sum the rows and columns spanned by this view
+    CGFloat rowSpan = 0, rowTop = 0, columnSpan = 0, columnLeft = 0;
+    for (NSInteger r = 0; r <= bounds.endRow; ++r) {
+      if (r < bounds.startRow) {
+        rowTop += 1.0;
+      } else {
+        rowSpan += 1.0;
+      }
+    }
+    for (NSInteger c = 0; c <= bounds.endColumn; ++c) {
+      if (c < bounds.startColumn) {
+        columnLeft += 1.0;
+      } else {
+        columnSpan += 1.0;
+      }
+    }
+
+    // Calculate a frame that encompasses the grid area.
+    CGRect childFrame = [self makeChildRectForGridHeight:gridHeight
+      gridWidth:gridWidth
+      rowTop:rowTop
+      rowSpan:rowSpan
+      rowGutter:rowGutter
+      rowTotal:rowTotal
+      columnLeft:columnLeft
+      columnSpan:columnSpan
+      columnGutter:columnGutter
+      columnTotal:columnTotal];
+
+    // if the record for the current child has a custom callback, allow that
+    // to perform layout.  Otherwise, just use the calculated grid area to set
+    // the child frame.
+
+    if (bounds.layoutCallback != nil) {
+      bounds.layoutCallback(view, childFrame, minWidth, minHeight);
+    } else {
+      view.frame = childFrame;
+    }
+
+    // give the view a chance to lay itself out if the frame changes require it
+    [view layoutIfNeeded];
+  }
+}
+
+/**
+  Determines whether a touch even occurred within this instance.
+
+  @param point The point to test.
+  @param event The event related to the touch event.
+
+  @return We just always return YES.
+ */
+- (BOOL)pointInside:(CGPoint)point withEvent:(UIEvent *)event {
+  return YES;
+}
+
+///-------------------------------------
+/// @name Overridden UIResponder Methods
+///-------------------------------------
+
+/**
+  Called when a touch event begins.
+
+  @param touches The collection of touches.  Since we don't allow multitouch, there should only be one touch.
+  @param event Event details about the touch.  Ignored.
+ */
+- (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+  // get a touch from the collection and handle it
+  UITouch *touch = [touches anyObject];
+  [self handleTouch:touch];
+}
+
+/**
+ Called when a touch event moves within the instance.
+
+ @param touches The collection of touches.  Since we don't allow multitouch, there should only be one touch.
+ @param event Event details about the touch.  Ignored.
+*/
+- (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+  // get a touch from the collection and handle it
+  UITouch *touch = [touches anyObject];
+  [self handleTouch:touch];
+}
+
+/**
+ Called when the user releases their touch.
+
+ @param touches The collection of touches.  Since we don't allow multitouch, there should only be one touch.
+ @param event Event details about the touch.  Ignored.
+*/
+- (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+  // get a touch from the collection and handle it
+  UITouch *touch = [touches anyObject];
+  [self handleTouchEnded:touch];
+}
+
+/**
+ Called when something happens that interrupts a touch event.  We just halt our touch processing.
+
+ @param touches The collection of touches.  Ignored.
+ @param event Event details about the touch.  Ignored.
+*/
+- (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event {
+  // just halt touch processing
+  [self clearTouches];
+}
+
+///------------------------------
+/// @name CALayerDelegate Methods
+///------------------------------
+
+/**
+  Delegate method that is called when a managed layer needs to be drawn.
+
+  By default, iOS makes the view a layer belongs to the default delegate.
+
+  @param layer The layer that needs to be drawn.  Ignored.
+  @param ctx The current context to use for drawing.
+ */
+-(void)drawLayer:(CALayer *)layer inContext:(CGContextRef)ctx {
+  if (_showDebugDraw) {
+    [self debugDrawInContext:ctx];
+  }
+}
+
+///----------------------------
+/// @name Layout Helper Methods
+///----------------------------
+
+/**
+  Creates a frame for a grid region according to the supplied configuration.
+
+  @param gridHeight The total height of the grid.
+  @param gridWidth The total width of the grid.
+  @param rowTop The row where the grid area starts.
+  @param rowSpan The number of rows the grid area spans.
+  @param rowGutter The row gutter setting (a percent of the grid height).
+  @param rowTotal The total number of rows in the grid.
+  @param columnLeft The columns where the grid area starts.
+  @param columnSpan The number of columns the grid area spans.
+  @param columnGutter The column gutter setting (a percent of the grid width).
+  @param columnTotal The total number of columns in the grid.
+
+  @return The frame area of the specified grid region.
+ */
+- (CGRect)makeChildRectForGridHeight:(CGFloat)gridHeight
+  gridWidth:(CGFloat)gridWidth
+  rowTop:(CGFloat)rowTop
+  rowSpan:(CGFloat)rowSpan
+  rowGutter:(CGFloat)rowGutter
+  rowTotal:(CGFloat)rowTotal
+  columnLeft:(CGFloat)columnLeft
+  columnSpan:(CGFloat)columnSpan
+  columnGutter:(CGFloat)columnGutter
+  columnTotal:(CGFloat)columnTotal {
+
+  CGFloat top, right, bottom, left, width, height;
+  top = gridHeight * (rowTop / rowTotal);
+  height = gridHeight * (rowSpan / rowTotal);
+  bottom = top + height;
+  left = gridWidth * (columnLeft / columnTotal);
+  width = gridWidth * (columnSpan / columnTotal);
+  right = left + width;
+
+  CGFloat gutterWidth = columnGutter * gridWidth / 2.0;
+  CGFloat gutterHeight = rowGutter * gridHeight / 2.0;
+
+  CGRect frame = CGRectMake(
+    left + gutterWidth,
+    top + gutterHeight,
+    width - (2 * gutterWidth),
+    height - (2 * gutterHeight));
+
+  return frame;
+}
+
+///---------------------------
+/// @name Touch Helper Methods
+///---------------------------
+
+/**
+  Handles when a touch starts or continues.
+
+  Moves the highlight to the control in the touched grid.
+
+  @param touch Information about the touch, including such information as the location.
+ */
+- (void)handleTouch:(UITouch *)touch {
+  CGPoint pos = [touch locationInView:self];
+  BOOL buttonFound = NO;
+
+  for (UIView *view in _layoutProps.keyEnumerator) {
+    if ([view isKindOfClass:[UIButton class]]) {
+      UIButton *button = (UIButton *)view;
+
+      // is the touch in the ui element?
+      if (CGRectContainsPoint(button.frame, pos)) {
+        // if not the current button, unhighlight the old and highlight the new
+        if (button != _currentChild) {
+          [self clearCurrentButton];
+          _currentChild = button;
+          [button setHighlighted:YES];
+        }
+
+        // done processing buttons
+        buttonFound = YES;
+        break;
+      }
+    }
+  }
+
+  // no button found
+  if (! buttonFound) {
+    [ self clearCurrentButton];
+  }
+}
+
+/**
+ Handles when a touch is lifted.
+
+ Clears any UI state, and if the selected control was a button, send it a touch event.
+
+ @param touch Information about the touch, including such information as the location.
+ */
+- (void)handleTouchEnded:(UITouch *)touch {
+
+  CGPoint pos = [touch locationInView:self];
+
+  for (UIView *view in _layoutProps.keyEnumerator) {
+    if ([view isKindOfClass:[UIButton class]]) {
+      UIButton *button = (UIButton *)view;
+
+      // is the touch in the ui element?
+      if (CGRectContainsPoint(button.frame, pos)) {
+        // clear the current (which should be this, but doesn't matter if not)
+        [self clearCurrentButton];
+
+        // handle the current button
+        [button sendActionsForControlEvents:UIControlEventTouchUpInside];
+
+        // done processing buttons
+        break;
+      }
+    }
+  }
+}
+
+/**
+  Halts touch processing and resets UI state.
+ */
+- (void)clearTouches {
+  [self clearCurrentButton];
+}
+
+/**
+  Resets the UI state, restoring the last interacted child to a non-highighted state.
+ */
+- (void)clearCurrentButton {
+  if (_currentChild) {
+    [_currentChild setHighlighted:NO];
+    _currentChild = nil;
+  }
+}
+
+///-------------------------
+/// @name Debug Draw Methods
+///-------------------------
+
+/**
+  Helper method to perform debug drawing to help visualize the cell layout.
+
+  @param ctx The current context to use for drawing.
+ */
+- (void)debugDrawInContext:(CGContextRef)ctx {
 
   setStrokeColor(ctx, UIColor.systemOrangeColor);
 
   CGContextBeginPath(ctx);
 
-  CGFloat rowTotal = self.totalRowWeight;
-  CGFloat columnTotal = self.totalColumnWeight;
+  CGFloat rowTotal = _rows;
+  CGFloat columnTotal = _columns;
   CGFloat width = self.frame.size.width;
   CGFloat height = self.frame.size.height;
 
   // draw row dividers
   CGFloat rowOffset = 0.0;
-  for (int i = 0; i < _rows.count - 1; ++i) {
-    CGFloat row = _rows[i].doubleValue;
-    rowOffset += row;
+  for (int i = 0; i < _rows - 1; ++i) {
+    rowOffset += 1.0;
     CGFloat y = (rowOffset / rowTotal) * height;
     CGContextMoveToPoint(ctx, 0, y);
     CGContextAddLineToPoint(ctx, width, y);
@@ -415,9 +472,8 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
 
   // draw column dividers
   CGFloat columnOffset = 0.0;
-  for (int i = 0; i < _columns.count - 1; ++i) {
-    CGFloat column = _columns[i].doubleValue;
-    columnOffset += column;
+  for (int i = 0; i < _columns - 1; ++i) {
+    columnOffset += 1.0;
     CGFloat x = (columnOffset / columnTotal) * width;
     CGContextMoveToPoint(ctx, x, 0);
     CGContextAddLineToPoint(ctx, x, height);
@@ -426,17 +482,16 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
   CGContextClosePath(ctx);
   CGContextDrawPath(ctx, kCGPathStroke);
 
-  // min gutters
+  // draw gutters
   setStrokeColor(ctx, UIColor.systemGreenColor);
 
   CGContextBeginPath(ctx);
 
-  if (_minRowGutter > 0) {
-    CGFloat gutterSize = _minRowGutter * height / 2.0;
+  if (_rowGutter > 0) {
+    CGFloat gutterSize = _rowGutter * height / 2.0;
     CGFloat rowOffset = 0.0;
-    for (int i = 0; i < _rows.count - 1; ++i) {
-      CGFloat row = _rows[i].doubleValue;
-      rowOffset += row;
+    for (int i = 0; i < _rows - 1; ++i) {
+      rowOffset += 1.0;
       CGFloat y = (rowOffset / rowTotal) * height;
       CGContextMoveToPoint(ctx, 0, y - gutterSize);
       CGContextAddLineToPoint(ctx, width, y - gutterSize);
@@ -451,12 +506,11 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
     CGContextAddLineToPoint(ctx, width, height - gutterSize);
   }
 
-  if (_minColumnGutter > 0) {
-    CGFloat gutterSize = _minColumnGutter * width / 2.0;
+  if (_columnGutter > 0) {
+    CGFloat gutterSize = _columnGutter * width / 2.0;
     CGFloat columnOffset = 0.0;
-    for (int i = 0; i < _columns.count - 1; ++i) {
-      CGFloat column = _columns[i].doubleValue;
-      columnOffset += column;
+    for (int i = 0; i < _columns - 1; ++i) {
+      columnOffset += 1.0;
       CGFloat x = (columnOffset / columnTotal) * width;
       CGContextMoveToPoint(ctx, x - gutterSize, 0);
       CGContextAddLineToPoint(ctx, x - gutterSize, height);
@@ -476,17 +530,3 @@ static void setStrokeColor(CGContextRef context, UIColor *color);
 }
 
 @end
-
-static void setStrokeColor(CGContextRef context, UIColor *color)
-{
-  CGFloat r, g, b, a;
-  [color getRed:&r green:&g blue:&b alpha:&a];
-  CGContextSetRGBStrokeColor(context, r, g, b, a);
-}
-
-//static void setFillColor(CGContextRef context, UIColor *color)
-//{
-//  CGFloat r, g, b, a;
-//  [color getRed:&r green:&g blue:&b alpha:&a];
-//  CGContextSetRGBFillColor(context, r, g, b, a);
-//}

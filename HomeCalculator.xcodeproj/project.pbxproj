@@ -27,6 +27,7 @@
 		FD5F2D902385CDBE0045B1AD /* EWCGridLayoutProps.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F2D8F2385CDBE0045B1AD /* EWCGridLayoutProps.m */; };
 		FD5F2D922385D00A0045B1AD /* EWCGridCustomLayoutCallback.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F2D912385D00A0045B1AD /* EWCGridCustomLayoutCallback.m */; };
 		FD5F2D952388C5E70045B1AD /* EWCTokenQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F2D942388C5E70045B1AD /* EWCTokenQueue.m */; };
+		FD5F2D98238B21270045B1AD /* EWCDecimalInputBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F2D97238B21270045B1AD /* EWCDecimalInputBuilder.m */; };
 		FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB5236CC30200780234 /* AppDelegate.m */; };
 		FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB8236CC30200780234 /* SceneDelegate.m */; };
 		FDBA3EBC236CC30200780234 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EBB236CC30200780234 /* ViewController.m */; };
@@ -85,6 +86,8 @@
 		FD5F2D912385D00A0045B1AD /* EWCGridCustomLayoutCallback.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCGridCustomLayoutCallback.m; sourceTree = "<group>"; };
 		FD5F2D932388C5E70045B1AD /* EWCTokenQueue.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCTokenQueue.h; sourceTree = "<group>"; };
 		FD5F2D942388C5E70045B1AD /* EWCTokenQueue.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCTokenQueue.m; sourceTree = "<group>"; };
+		FD5F2D96238B21270045B1AD /* EWCDecimalInputBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCDecimalInputBuilder.h; sourceTree = "<group>"; };
+		FD5F2D97238B21270045B1AD /* EWCDecimalInputBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCDecimalInputBuilder.m; sourceTree = "<group>"; };
 		FDBA3EB1236CC30200780234 /* Home Calculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Home Calculator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDBA3EB4236CC30200780234 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		FDBA3EB5236CC30200780234 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -258,6 +261,8 @@
 				FDC1A4F623767FCF00D21FEB /* EWCCalculatorDataProtocol.h */,
 				FD5F2D932388C5E70045B1AD /* EWCTokenQueue.h */,
 				FD5F2D942388C5E70045B1AD /* EWCTokenQueue.m */,
+				FD5F2D96238B21270045B1AD /* EWCDecimalInputBuilder.h */,
+				FD5F2D97238B21270045B1AD /* EWCDecimalInputBuilder.m */,
 			);
 			name = Calculator;
 			sourceTree = "<group>";
@@ -390,6 +395,7 @@
 				FDC1A4D22372470600D21FEB /* EWCCalculatorToken.m in Sources */,
 				FD5F2D902385CDBE0045B1AD /* EWCGridLayoutProps.m in Sources */,
 				FDBA3EBC236CC30200780234 /* ViewController.m in Sources */,
+				FD5F2D98238B21270045B1AD /* EWCDecimalInputBuilder.m in Sources */,
 				FD22A9A2237CE767003E2C74 /* EWCCopyableLabel.m in Sources */,
 				FDC1A4CF2371349B00D21FEB /* EWCNumericField.m in Sources */,
 				FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */,

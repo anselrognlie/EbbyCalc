@@ -474,4 +474,19 @@
   XCTAssertEqualObjects(_calculator.displayContent, @"5.", @"but = picks up with binary add");
 }
 
+- (void)testTrailingZeros {
+  [self applyKeys:@[
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorDecimalKey),
+  ]];
+  [_calculator pressKey:EWCCalculatorZeroKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"3.0");
+  [_calculator pressKey:EWCCalculatorZeroKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"3.00");
+  [_calculator pressKey:EWCCalculatorZeroKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"3.000");
+  [_calculator pressKey:EWCCalculatorOneKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"3.0001");
+}
+
 @end

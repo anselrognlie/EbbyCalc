@@ -26,14 +26,7 @@
 #import "EWCCalculatorToken.h"
 #import "EWCCalculatorDataProtocol.h"
 #import "EWCTokenQueue.h"
-
-/**
-  `EWCCalculatorInputMode` tracks whether the input state is receiving digits that are part of the whole number, or the fraction.
- */
-typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
-  EWCCalculatorInputModeWhole = 1,
-  EWCCalculatorInputModeFraction,
-};
+#import "EWCDecimalInputBuilder.h"
 
 @interface EWCCalculator() {
   EWCCalculatorUpdatedCallback _callback;  // callback used to notify a listener of state changes in the calculator
@@ -43,19 +36,16 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   EWCNumericField *_memory;  // stores the general memory value
   EWCNumericField *_operand;  // stores the last operand for binary operations
   EWCCalculatorOpcode _operation;  // stores the last operation
-  BOOL _editingDisplay;  // NO when user hasn't contributed to input yet
-  BOOL _displayAvailable;  // YES if consider display to have useable data (such as from a display-only operator like sqrt, or by pasting a value)
-  EWCCalculatorInputMode _inputMode;  // track whether input digits are for the whole or fractional part of a number
-  short _fractionPower;  // power of the fractional digit being added.  ranges from 0 to more negative values.  treated as the power of ten of the next fraction digit
-  short _sign;  // the sign of the number being built up in the display
-  short _numDigits;  // the number of digits accumulated in the input display
   EWCCalculatorKey _lastKey;  // the last key pressed
   BOOL _showingJustTax;  // whether the display is showing the tax portion of a tax calculation
+
+  BOOL _displayAvailable;  // whether the value held in the display should be considered available for a calculation
 
   NSDecimalNumber *_taxResultWithTax;  // cache the last tax calculation that includes tax
   NSDecimalNumber *_taxResultJustTax;  // cache the tax from the last tax calculation
 
   EWCTokenQueue *_tokenQueue;
+  EWCDecimalInputBuilder *_inputBuilder;
 }
 
 @end
@@ -95,11 +85,8 @@ const static int s_maximumFractionDigits = 20;
 
   _error = NO;
 
-  _editingDisplay = NO;
-  _displayAvailable = NO;
-  _fractionPower = 0;
-  _sign = 1;
   _display = [EWCNumericField new];
+  _displayAvailable = NO;
 
   // this property should *not* be read directly from anywhere else but the
   // public property after this, so that it can get a default value if not set
@@ -117,6 +104,8 @@ const static int s_maximumFractionDigits = 20;
   _lastKey = EWCCalculatorNoKey;
 
   _tokenQueue = [EWCTokenQueue new];
+  _inputBuilder = [EWCDecimalInputBuilder new];
+  _inputBuilder.maximumDigits = _maximumDigits;
 
   // clear out all input and calculation status to be ready for user input
   [self fullClear];
@@ -171,6 +160,10 @@ const static int s_maximumFractionDigits = 20;
   return (_lastKey == EWCCalculatorMemoryKey);
 }
 
+- (void)setMaximumDigits:(NSInteger)value {
+  _maximumDigits = value;
+  _inputBuilder.maximumDigits = value;
+}
 
 ///--------------------------------
 /// @name Shared Formatting Methods
@@ -190,7 +183,7 @@ const static int s_maximumFractionDigits = 20;
 
   // force at least the number of input fractional digits so that trailing
   // zeros aren't hidden
-  formatter.minimumFractionDigits = -_fractionPower;
+  formatter.minimumFractionDigits = _inputBuilder.fractionalDigitCount;
 
   // apply the locale
   formatter.locale = self.locale;
@@ -282,12 +275,7 @@ const static int s_maximumFractionDigits = 20;
 
 - (void)clearDisplay {
   [_display clear];
-  _inputMode = EWCCalculatorInputModeWhole;
-  _fractionPower = 0;
-  _sign = 1;
-  _numDigits = 0;
-  _editingDisplay = NO;
-  _displayAvailable = NO;
+  [_inputBuilder clear];
 }
 
 - (void)setDisplay:(NSDecimalNumber *)number {
@@ -299,11 +287,14 @@ const static int s_maximumFractionDigits = 20;
   if (! clamped) {
     // precision error
     clamped = [self forceClampToMaxDigits:number];
-    _display.value = clamped;
     [self setError];
-  } else {
-    _display.value = clamped;
   }
+
+  _display.value = clamped;
+
+  // the input builder needs to get set along with the display in case
+  // there is a sign change after a previous calculation
+  _inputBuilder.value = clamped;
 }
 
 ///-------------------------------------
@@ -405,113 +396,6 @@ const static int s_maximumFractionDigits = 20;
   _taxPercentStatusVisible = NO;
 }
 
-
-///---------------------------------------
-/// @name Numeric Input Processing Methods
-///---------------------------------------
-
-- (BOOL)isDigitKey:(EWCCalculatorKey)key {
-  switch (key) {
-    case EWCCalculatorZeroKey:
-    case EWCCalculatorOneKey:
-    case EWCCalculatorTwoKey:
-    case EWCCalculatorThreeKey:
-    case EWCCalculatorFourKey:
-    case EWCCalculatorFiveKey:
-    case EWCCalculatorSixKey:
-    case EWCCalculatorSevenKey:
-    case EWCCalculatorEightKey:
-    case EWCCalculatorNineKey:
-      return YES;
-
-    default:
-      return NO;
-  }
-}
-
-// return -1 if invalid
-- (short)digitFromKey:(EWCCalculatorKey)key {
-  if (key < EWCCalculatorZeroKey || key > EWCCalculatorNineKey) {
-    return -1;
-  }
-
-  return (key - EWCCalculatorZeroKey);
-}
-
-- (void)digitPressed:(int)digit {
-  // no action if in error state
-  if (_error) { return; }
-
-  if (! _editingDisplay) {
-    [self clearDisplay];
-    _editingDisplay = YES;
-  }
-
-  _displayAvailable = YES;
-
-  digit *= _sign;
-
-  if (_maximumDigits && (_numDigits + 1 > _maximumDigits)) {
-    // don't allow input of more than maximum digits
-    return;
-  }
-
-  switch (_inputMode) {
-    case EWCCalculatorInputModeWhole: {
-      NSDecimalNumber *decimalDigit = [[NSDecimalNumber alloc] initWithInt:digit];
-      NSDecimalNumber *tmp = [_display.value decimalNumberByMultiplyingByPowerOf10:1];
-      _display.value = [tmp decimalNumberByAdding:decimalDigit];
-    }
-    break;
-
-    case EWCCalculatorInputModeFraction: {
-      // if we had no digits, then this is the first, so increment again, as we
-      // must have a leading zero
-      if (! _numDigits) {
-        _numDigits = 1;
-      }
-
-      _fractionPower--;
-      NSDecimalNumber *decimalDigit = [[NSDecimalNumber alloc] initWithInt:digit];
-      decimalDigit = [decimalDigit decimalNumberByMultiplyingByPowerOf10:_fractionPower];
-      _display.value = [_display.value decimalNumberByAdding:decimalDigit];
-    }
-    break;
-  }
-
-  ++_numDigits;
-}
-
-- (void)signPressed {
-  // no action if in error state
-  if (_error) { return; }
-
-  if ([_display.value isEqualToNumber:@0]) { return; }
-
-  _displayAvailable = YES;
-
-  _sign = -_sign;
-
-  NSDecimalNumber *minusOne = [[NSDecimalNumber alloc] initWithInt:-1];
-  _display.value = [_display.value decimalNumberByMultiplyingBy:minusOne];
-}
-
-- (void)decimalPressed {
-  if (_error) { return; }
-
-  if (! _editingDisplay) {
-    [self clearDisplay];
-    _editingDisplay = YES;
-  }
-
-  _displayAvailable = YES;
-
-  // do we already have a decimal
-  if (_inputMode != EWCCalculatorInputModeWhole) { return; }
-
-  _inputMode = EWCCalculatorInputModeFraction;
-  _fractionPower = 0;
-}
 
 ///-------------------------------------
 /// @name Display-only Operation Methods
@@ -684,25 +568,6 @@ const static int s_maximumFractionDigits = 20;
 ///-----------------------------------------
 
 
-// returns NO if key was not handled
-- (BOOL)processInputKey:(EWCCalculatorKey)key {
-  if ([self isDigitKey:key]) {
-    short digit = [self digitFromKey:key];
-    if (digit == -1) {
-      return NO;
-    }
-    [self digitPressed:digit];
-  } else if (key == EWCCalculatorSignKey) {
-    [self signPressed];
-  } else if (key == EWCCalculatorDecimalKey) {
-    [self decimalPressed];
-  } else {
-    return NO;
-  }
-
-  return YES;
-}
-
 - (void)processClearKey {
   if (_error) {
     _error = NO;
@@ -724,8 +589,6 @@ const static int s_maximumFractionDigits = 20;
 }
 
 - (void)processMemoryKey {
-  _editingDisplay = NO;
-
   if (_lastKey == EWCCalculatorMemoryKey) {
     // clear memory
     [self clearMemory];
@@ -737,8 +600,6 @@ const static int s_maximumFractionDigits = 20;
 }
 
 - (void)processMemoryPlusKey {
-  _editingDisplay = NO;
-
   NSDecimalNumber *mem = _memory.value;
   NSDecimalNumber *opd = _display.value;
   mem = [mem decimalNumberByAdding:opd];
@@ -747,8 +608,6 @@ const static int s_maximumFractionDigits = 20;
 }
 
 - (void)processMemoryMinusKey {
-  _editingDisplay = NO;
-
   NSDecimalNumber *mem = _memory.value;
   NSDecimalNumber *opd = _display.value;
   mem = [mem decimalNumberBySubtracting:opd];
@@ -758,7 +617,6 @@ const static int s_maximumFractionDigits = 20;
 
 - (void)processRateKey {
   _rateShifted = ! _rateShifted;
-  _editingDisplay = NO;
 }
 
 - (void)displayTaxResult {
@@ -879,9 +737,16 @@ const static int s_maximumFractionDigits = 20;
     _rateShifted = NO;
   }
 
-  handled = [self processInputKey:key];
-  if (handled) { return; }
+  // keys that contribute to building up a number
+  handled = [_inputBuilder processKey:key];
+  if (handled) {
+    // update the display with the current input
+    _display.value = _inputBuilder.value;
+    _displayAvailable = YES;
+    return;
+  }
 
+  // keys that operate on the display value
   if (key == EWCCalculatorSqrtKey) {
     [self sqrtPressed];
     return;
@@ -909,7 +774,6 @@ const static int s_maximumFractionDigits = 20;
   // so the input is complete
 
   if (_displayAvailable) {
-    _editingDisplay = NO;
     _displayAvailable = NO;
     [_tokenQueue enqueueData:_display.value];
   }

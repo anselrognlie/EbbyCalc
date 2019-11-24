@@ -55,19 +55,37 @@ typedef NS_ENUM(NSInteger, EWCCalculatorKey) {
 };
 
 /**
- Determines whether a key represents a binary operation.
+  Determines whether a key represents a binary operation.
 
- @param key The key to examine.
+  @param key The key to examine.
 
- @return YES if the key is a binary operation, otherwise NO.
+  @return YES if the key is a binary operation, otherwise NO.
 */
 BOOL EWCCalculatorKeyIsBinaryOp(EWCCalculatorKey key);
 
 /**
- Determines whether a key is related to setting the tax rate.
+  Determines whether a key is related to setting the tax rate.
 
- @param key The key to examine.
+  @param key The key to examine.
 
- @return YES if the key is related to setting the tax rate.
+  @return YES if the key is related to setting the tax rate.
  */
 BOOL EWCCalculatorKeyIsRateKey(EWCCalculatorKey key);
+
+/**
+  Determines whether a key is a digit.
+
+  @param key The key to examine.
+
+  @return YES if the key is a digit, otherwise NO.
+ */
+BOOL EWCCalculatorKeyIsDigit(EWCCalculatorKey key);
+
+/**
+  Gets the numeric value of the provided key.
+
+  @param key The digit key.
+
+  @return The numeric value of the key, or -1 if the key is not a numeric key.
+*/
+short EWCCalculatorDigitFromKey(EWCCalculatorKey key);

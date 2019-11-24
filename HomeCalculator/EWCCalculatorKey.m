@@ -48,3 +48,32 @@ BOOL EWCCalculatorKeyIsRateKey(EWCCalculatorKey key) {
       return NO;
   }
 }
+
+BOOL EWCCalculatorKeyIsDigit(EWCCalculatorKey key) {
+  switch (key) {
+    case EWCCalculatorZeroKey:
+    case EWCCalculatorOneKey:
+    case EWCCalculatorTwoKey:
+    case EWCCalculatorThreeKey:
+    case EWCCalculatorFourKey:
+    case EWCCalculatorFiveKey:
+    case EWCCalculatorSixKey:
+    case EWCCalculatorSevenKey:
+    case EWCCalculatorEightKey:
+    case EWCCalculatorNineKey:
+      return YES;
+
+    default:
+      return NO;
+  }
+}
+
+// return -1 if invalid
+short EWCCalculatorDigitFromKey(EWCCalculatorKey key) {
+  if (key < EWCCalculatorZeroKey || key > EWCCalculatorNineKey) {
+    return -1;
+  }
+
+  return (key - EWCCalculatorZeroKey);
+}
+

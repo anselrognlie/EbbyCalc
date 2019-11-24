@@ -44,27 +44,27 @@ typedef struct {
   /**
     Used to calculate the text button font size using the current minimum dimension.
    */
-  const float textSizeAsPercentOfNarrowDimension;
+  const float textSizeAsPercentOfHeight;
 
   /**
     Used to calculate the status indicator font size using the current minimum dimension.
    */
-  const float statusSizeAsPercentOfNarrowDimension;
+  const float statusSizeAsPercentOfHeight;
 
   /**
     Used to calculate the digit button font size using the current minimum dimension.
    */
-  const float digitSizeAsPercentOfNarrowDimension;
+  const float digitSizeAsPercentOfHeight;
 
   /**
     Used to calculate the text button font size using the current minimum dimension.
    */
-  const float operatorSizeAsPercentOfNarrowDimension;
+  const float operatorSizeAsPercentOfHeight;
 
   /**
     Used to calculate the display font size using the current minimum dimension.
    */
-  const float displaySizeAsPercentOfNarrowDimension;
+  const float displaySizeAsPercentOfHeight;
 
   /**
     Used to calculate the display height from the font size it will need to display.
@@ -130,23 +130,24 @@ typedef struct {
 /// @name Layout Constants
 ///-----------------------
 
-static const float s_tallGridHeightWidthRatio = 1.900;  // the aspect ratio that determines whether to layout the buttons in tall or wide mode
+static const float s_tallGridHeightWidthRatio = 1.800;  // the aspect ratio that determines whether to layout the buttons in tall or wide mode
 
 static const float s_minimumDisplayScaleFactor = 0.25;  // the minimum scale font that can be applied to the display to fit the contents on screen
 static const int s_maximumDigits = 16;  // the number of digits we will support
 
-static const float s_wideLayoutBase = 0.049;  // base layout value for narrow and wide layout
-static const float s_tallLayoutBase = 0.060;  // base layout value for tall layout
+static const float s_narrowLayoutBase = 0.037;  // base layout value for narrow layout
+static const float s_wideLayoutBase = 0.045;  // base layout value for wide layout
+static const float s_tallLayoutBase = 0.030;  // base layout value for tall layout
 
 /**
   Layout constants for the narrow layout (wide layout, but width is smaller than height).
  */
 static const EWCLayoutConstants s_narrowLayoutConstants = {
-  s_wideLayoutBase,  // textSizeAsPercentOfNarrowDimension
-  s_wideLayoutBase / 2,  // statusSizeAsPercentOfNarrowDimension
-  s_wideLayoutBase * 2,  // digitSizeAsPercentOfNarrowDimension
-  s_wideLayoutBase * 2,  // operatorSizeAsPercentOfNarrowDimension
-  s_wideLayoutBase * 3.7,  // displaySizeAsPercentOfNarrowDimension
+  s_narrowLayoutBase,  // textSizeAsPercentOfHeight
+  s_narrowLayoutBase * 0.5,  // statusSizeAsPercentOfHeight
+  s_narrowLayoutBase * 2,  // digitSizeAsPercentOfHeight
+  s_narrowLayoutBase * 2,  // operatorSizeAsPercentOfHeight
+  s_narrowLayoutBase * 3.7,  // displaySizeAsPercentOfHeight
   1.500,  // displayHeightFromFontSize
   0.020,  // minimumRowGutter
   0.020,  // minimumColumnGutter
@@ -156,11 +157,11 @@ static const EWCLayoutConstants s_narrowLayoutConstants = {
  Layout constants for the wide layout (wide layout, and width is larger than height).
 */
 static const EWCLayoutConstants s_wideLayoutConstants = {
-  s_wideLayoutBase,  // textSizeAsPercentOfNarrowDimension
-  s_wideLayoutBase / 2,  // statusSizeAsPercentOfNarrowDimension
-  s_wideLayoutBase * 2,  // digitSizeAsPercentOfNarrowDimension
-  s_wideLayoutBase * 2,  // operatorSizeAsPercentOfNarrowDimension
-  s_wideLayoutBase * 2.6,  // displaySizeAsPercentOfNarrowDimension
+  s_wideLayoutBase,  // textSizeAsPercentOfHeight
+  s_wideLayoutBase * 0.5,  // statusSizeAsPercentOfHeight
+  s_wideLayoutBase * 2,  // digitSizeAsPercentOfHeight
+  s_wideLayoutBase * 2,  // operatorSizeAsPercentOfHeight
+  s_wideLayoutBase * 2.6,  // displaySizeAsPercentOfHeight
   1.500,  // displayHeightFromFontSize
   0.030,  // minimumRowGutter
   0.010,  // minimumColumnGutter
@@ -170,11 +171,11 @@ static const EWCLayoutConstants s_wideLayoutConstants = {
  Layout constants for the tall layout (greater than tall aspect ratio).
 */
 static const EWCLayoutConstants s_tallLayoutConstants = {
-  s_tallLayoutBase,  // textSizeAsPercentOfNarrowDimension
-  s_tallLayoutBase / 2,  // statusSizeAsPercentOfNarrowDimension
-  s_tallLayoutBase * 1.8,  // digitSizeAsPercentOfNarrowDimension
-  s_tallLayoutBase * 1.7,  // operatorSizeAsPercentOfNarrowDimension
-  s_tallLayoutBase * 2.8,  // displaySizeAsPercentOfNarrowDimension
+  s_tallLayoutBase,  // textSizeAsPercentOfHeight
+  s_tallLayoutBase * 0.5,  // statusSizeAsPercentOfHeight
+  s_tallLayoutBase * 1.8,  // digitSizeAsPercentOfHeight
+  s_tallLayoutBase * 1.7,  // operatorSizeAsPercentOfHeight
+  s_tallLayoutBase * 2.8,  // displaySizeAsPercentOfHeight
   1.500,  // displayHeightFromFontSize
   0.020,  // minimumRowGutter
   0.030,  // minimumColumnGutter
@@ -760,11 +761,11 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
     [self layoutGrid];
   }
 
-  // take the more narrow dimension as the one to use for font calculations
-  CGFloat fontDim = (width < height) ? width : height;
+  // use the height as the dimension to base our font sizes on
+  CGFloat fontDim = height;
 
-  // the display font scale factor depends on the orientation as well
-  CGFloat fontHeight = fontDim * _currentLayout->displaySizeAsPercentOfNarrowDimension;
+  // get the display font size
+  CGFloat fontHeight = fontDim * _currentLayout->displaySizeAsPercentOfHeight;
 
   // use it to update the display font size
   [_displayArea setFont:[_displayArea.font fontWithSize:fontHeight]];
@@ -774,10 +775,10 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   _gridTopConstraint.constant = -height + displayHeight + _gridBottomConstraint.constant;
 
   // update the remaining font sizes
-  [self setTextButtonsFontSize:fontDim * _currentLayout->textSizeAsPercentOfNarrowDimension];
-  [self setDigitButtonsFontSize:fontDim * _currentLayout->digitSizeAsPercentOfNarrowDimension];
-  [self setOperatorButtonsFontSize:fontDim * _currentLayout->operatorSizeAsPercentOfNarrowDimension];
-  [self setStatusFontSize:fontDim * _currentLayout->statusSizeAsPercentOfNarrowDimension];
+  [self setTextButtonsFontSize:fontDim * _currentLayout->textSizeAsPercentOfHeight];
+  [self setDigitButtonsFontSize:fontDim * _currentLayout->digitSizeAsPercentOfHeight];
+  [self setOperatorButtonsFontSize:fontDim * _currentLayout->operatorSizeAsPercentOfHeight];
+  [self setStatusFontSize:fontDim * _currentLayout->statusSizeAsPercentOfHeight];
 
   // adjust the status constraints
   _statusRightConstraint.constant = [self getTrailingStatusConstant:width];
@@ -874,7 +875,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   return [self makeOperatorButton:label
     accessibilityLabel:accessibilityLabel
     tag:tag
-    withSize:_currentLayout->operatorSizeAsPercentOfNarrowDimension * width];
+    withSize:_currentLayout->operatorSizeAsPercentOfHeight * width];
 }
 
 /**
@@ -895,7 +896,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   return [self makeOperatorButton:label
     accessibilityLabel:accessibilityLabel
     tag:tag
-    withSize:_currentLayout->textSizeAsPercentOfNarrowDimension * width];
+    withSize:_currentLayout->textSizeAsPercentOfHeight * width];
 }
 
 /**
@@ -943,7 +944,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
     colored:[UIColor whiteColor]
     highlightColor:[UIColor lightGrayColor]
     backgroundColor:[UIColor darkGrayColor]
-    fontSize:_currentLayout->digitSizeAsPercentOfNarrowDimension * width];
+    fontSize:_currentLayout->digitSizeAsPercentOfHeight * width];
 }
 
 /**
@@ -967,7 +968,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
     colored:[ViewController regularTextColor]
     highlightColor:[UIColor colorWithRed:204.0/255 green:204.0/255 blue:204.0/255 alpha:1.0]
     backgroundColor:[UIColor lightGrayColor]
-    fontSize:_currentLayout->textSizeAsPercentOfNarrowDimension * width];
+    fontSize:_currentLayout->textSizeAsPercentOfHeight * width];
 }
 
 /**

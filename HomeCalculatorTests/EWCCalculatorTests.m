@@ -313,7 +313,7 @@
     @(EWCCalculatorSqrtKey),
   ]];
   XCTAssertEqualObjects(_calculator.displayContent, @"2.");
-  XCTAssertTrue(_calculator.isErrorStatusVisible, @"Error should be visible");
+  XCTAssertTrue(_calculator.hasError, @"Error should be visible");
 }
 
 - (void)testSimpleSqrtErrorResume {
@@ -327,7 +327,7 @@
     @(EWCCalculatorEqualKey),
   ]];
   XCTAssertEqualObjects(_calculator.displayContent, @"6.");
-  XCTAssertFalse(_calculator.isErrorStatusVisible, @"Error should NOT be visible");
+  XCTAssertFalse(_calculator.hasError, @"Error should NOT be visible");
 }
 
 - (void)testUnarySqrtErrorResume {
@@ -343,7 +343,7 @@
     @(EWCCalculatorAddKey),  // this is the step that errored in the past
   ]];
   XCTAssertEqualObjects(_calculator.displayContent, @"2.");  // this would error as 1 (the input)
-  XCTAssertFalse(_calculator.isErrorStatusVisible, @"Error should NOT be visible");
+  XCTAssertFalse(_calculator.hasError, @"Error should NOT be visible");
 
   [self applyKeys:@[
     @(EWCCalculatorFourKey),
@@ -443,6 +443,35 @@
   XCTAssertEqualObjects(_calculator.displayContent, @"9.");
   [_calculator pressKey:EWCCalculatorEqualKey];
   XCTAssertEqualObjects(_calculator.displayContent, @"12.");
+}
+
+- (void)testInvalidPercentCases {
+  // has no effect for unary data
+  [self applyKeys:@[
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorPercentKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"3.", @"3%% should have no observable effect");
+  [self applyKeys:@[
+    @(EWCCalculatorAddKey),
+    @(EWCCalculatorPercentKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"3.", @"3+%% should also have no observable effect");
+  [_calculator pressKey:EWCCalculatorPercentKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"3.", @"no matter how many times we press %%");
+  [_calculator pressKey:EWCCalculatorEqualKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"3.", @"first regular = should still show 3.");
+  [_calculator pressKey:EWCCalculatorEqualKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"6.", @"second = picks up with unary add");
+
+  // even if there is a previous operation (allowed for equal)
+  [self applyKeys:@[
+    @(EWCCalculatorTwoKey),
+    @(EWCCalculatorPercentKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"2.", @"%% after continuation has no effect");
+  [_calculator pressKey:EWCCalculatorEqualKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"5.", @"but = picks up with binary add");
 }
 
 @end

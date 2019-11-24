@@ -25,49 +25,49 @@
 #import "EWCCalculatorOpcode.h"
 #import "EWCCalculatorToken.h"
 #import "EWCCalculatorDataProtocol.h"
+#import "EWCTokenQueue.h"
 
+/**
+  `EWCCalculatorInputMode` tracks whether the input state is receiving digits that are part of the whole number, or the fraction.
+ */
 typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
-  EWCCalculatorInputModeRegular = 1,
+  EWCCalculatorInputModeWhole = 1,
   EWCCalculatorInputModeFraction,
 };
 
 @interface EWCCalculator() {
-  EWCCalculatorUpdatedCallback _callback;
-  BOOL _shift;
-  BOOL _error;
-  EWCNumericField *_accumulator;
-  EWCNumericField *_display;
+  EWCCalculatorUpdatedCallback _callback;  // callback used to notify a listener of state changes in the calculator
+  EWCNumericField *_accumulator;  // stores the results of the last calculation
+  EWCNumericField *_display;  // stores the value displayed to the client
+  EWCNumericField *_taxRate;  // stores the tax rate
+  EWCNumericField *_memory;  // stores the general memory value
+  EWCNumericField *_operand;  // stores the last operand for binary operations
+  EWCCalculatorOpcode _operation;  // stores the last operation
   BOOL _editingDisplay;  // NO when user hasn't contributed to input yet
-  BOOL _displayAvailable;  // YES if consider display to have useable data
-  EWCNumericField *_taxRate;
-  EWCNumericField *_memory;
-  EWCNumericField *_operand;
-  EWCCalculatorOpcode _operation;
-  EWCCalculatorInputMode _inputMode;
-  short _fractionPower;
-  short _sign;
-  short _numDigits;
-  EWCCalculatorKey _lastKey;
-  BOOL _showingJustTax;
-  NSLocale *_locale;
+  BOOL _displayAvailable;  // YES if consider display to have useable data (such as from a display-only operator like sqrt, or by pasting a value)
+  EWCCalculatorInputMode _inputMode;  // track whether input digits are for the whole or fractional part of a number
+  short _fractionPower;  // power of the fractional digit being added.  ranges from 0 to more negative values.  treated as the power of ten of the next fraction digit
+  short _sign;  // the sign of the number being built up in the display
+  short _numDigits;  // the number of digits accumulated in the input display
+  EWCCalculatorKey _lastKey;  // the last key pressed
+  BOOL _showingJustTax;  // whether the display is showing the tax portion of a tax calculation
 
-  NSDecimalNumber *_taxResultWithTax;
-  NSDecimalNumber *_taxResultJustTax;
+  NSDecimalNumber *_taxResultWithTax;  // cache the last tax calculation that includes tax
+  NSDecimalNumber *_taxResultJustTax;  // cache the tax from the last tax calculation
 
-  NSMutableArray<EWCCalculatorToken *> *_queue;
-  short _ip;
+  EWCTokenQueue *_tokenQueue;
 }
-
-@property (nonatomic, getter=isTaxStatusVisible) BOOL taxStatusVisible;
-@property (nonatomic, getter=isTaxPlusStatusVisible) BOOL taxPlusStatusVisible;
-@property (nonatomic, getter=isTaxMinusStatusVisible) BOOL taxMinusStatusVisible;
-@property (nonatomic, getter=isTaxPercentStatusVisible) BOOL taxPercentStatusVisible;
 
 @end
 
-static int s_maximumFractionDigits = 20;
+// the default number of rounding fractional digits
+const static int s_maximumFractionDigits = 20;
 
 @implementation EWCCalculator
+
+///----------------------------------------------
+/// @name Construction and Initialization Methods
+///----------------------------------------------
 
 + (instancetype)calculator {
   return [EWCCalculator new];
@@ -82,6 +82,9 @@ static int s_maximumFractionDigits = 20;
   return self;
 }
 
+/**
+  Initialization helper method.  Sets state to reasonable defaults and initializes token queue.
+ */
 - (void)sharedInit {
   _taxStatusVisible = NO;
   _taxPlusStatusVisible = NO;
@@ -98,23 +101,36 @@ static int s_maximumFractionDigits = 20;
   _sign = 1;
   _display = [EWCNumericField new];
 
+  // this property should *not* be read directly from anywhere else but the
+  // public property after this, so that it can get a default value if not set
+  _locale = nil;
+
   _operation = EWCCalculatorNoOpcode;
   _operand = [EWCNumericField new];
 
   _accumulator = [EWCNumericField new];
 
-  _shift = NO;
+  _rateShifted = NO;
   _taxRate = [EWCNumericField new];
   _memory = [EWCNumericField new];
 
   _lastKey = EWCCalculatorNoKey;
 
-  _queue = [NSMutableArray<EWCCalculatorToken *> new];
-  _ip = 0;
+  _tokenQueue = [EWCTokenQueue new];
 
+  // clear out all input and calculation status to be ready for user input
   [self fullClear];
 }
 
+///------------------------------
+/// @name Custom Property Methods
+///------------------------------
+
+/**
+  Reads and sets the state for values provided by the data provider when set.
+
+  @param dataProvider The provider to use for persistence.
+ */
 - (void)setDataProvider:(id<EWCCalculatorDataProtocol>)dataProvider {
   _dataProvider = dataProvider;
 
@@ -124,33 +140,90 @@ static int s_maximumFractionDigits = 20;
   }
 }
 
+/**
+  Returns the set locale, using the current locale if it hasn't been set.
+
+  @note The locale value must only be accessed through this property (no direct ivar access) so that it can be given a default value on first access if not set.
+
+  @return The set locale, or the current locale if not already set.
+ */
+- (NSLocale *)locale {
+  if (! _locale) {
+    _locale = [[NSLocale currentLocale] copy];
+  }
+
+  return _locale;
+}
+
+- (NSDecimalNumber *)displayValue {
+  // instead of a backing property, return from the display field
+  return _display.value;
+}
+
+- (BOOL)hasMemory {
+  // instead of a backing property, returns based on the content state of the
+  // memory field
+  return ! _memory.isEmpty;
+}
+
+- (BOOL)shouldMemoryClear {
+  // if the last key was mrc, then if it is pressed it will be clear
+  return (_lastKey == EWCCalculatorMemoryKey);
+}
+
+
+///--------------------------------
+/// @name Shared Formatting Methods
+///--------------------------------
+
+/**
+  Gets a formatter suitable for displaying numbers in the display.
+
+  @return A formatter to be used to format the display value.
+ */
 - (NSNumberFormatter *)getFormatter {
   NSNumberFormatter *formatter = [NSNumberFormatter new];
 
   formatter.maximumFractionDigits = (_maximumDigits > 0)
     ? _maximumDigits
     : s_maximumFractionDigits;
+
+  // force at least the number of input fractional digits so that trailing
+  // zeros aren't hidden
   formatter.minimumFractionDigits = -_fractionPower;
+
+  // apply the locale
   formatter.locale = self.locale;
+
+  // This is to be a decimal number display
   [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
 
   return formatter;
 }
 
-- (void)setLocale:(NSLocale *)locale {
-  _locale = locale;
+/**
+  Gets a formatter suitable for generating the accessibility label for the display
+
+  @return A formatter to be used to format the display accessibility label.
+ */
+- (NSNumberFormatter *)getAccessibleFormatter {
+  // start with our per-locale decimal formatter
+  NSNumberFormatter *formatter = [self getFormatter];
+
+  // use a number spell out style so the generated text reads long numbers as
+  // the full number and not just a long string of digits
+  [formatter setNumberStyle:NSNumberFormatterSpellOutStyle];
+
+  return formatter;
 }
 
-- (NSLocale *)locale {
-  if (! _locale) {
-    _locale = [NSLocale currentLocale];
-  }
-
-  return _locale;
-}
+///---------------------------------------------------------------
+/// @name Public Properties and Methods (documented in the header)
+///---------------------------------------------------------------
 
 - (void)registerUpdateCallbackWithBlock:(EWCCalculatorUpdatedCallback)callback {
-  _callback = callback;
+  // copy the block, in case it was stack allocated
+  _callback = [callback copy];
 }
 
 - (NSString *)displayContent {
@@ -166,17 +239,35 @@ static int s_maximumFractionDigits = 20;
 - (NSString *)displayAccessibleContent {
 
   NSDecimalNumber *value = _display.value;
-  NSNumberFormatter *formatter = [self getFormatter];
-  [formatter setNumberStyle:NSNumberFormatterSpellOutStyle];
+  NSNumberFormatter * formatter = [self getAccessibleFormatter];
 
   NSString *display = [formatter stringFromNumber:value];
 
   return display;
 }
 
-- (NSDecimalNumber *)displayValue {
-  return _display.value;
+/**
+  This method is only intended for the client to be able to explicitly set the input without typing keys one by one.
+
+  @note This is not intended to be used within the calculator itself.  Setting this does raise a change notification, but the caller knows that it has made this call, and hence can also perform its update logic.
+ */
+- (void)setInput:(NSDecimalNumber *)value {
+  [self setDisplay:value];
+  _displayAvailable = YES;
 }
+
+- (void)pressKey:(EWCCalculatorKey)key {
+
+  [self processKey:key];
+
+  _lastKey = key;
+
+  [self safeCallback];
+}
+
+///---------------------------------
+/// @name Display Processing Methods
+///---------------------------------
 
 - (NSString *)processDisplay:(NSString *)display {
   NSString *separator = [self.locale decimalSeparator];
@@ -189,113 +280,14 @@ static int s_maximumFractionDigits = 20;
   return display;
 }
 
-- (BOOL)isMemoryStatusVisible {
-  return ! _memory.isEmpty;
-}
-
-// implements public accessor
-- (BOOL)isRateShifted {
-  return _shift;
-}
-
-// implements public accessor
-- (BOOL)isErrorStatusVisible {
-  return _error;
-}
-
-// implements public accessor
-- (BOOL)shouldMemoryClear {
-  return (_lastKey == EWCCalculatorMemoryKey);
-}
-
-- (void)fullClear {
-  [self clearDisplay];
-  [self clearCalculation];
-  _shift = NO;
-}
-
-- (void)clearCalculation {
-  [self clearAccumulator];
-  [self clearOperand];
-
-  _operation = EWCCalculatorNoOpcode;
-
-  [_queue removeAllObjects];
-  _ip = 0;
-}
-
 - (void)clearDisplay {
   [_display clear];
-  _inputMode = EWCCalculatorInputModeRegular;
+  _inputMode = EWCCalculatorInputModeWhole;
   _fractionPower = 0;
   _sign = 1;
   _numDigits = 0;
   _editingDisplay = NO;
   _displayAvailable = NO;
-}
-
-- (void)clearAccumulator {
-  [_accumulator clear];
-}
-
-- (void)clearOperand {
-  [_operand clear];
-}
-
-- (void)clearTaxRate {
-  [_taxRate clear];
-}
-
-- (void)clearMemory {
-  [_memory clear];
-
-  if (_dataProvider) {
-    _dataProvider.memory = _memory.value;
-  }
-}
-
-- (void)clearAllTaxStatus {
-  _taxStatusVisible = NO;
-  _taxPlusStatusVisible = NO;
-  _taxMinusStatusVisible = NO;
-  _taxPercentStatusVisible = NO;
-}
-
-// not to be called from within regular calculation
-// this is intended for an outside agent to change the value in
-// the input field.  As such, it must raise a change notification
-// so that any display client can update itself
-- (void)setInput:(NSDecimalNumber *)value {
-  [self setDisplay:value];
-  _displayAvailable = YES;
-
-  [self safeCallback];
-}
-
-- (void)setAccumulator:(NSDecimalNumber *)number {
-  _accumulator.value = number;
-}
-
-- (void)setOperand:(NSDecimalNumber *)number {
-  _operand.value = number;
-}
-
-- (NSDecimalNumber *)clampErrorToMaxDigits:(NSDecimalNumber *)number {
-
-  // nothing to do if we aren't clamping
-  if (_maximumDigits == 0) {
-    return number;
-  }
-
-  NSDecimalNumber *maxDigitNumber = [NSDecimalNumber decimalNumberWithMantissa:1 exponent:_maximumDigits isNegative:NO];
-
-  NSDecimalNumber *clamped = nil;
-  do {
-    number = [number decimalNumberByDividingBy:maxDigitNumber];
-    clamped = [number ewc_decimalNumberByRestrictingToDigits:_maximumDigits];
-  } while (clamped == nil);
-
-  return clamped;
 }
 
 - (void)setDisplay:(NSDecimalNumber *)number {
@@ -306,7 +298,7 @@ static int s_maximumFractionDigits = 20;
 
   if (! clamped) {
     // precision error
-    clamped = [self clampErrorToMaxDigits:number];
+    clamped = [self forceClampToMaxDigits:number];
     _display.value = clamped;
     [self setError];
   } else {
@@ -314,11 +306,55 @@ static int s_maximumFractionDigits = 20;
   }
 }
 
+///-------------------------------------
+/// @name Accumulator Processing Methods
+///-------------------------------------
+
+- (void)clearAccumulator {
+  [_accumulator clear];
+}
+
+- (void)setAccumulator:(NSDecimalNumber *)number {
+  _accumulator.value = number;
+}
+
+///---------------------------------
+/// @name Operand Processing Methods
+///---------------------------------
+
+- (void)clearOperand {
+  [_operand clear];
+}
+
+- (void)setOperand:(NSDecimalNumber *)number {
+  _operand.value = number;
+}
+
+///---------------------------------
+/// @name Tax Rate Processing Methods
+///---------------------------------
+
+- (void)clearTaxRate {
+  [_taxRate clear];
+}
+
 - (void)setTaxRate:(NSDecimalNumber *)number {
   _taxRate.value = number;
 
   if (_dataProvider) {
     _dataProvider.taxRate = number;
+  }
+}
+
+///---------------------------------
+/// @name Memory Processing Methods
+///---------------------------------
+
+- (void)clearMemory {
+  [_memory clear];
+
+  if (_dataProvider) {
+    _dataProvider.memory = _memory.value;
   }
 }
 
@@ -343,6 +379,65 @@ static int s_maximumFractionDigits = 20;
   }
 }
 
+///-------------------------------------------------
+/// @name Other Methods for Clearing/Resetting State
+///-------------------------------------------------
+
+- (void)fullClear {
+  [self clearDisplay];
+  [self clearCalculation];
+  _rateShifted = NO;
+}
+
+- (void)clearCalculation {
+  [self clearAccumulator];
+  [self clearOperand];
+
+  _operation = EWCCalculatorNoOpcode;
+
+  [_tokenQueue clear];
+}
+
+- (void)clearAllTaxStatus {
+  _taxStatusVisible = NO;
+  _taxPlusStatusVisible = NO;
+  _taxMinusStatusVisible = NO;
+  _taxPercentStatusVisible = NO;
+}
+
+
+///---------------------------------------
+/// @name Numeric Input Processing Methods
+///---------------------------------------
+
+- (BOOL)isDigitKey:(EWCCalculatorKey)key {
+  switch (key) {
+    case EWCCalculatorZeroKey:
+    case EWCCalculatorOneKey:
+    case EWCCalculatorTwoKey:
+    case EWCCalculatorThreeKey:
+    case EWCCalculatorFourKey:
+    case EWCCalculatorFiveKey:
+    case EWCCalculatorSixKey:
+    case EWCCalculatorSevenKey:
+    case EWCCalculatorEightKey:
+    case EWCCalculatorNineKey:
+      return YES;
+
+    default:
+      return NO;
+  }
+}
+
+// return -1 if invalid
+- (short)digitFromKey:(EWCCalculatorKey)key {
+  if (key < EWCCalculatorZeroKey || key > EWCCalculatorNineKey) {
+    return -1;
+  }
+
+  return (key - EWCCalculatorZeroKey);
+}
+
 - (void)digitPressed:(int)digit {
   // no action if in error state
   if (_error) { return; }
@@ -362,7 +457,7 @@ static int s_maximumFractionDigits = 20;
   }
 
   switch (_inputMode) {
-    case EWCCalculatorInputModeRegular: {
+    case EWCCalculatorInputModeWhole: {
       NSDecimalNumber *decimalDigit = [[NSDecimalNumber alloc] initWithInt:digit];
       NSDecimalNumber *tmp = [_display.value decimalNumberByMultiplyingByPowerOf10:1];
       _display.value = [tmp decimalNumberByAdding:decimalDigit];
@@ -385,6 +480,95 @@ static int s_maximumFractionDigits = 20;
   }
 
   ++_numDigits;
+}
+
+- (void)signPressed {
+  // no action if in error state
+  if (_error) { return; }
+
+  if ([_display.value isEqualToNumber:@0]) { return; }
+
+  _displayAvailable = YES;
+
+  _sign = -_sign;
+
+  NSDecimalNumber *minusOne = [[NSDecimalNumber alloc] initWithInt:-1];
+  _display.value = [_display.value decimalNumberByMultiplyingBy:minusOne];
+}
+
+- (void)decimalPressed {
+  if (_error) { return; }
+
+  if (! _editingDisplay) {
+    [self clearDisplay];
+    _editingDisplay = YES;
+  }
+
+  _displayAvailable = YES;
+
+  // do we already have a decimal
+  if (_inputMode != EWCCalculatorInputModeWhole) { return; }
+
+  _inputMode = EWCCalculatorInputModeFraction;
+  _fractionPower = 0;
+}
+
+///-------------------------------------
+/// @name Display-only Operation Methods
+///-------------------------------------
+
+- (void)sqrtPressed {
+  // no action if in error state
+  if (_error) { return; }
+
+  BOOL shouldSetError = NO;
+
+  NSDecimalNumber *tmp = _display.value;
+  if ([tmp compare:[NSDecimalNumber zero]] == NSOrderedAscending) {
+    // negative
+    // treat as positive for the sqrt, but riase an error
+    tmp = [[NSDecimalNumber zero] decimalNumberBySubtracting:tmp];
+    shouldSetError = YES;
+  }
+
+  [self setDisplay:[tmp ewc_decimalNumberBySqrt]];
+  _displayAvailable = YES;
+
+  if (shouldSetError) {
+    [self setError];
+  }
+}
+
+///-----------------------------
+/// @name Math Operation Methods
+///-----------------------------
+
+- (EWCCalculatorOpcode)getOpcodeFromKey:(EWCCalculatorKey)key {
+  EWCCalculatorOpcode op;
+
+  switch (key) {
+    case EWCCalculatorAddKey:
+      op = EWCCalculatorAddOpcode;
+      break;
+
+    case EWCCalculatorSubtractKey:
+      op = EWCCalculatorSubtractOpcode;
+      break;
+
+    case EWCCalculatorMultiplyKey:
+      op = EWCCalculatorMultiplyOpcode;
+      break;
+
+    case EWCCalculatorDivideKey:
+      op = EWCCalculatorDivideOpcode;
+      break;
+
+    default:
+      op = EWCCalculatorNoOpcode;
+      break;
+  }
+
+  return op;
 }
 
 - (void)performLastOperation {
@@ -495,114 +679,10 @@ static int s_maximumFractionDigits = 20;
   }
 }
 
-- (void)signPressed {
-  // no action if in error state
-  if (_error) { return; }
+///-----------------------------------------
+/// @name Other Input Key Processing Methods
+///-----------------------------------------
 
-  if ([_display.value isEqualToNumber:@0]) { return; }
-
-  _displayAvailable = YES;
-
-  _sign = -_sign;
-
-  NSDecimalNumber *minusOne = [[NSDecimalNumber alloc] initWithInt:-1];
-  _display.value = [_display.value decimalNumberByMultiplyingBy:minusOne];
-}
-
-- (void)sqrtPressed {
-  // no action if in error state
-  if (_error) { return; }
-
-  BOOL shouldSetError = NO;
-
-  NSDecimalNumber *tmp = _display.value;
-  if ([tmp compare:[NSDecimalNumber zero]] == NSOrderedAscending) {
-    // negative
-    // treat as positive for the sqrt, but riase an error
-    tmp = [[NSDecimalNumber zero] decimalNumberBySubtracting:tmp];
-    shouldSetError = YES;
-  }
-
-  [self setDisplay:[tmp ewc_decimalNumberBySqrt]];
-  _displayAvailable = YES;
-
-  if (shouldSetError) {
-    [self setError];
-  }
-}
-
-- (void)decimalPressed {
-  if (_error) { return; }
-
-  if (! _editingDisplay) {
-    [self clearDisplay];
-    _editingDisplay = YES;
-  }
-
-  _displayAvailable = YES;
-
-  // do we already have a decimal
-  if (_inputMode != EWCCalculatorInputModeRegular) { return; }
-
-  _inputMode = EWCCalculatorInputModeFraction;
-  _fractionPower = 0;
-}
-
-- (BOOL)isDigitKey:(EWCCalculatorKey)key {
-  switch (key) {
-    case EWCCalculatorZeroKey:
-    case EWCCalculatorOneKey:
-    case EWCCalculatorTwoKey:
-    case EWCCalculatorThreeKey:
-    case EWCCalculatorFourKey:
-    case EWCCalculatorFiveKey:
-    case EWCCalculatorSixKey:
-    case EWCCalculatorSevenKey:
-    case EWCCalculatorEightKey:
-    case EWCCalculatorNineKey:
-      return YES;
-
-    default:
-      return NO;
-  }
-}
-
-// return -1 if invalid
-- (short)digitFromKey:(EWCCalculatorKey)key {
-  if (key < EWCCalculatorZeroKey || key > EWCCalculatorNineKey) {
-    return -1;
-  }
-
-  return (key - EWCCalculatorZeroKey);
-}
-
-- (EWCCalculatorOpcode)getOpcodeFromKey:(EWCCalculatorKey)key {
-  EWCCalculatorOpcode op;
-
-  switch (key) {
-    case EWCCalculatorAddKey:
-      op = EWCCalculatorAddOpcode;
-      break;
-
-    case EWCCalculatorSubtractKey:
-      op = EWCCalculatorSubtractOpcode;
-      break;
-
-    case EWCCalculatorMultiplyKey:
-      op = EWCCalculatorMultiplyOpcode;
-      break;
-
-    case EWCCalculatorDivideKey:
-      op = EWCCalculatorDivideOpcode;
-      break;
-
-    default:
-      op = EWCCalculatorNoOpcode;
-      break;
-  }
-
-  return op;
-}
 
 // returns NO if key was not handled
 - (BOOL)processInputKey:(EWCCalculatorKey)key {
@@ -623,270 +703,6 @@ static int s_maximumFractionDigits = 20;
   return YES;
 }
 
-- (void)setError {
-  _error = YES;
-  [_queue removeAllObjects];
-  _ip = 0;
-  [self clearAccumulator];
-  [self clearOperand];
-  _operation = EWCCalculatorNoOpcode;
-}
-
-- (BOOL)parseStartingWithOp:(EWCCalculatorToken *)aToken {
-
-  // must be one of
-  // o= - change the operator used for last operation (and execute it)
-  // od= - binary operation
-  // odo - binary operation with a continuation
-
-  EWCCalculatorToken *o1 = nil, *d1 = nil, *o2 = nil, *eq = nil;
-  o1 = aToken;
-
-  d1 = [self nextTokenAs:EWCCalculatorDataTokenType];
-  if (! d1) {
-    eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
-    if (eq) {
-      // o= - change the operator used for last operation (and execute it)
-      EWCCalculatorOpcode op = EWCCalculatorOpcodeModifyForEqualMode(o1.opcode, eq.opcode);
-      _operation = op;
-      //_operation = o1.opcode;
-      [self performLastOperation];
-      return YES;
-    }
-
-    return NO;
-  }
-
-  o2 = [self nextTokenAs:EWCCalculatorBinOpTokenType];
-  if (! o2) {
-    eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
-    if (eq) {
-      // od= - binary operation
-      NSDecimalNumber *acc = _accumulator.value;
-      EWCCalculatorOpcode op = EWCCalculatorOpcodeModifyForEqualMode(o1.opcode, eq.opcode);
-      [self performBinaryOperation:op withData:acc andOperand:d1.data];
-//      [self performBinaryOperation:o1.opcode withData:acc andOperand:d1.data];
-      return YES;
-    }
-
-    return NO;
-  }
-
-  // odo - binary operation with a continuation
-  NSDecimalNumber *acc = _accumulator.value;
-  [self pushbackToken];
-  [self performBinaryOperation:o1.opcode withData:acc andOperand:d1.data];
-
-  return YES;
-}
-
-- (BOOL)parseStartingWithData:(EWCCalculatorToken *)aToken {
-
-  // must be one of
-  // d= - assign d to acc, and perform last if present
-  // do= - unary operation on d
-  // dod= - binary operation
-  // dodo - binary operation with a continuation
-
-  EWCCalculatorToken *d1 = nil, *o1 = nil, *d2 = nil, *o2 = nil, *eq = nil;
-  d1 = aToken;
-
-  o1 = [self nextTokenAs:EWCCalculatorBinOpTokenType];
-  if (! o1) {
-    eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
-    if (eq) {
-      // d= - if there is a last op, assign d to acc, and perform it
-      if (_operation != EWCCalculatorNoOpcode) {
-        [self setAccumulator:d1.data];
-        [self performLastOperation];
-      } else {
-        // there was no operation, user just entered a number and hit enter
-        // just don't clear the display, mark the that it is available, and let
-        // the queue be cleared
-        _displayAvailable = YES;
-      }
-      return YES;
-    }
-
-    return NO;
-  }
-
-  d2 = [self nextTokenAs:EWCCalculatorDataTokenType];
-  if (! d2) {
-    eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
-    if (eq) {
-      // do= - unary operation on d, but not for percent
-      if (eq.opcode == EWCCalculatorEqualOpcode) {
-        [self performUnaryOperation:o1.opcode withData:d1.data];
-      }
-
-      // regardless, advance the queue
-      return YES;
-    }
-
-    return NO;
-  }
-
-  o2 = [self nextTokenAs:EWCCalculatorBinOpTokenType];
-  if (! o2) {
-    eq = [self nextTokenAs:EWCCalculatorEqualTokenType];
-    if (eq) {
-      // dod= - binary operation
-      EWCCalculatorOpcode op = EWCCalculatorOpcodeModifyForEqualMode(o1.opcode, eq.opcode);
-      [self performBinaryOperation:op withData:d1.data andOperand:d2.data];
-      return YES;
-    }
-
-    return NO;
-  }
-
-  // dodo - binary operation with a continuation
-  [self pushbackToken];
-  [self performBinaryOperation:o1.opcode withData:d1.data andOperand:d2.data];
-
-  return YES;
-}
-
-- (void)parseQueue {
-
-  BOOL shouldCommit = NO;
-  _ip = 0;
-
-  EWCCalculatorToken *token = [self nextToken];
-  switch (token.tokenType) {
-    case EWCCalculatorEmptyTokenType:
-      // nothing to do
-      return;
-
-    case EWCCalculatorBinOpTokenType:
-      // could be continuation op or unary
-      shouldCommit = [self parseStartingWithOp:token];
-      break;
-
-    case EWCCalculatorEqualTokenType:
-      // perform last operation (only if normal equal)
-      if (token.opcode == EWCCalculatorEqualOpcode) {
-        [self performLastOperation];
-      }
-
-      // but clear the queue regardless
-      shouldCommit = YES;
-      break;
-
-    case EWCCalculatorDataTokenType:
-      // could be start of binary op, or simple assignment
-      shouldCommit = [self parseStartingWithData:token];
-      break;
-  }
-
-  if (shouldCommit) {
-    // clear processed items
-    [_queue removeObjectsInRange:NSMakeRange(0, _ip)];
-    _ip = 0;
-  }
-}
-
-- (EWCCalculatorToken *)nextTokenAs:(EWCCalculatorTokenType)tokenType {  
-  if (_queue.count == 0 || _ip >= _queue.count) { return nil; }
-
-  EWCCalculatorToken *token = _queue[_ip];
-  if (token.tokenType == tokenType) {
-    ++_ip;
-  } else {
-    token = nil;
-  }
-
-  return token;
-}
-
-- (EWCCalculatorToken *)nextToken {
-  if (_queue.count == 0 || _ip >= _queue.count) { return nil; }
-
-  EWCCalculatorToken *token = _queue[_ip];
-  ++_ip;
-
-  return token;
-}
-
-- (void)pushbackToken {
-  --_ip;
-}
-
-- (void)enqueueBinOp:(EWCCalculatorOpcode)op {
-
-  // if the last item in queue is a binary op, and we are adding a binary op,
-  // just replace it (user changed mind about operator)
-  BOOL replaced = NO;
-  if (_queue.count > 0) {
-    EWCCalculatorToken *last = _queue[_queue.count - 1];
-    if (last.tokenType == EWCCalculatorBinOpTokenType) {
-      _queue[_queue.count - 1] = [EWCCalculatorToken tokenWithBinOp:op];
-      replaced = YES;
-    }
-  }
-
-  if (! replaced) {
-    [_queue addObject:[EWCCalculatorToken tokenWithBinOp:op]];
-  }
-
-  [self parseQueue];
-}
-
-- (void)enqueueEqual:(EWCCalculatorOpcode)op {
-
-  // should not allow back to back equal tokens
-  // they get removed due to processing, so a back to back equal is strange
-  if (_queue.count > 0) {
-    EWCCalculatorToken *last = _queue[_queue.count - 1];
-    if (last.tokenType == EWCCalculatorEqualTokenType) {
-      [self setError];
-      return;
-    }
-  }
-
-  [_queue addObject:[EWCCalculatorToken tokenWithEqual:op]];
-  [self parseQueue];
-}
-
-- (void)enqueueData:(NSDecimalNumber *)data {
-
-  // if the last item in queue is data, and we are adding data,
-  // just replace it (user could have been working with memory or rate)
-  BOOL replaced = NO;
-  if (_queue.count > 0) {
-    EWCCalculatorToken *last = _queue[_queue.count - 1];
-    if (last.tokenType == EWCCalculatorDataTokenType) {
-      _queue[_queue.count - 1] = [EWCCalculatorToken tokenWithData:data];
-      replaced = YES;
-    }
-  }
-
-  if (! replaced) {
-    [_queue addObject:[EWCCalculatorToken tokenWithData:data]];
-  }
-
-  [self parseQueue];
-}
-
-- (void)enqueueToken:(EWCCalculatorToken *)token {
-  [_queue addObject:token];
-  [self parseQueue];
-}
-
-- (EWCCalculatorToken *)getLastToken {
-  if (_queue.count > 0) {
-    return _queue[_queue.count - 1];
-  }
-
-  return nil;
-}
-
-- (void)removeLastToken {
-  if (_queue.count > 0) {
-    [_queue removeObjectAtIndex:_queue.count - 1];
-  }
-}
-
 - (void)processClearKey {
   if (_error) {
     _error = NO;
@@ -896,9 +712,9 @@ static int s_maximumFractionDigits = 20;
 
   // if we are in the middle of a calculation (last token is number)
   // just remove it
-  EWCCalculatorToken *lastToken = [self getLastToken];
+  EWCCalculatorToken *lastToken = [_tokenQueue getLastToken];
   if (lastToken && lastToken.tokenType == EWCCalculatorDataTokenType) {
-    [self removeLastToken];
+    [_tokenQueue removeLastToken];
     [self clearDisplay];
     return;
   }
@@ -941,7 +757,7 @@ static int s_maximumFractionDigits = 20;
 }
 
 - (void)processRateKey {
-  _shift = ! _shift;
+  _rateShifted = ! _rateShifted;
   _editingDisplay = NO;
 }
 
@@ -960,7 +776,7 @@ static int s_maximumFractionDigits = 20;
 }
 
 - (void)processTaxPlusKey {
-  if (_shift) {
+  if (_rateShifted) {
     // treat as store
     [self setTaxRate:_display.value];
     _taxPercentStatusVisible = YES;
@@ -996,7 +812,7 @@ static int s_maximumFractionDigits = 20;
 }
 
 - (void)processTaxMinusKey {
-  if (_shift) {
+  if (_rateShifted) {
     // treat as recall
     [self setDisplay:_taxRate.value];
     _taxPercentStatusVisible = YES;
@@ -1060,7 +876,7 @@ static int s_maximumFractionDigits = 20;
 
   // if not a tax rate-related key, unshift
   if (! isRateKey) {
-    _shift = NO;
+    _rateShifted = NO;
   }
 
   handled = [self processInputKey:key];
@@ -1095,33 +911,291 @@ static int s_maximumFractionDigits = 20;
   if (_displayAvailable) {
     _editingDisplay = NO;
     _displayAvailable = NO;
-    [self enqueueData:_display.value];
+    [_tokenQueue enqueueData:_display.value];
   }
 
   if (key == EWCCalculatorClearKey) {
     [self processClearKey];
   } else if (EWCCalculatorKeyIsBinaryOp(key)) {
-    [self enqueueBinOp:[self getOpcodeFromKey:key]];
+    [_tokenQueue enqueueBinOp:[self getOpcodeFromKey:key]];
   } else if (key == EWCCalculatorEqualKey) {
-    [self enqueueEqual:EWCCalculatorEqualOpcode];
+    [_tokenQueue enqueueEqual:EWCCalculatorEqualOpcode];
   } else if (key == EWCCalculatorPercentKey) {
-    [self enqueueEqual:EWCCalculatorPercentOpcode];
+    [_tokenQueue enqueueEqual:EWCCalculatorPercentOpcode];
+  }
+
+  // check whether one of the previous possible enqueue statements was invalid
+  if (_tokenQueue.hasError) {
+    [self setError];
+    return;
+  }
+
+  // if there was a change to the queue, try to parse it
+  if (_tokenQueue.didChange) {
+    [self parseQueue];
   }
 }
 
+///------------------------------
+/// @name Operation Queue Methods
+///------------------------------
+
+/**
+  Parses the operation queue knowing that the first token is an operator.  Knowing this restricts the possible valid operation combinations, making the parsing a little easier.
+
+  @param aToken The operation token that started the operation queue.
+
+  @return YES if the tokens processed during parsing should be removed from the queue (they have been applied to the calculation), otherwise NO (there wasn't yet a complete operation).
+ */
+- (BOOL)parseStartingWithOp:(EWCCalculatorToken *)aToken {
+
+  // must be one of
+  // o= - change the operator used for last operation (and execute it)
+  // od= - binary operation
+  // odo - binary operation with a continuation
+
+  EWCCalculatorToken *o1 = nil, *d1 = nil, *o2 = nil, *eq = nil;
+  o1 = aToken;
+
+  d1 = [_tokenQueue nextTokenAs:EWCCalculatorDataTokenType];
+  if (! d1) {
+    eq = [_tokenQueue nextTokenAs:EWCCalculatorEqualTokenType];
+    if (eq) {
+      // o= - change the operator used for last operation (and execute it)
+      EWCCalculatorOpcode op = EWCCalculatorOpcodeModifyForEqualMode(o1.opcode, eq.opcode);
+      _operation = op;
+      [self performLastOperation];
+      return YES;
+    }
+
+    return NO;
+  }
+
+  o2 = [_tokenQueue nextTokenAs:EWCCalculatorBinOpTokenType];
+  if (! o2) {
+    eq = [_tokenQueue nextTokenAs:EWCCalculatorEqualTokenType];
+    if (eq) {
+      // od= - binary operation
+      NSDecimalNumber *acc = _accumulator.value;
+      EWCCalculatorOpcode op = EWCCalculatorOpcodeModifyForEqualMode(o1.opcode, eq.opcode);
+      [self performBinaryOperation:op withData:acc andOperand:d1.data];
+      return YES;
+    }
+
+    return NO;
+  }
+
+  // odo - binary operation with a continuation
+  NSDecimalNumber *acc = _accumulator.value;
+  [_tokenQueue pushbackToken];
+  [self performBinaryOperation:o1.opcode withData:acc andOperand:d1.data];
+
+  return YES;
+}
+
+/**
+ Parses the operation queue knowing that the first token is data.  Knowing this restricts the possible valid operation combinations, making the parsing a little easier.
+
+ @param aToken The data token that started the operation queue.
+
+ @return YES if the tokens processed during parsing should be removed from the queue (they have been applied to the calculation), otherwise NO (there wasn't yet a complete operation).
+*/
+- (BOOL)parseStartingWithData:(EWCCalculatorToken *)aToken {
+
+  // must be one of
+  // d= - if there was a last operation, assign d to acc and execute, if not this has no real impact on the state, so just consume
+  // do= - unary operation on d
+  // dod= - binary operation
+  // dodo - binary operation with a continuation
+
+  EWCCalculatorToken *d1 = nil, *o1 = nil, *d2 = nil, *o2 = nil, *eq = nil;
+  d1 = aToken;
+
+  o1 = [_tokenQueue nextTokenAs:EWCCalculatorBinOpTokenType];
+  if (! o1) {
+    eq = [_tokenQueue nextTokenAs:EWCCalculatorEqualTokenType];
+    if (eq) {
+      // d= - if there is a last op, assign d to acc, and perform it (not if percent!)
+      if (_operation != EWCCalculatorNoOpcode && eq.opcode == EWCCalculatorEqualOpcode) {
+        [self setAccumulator:d1.data];
+        [self performLastOperation];
+      } else {
+        // there was no operation, user just entered a number and hit enter
+        // just don't clear the display, mark the that it is available, and let
+        // the queue be cleared
+        _displayAvailable = YES;
+      }
+      return YES;
+    }
+
+    return NO;
+  }
+
+  d2 = [_tokenQueue nextTokenAs:EWCCalculatorDataTokenType];
+  if (! d2) {
+    eq = [_tokenQueue nextTokenAs:EWCCalculatorEqualTokenType];
+    if (eq) {
+      // do= - unary operation on d
+      if (eq.opcode == EWCCalculatorEqualOpcode) {
+        [self performUnaryOperation:o1.opcode withData:d1.data];
+        return YES;
+      } else {
+        // the equal was a percent, which has no effect
+        // leave the queue alone, but excise the percent token
+        [_tokenQueue pushbackToken];  // percent is top of queue
+        [_tokenQueue popToken];
+      }
+    }
+
+    return NO;
+  }
+
+  o2 = [_tokenQueue nextTokenAs:EWCCalculatorBinOpTokenType];
+  if (! o2) {
+    eq = [_tokenQueue nextTokenAs:EWCCalculatorEqualTokenType];
+    if (eq) {
+      // dod= - binary operation
+      EWCCalculatorOpcode op = EWCCalculatorOpcodeModifyForEqualMode(o1.opcode, eq.opcode);
+      [self performBinaryOperation:op withData:d1.data andOperand:d2.data];
+      return YES;
+    }
+
+    return NO;
+  }
+
+  // dodo - binary operation with a continuation
+  [_tokenQueue pushbackToken];
+  [self performBinaryOperation:o1.opcode withData:d1.data andOperand:d2.data];
+
+  return YES;
+}
+
+/**
+  Parses the pending operation queue, looking for an operation that can be performed.
+
+  This method determines roughly how the queu starts, and uses that to delegate handling of the remainder of the parse to helper methods.
+
+  After execution, if a valid oepration was found, the tokens in the operation will be removed from the queue.  If no valid operation is found, the queue will remain unchanged.
+ */
+- (void)parseQueue {
+
+  // assume that we won't find anything
+  BOOL shouldCommit = NO;
+
+  [_tokenQueue moveToFirst];
+
+  // read tokens until either we get passed any empty tokens, or we run out of
+  // tokens to process
+  EWCCalculatorToken *token = [_tokenQueue nextToken];
+
+  // check whether anything is queued
+  if (! token) {
+    // nothing in the queue
+    return;
+  }
+
+  switch (token.tokenType) {
+    case EWCCalculatorBinOpTokenType:
+      // could be continuation op or unary
+      shouldCommit = [self parseStartingWithOp:token];
+      break;
+
+    case EWCCalculatorEqualTokenType:
+      // perform last operation (only if normal equal)
+      if (token.opcode == EWCCalculatorEqualOpcode) {
+        [self performLastOperation];
+      }
+
+      // but clear the queue regardless (so percent will essentially be a no-op)
+      shouldCommit = YES;
+      break;
+
+    case EWCCalculatorDataTokenType:
+      // could be start of binary op, or simple assignment
+      shouldCommit = [self parseStartingWithData:token];
+      break;
+
+    case EWCCalculatorEmptyTokenType:
+      // nop, just here for enumeration completeness
+      // there is no method to enqueue an empty token, so this can never occur
+      return;
+  }
+
+  // we handled an operation, so commit the portion of the queue that we used.
+  if (shouldCommit) {
+    // clear processed items
+    [_tokenQueue commit];
+  }
+}
+
+///-----------------------------
+/// @name Error Handling Methods
+///-----------------------------
+
+/**
+  Forcibly clamp a value to the configured number of digits even if it doesn't fit.  This is accomplished by continually dividing it down until it does, using a number based on the max digits so that it doesn't take many iterations.
+
+  @note The resulting number is meaningless.  Only use it dor display in error conditions.
+
+  @param number The number to force clamp (it was probably a number resulting from a calculation which is too large to fit in our allowed number of digits).
+
+  @return A number clamped small enough to fit in the digits.  Effectively, it should contain the most significant digits of the original number, but the decimal will be shifted too far left.
+ */
+- (NSDecimalNumber *)forceClampToMaxDigits:(NSDecimalNumber *)number {
+
+  // nothing to do if we aren't clamping
+  if (_maximumDigits == 0) {
+    return number;
+  }
+
+  // our divisor is a power of ten related to our max digits.  This effectively
+  // will move the decimal max digit positions to the left with each division.
+  NSDecimalNumber *maxDigitNumber = [NSDecimalNumber
+    decimalNumberWithMantissa:1
+    exponent:_maximumDigits
+    isNegative:NO];
+
+  NSDecimalNumber *clamped = nil;
+  do {
+    // divide through until the regular clamp function can successfully clamp
+    // the value.  Really this should only take a single pass, but we loop for
+    // safety.
+
+    number = [number decimalNumberByDividingBy:maxDigitNumber];
+    clamped = [number ewc_decimalNumberByRestrictingToDigits:_maximumDigits];
+  } while (clamped == nil);
+
+  // once we have our artificially clamped value, we can return it
+  return clamped;
+}
+
+/**
+  Puts the calculator into an error state, clearing the operation queue and all cached operator state.  The display is preserved and once the user clears the error, they may choose to make use of it, but all other state is lost.
+ */
+- (void)setError {
+  // mark the rror
+  _error = YES;
+
+  // clear the operation queue
+  [_tokenQueue clear];
+
+  // clear other state related to the calculation history
+  [self clearAccumulator];
+  [self clearOperand];
+  _operation = EWCCalculatorNoOpcode;
+}
+
+///----------------------------
+/// @name Other Utility Methods
+///----------------------------
+
+/**
+  Caller can invoke without worrying about whether the callback is set.  Only tries to invoke the callback if it has been set.
+ */
 - (void)safeCallback {
   if (_callback) {
     _callback();
   }
-}
-
-- (void)pressKey:(EWCCalculatorKey)key {
-
-  [self processKey:key];
-
-  _lastKey = key;
-
-  [self safeCallback];
 }
 
 @end

@@ -26,30 +26,106 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+  `EWCCalculatorUpdatedCallback` defines the callback notification signature used to notify a listener that the calculator state has changed.
+ */
 typedef void(^EWCCalculatorUpdatedCallback)(void);
 
+/**
+  `EWCCalculator` provides the calculator logic, interpretting virtual button presses as actions on the calculator, updating state and results, and notifying a listener of state changes.  It provides no UI, it is just the logical core.
+ */
 @interface EWCCalculator : NSObject
 
-@property (nonatomic, readonly, getter=isMemoryStatusVisible) BOOL memoryStatusVisible;
-@property (nonatomic, readonly, getter=isErrorStatusVisible) BOOL errorStatusVisible;
+/**
+  Whether or not the calculator has stored memory.
+ */
+@property (nonatomic, readonly, getter=hasMemory) BOOL memoryStatusVisible;
+
+/**
+  Whether or not the calculator is in an error state.
+ */
+@property (nonatomic, readonly, getter=hasError) BOOL error;
+
+/**
+  Whether or not an indicator showing that the current value is a tax result should be visible.
+ */
 @property (nonatomic, readonly, getter=isTaxStatusVisible) BOOL taxStatusVisible;
+
+/**
+  Whether or not an indicator showing that the current value is a tax-including result should be visible.
+ */
 @property (nonatomic, readonly, getter=isTaxPlusStatusVisible) BOOL taxPlusStatusVisible;
+
+/**
+  Whether or not an indicator showing that the current value is a tax-excluding result should be visible.
+ */
 @property (nonatomic, readonly, getter=isTaxMinusStatusVisible) BOOL taxMinusStatusVisible;
+
+/**
+  Whether or not an indicator showing that the current value is the tax percentage should be visible.
+ */
 @property (nonatomic, readonly, getter=isTaxPercentStatusVisible) BOOL taxPercentStatusVisible;
+
+/**
+  Whether or not the calculator is in rate-shifted state.
+ */
 @property (nonatomic, readonly, getter=isRateShifted) BOOL rateShifted;
+
+/**
+  Whether or not the next mrc press will act as a clear operation.
+ */
 @property (nonatomic, readonly) BOOL shouldMemoryClear;
 
+/**
+  The calculator display formatted as a string.
+ */
 @property (nonatomic, readonly) NSString *displayContent;
+
+/**
+  The calculator display as a raw NSDecimalNumber.
+ */
 @property (nonatomic, readonly) NSDecimalNumber *displayValue;
+
+/**
+ The calculator display formatted for accessibility VoiceOver (effectively a spelled out locale-specific reading).
+ */
 @property (nonatomic, readonly) NSString *displayAccessibleContent;
+
+/**
+  The number of digits to which to restrict calculations.
+ */
 @property (nonatomic) NSInteger maximumDigits;
+
+/**
+  An `EWCCalculatorDataProtocol` instance that the calculator can use to store and retrieve persistent values.
+ */
 @property (nonatomic, copy) id<EWCCalculatorDataProtocol> dataProvider;
+
+/**
+  Explicitly provides a locale to use for the calculator.  If not supplied, it will default to the locale set at the time the calculator is created.
+*/
 @property (nonatomic, copy) NSLocale *locale;
 
+/**
+  Creates a new calculator.
+ */
 + (instancetype)calculator;
 
+/**
+  Sets the callback to use to notify a listener that the calculator state has changed.
+ */
 - (void)registerUpdateCallbackWithBlock:(EWCCalculatorUpdatedCallback)callback;
+
+/**
+  Explicitly sets the current display input to a supplied numeric value rather than performing key inputs.
+
+  This will not allow getting arround the digit limit, as that is checked every time the display is set, so setting too large a value will result in an error state.
+ */
 - (void)setInput:(NSDecimalNumber *)value;
+
+/**
+  Perform a key press on the calculator.  This is the primary way a client should provide input to the calculator.
+ */
 - (void)pressKey:(EWCCalculatorKey)key;
 
 @end

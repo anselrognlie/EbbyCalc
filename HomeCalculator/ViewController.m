@@ -580,6 +580,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   if ([num compare:[NSDecimalNumber notANumber]] != NSOrderedSame) {
     // we got some kind of number, so update the display
     [_calculator setInput:num];
+    [self updateDisplayFromCalculator];
   }
 
   // this will set the display value directly, so always return nil
@@ -1072,10 +1073,10 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   Updates the clear button label and accessibility label based on whether the calculator is in an error state.
  */
 - (void)updateClearLabels {
-  NSString *label = (_calculator.isErrorStatusVisible)
+  NSString *label = (_calculator.hasError)
     ? NSLocalizedString(@"All Clear Button", @"voiceover label for the clear button when there is an error")
     : NSLocalizedString(@"Clear Button", @"");
-  NSString *ariaLabel = (_calculator.isErrorStatusVisible)
+  NSString *ariaLabel = (_calculator.hasError)
     ? NSLocalizedString(@"All Clear Aria Label", @"voiceover label for the clear button when there is an error")
     : NSLocalizedString(@"Clear Aria Label", @"");
   [_clearButton setTitle:label forState:UIControlStateNormal];
@@ -1124,7 +1125,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   Updates the accessibility label on the memory (mrc) button in response to the action it will take.
  */
 - (void)updateMemoryLabels {
-  NSString *ariaLabel = (_calculator.shouldMemoryClear && _calculator.isMemoryStatusVisible)
+  NSString *ariaLabel = (_calculator.shouldMemoryClear && _calculator.hasMemory)
     ? NSLocalizedString(@"Memory Clear Aria Label", @"voiceover label for the memory button when it should clear")
     : NSLocalizedString(@"Memory Recall Aria Label", @"voiceover label for the memory button when it should recall");
   _memoryButton.accessibilityLabel = ariaLabel;
@@ -1165,9 +1166,9 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
  */
 - (void)updateStatusIndicators {
 
-  self.errorVisible = _calculator.isErrorStatusVisible;
+  self.errorVisible = _calculator.hasError;
   BOOL oldMemory = self.isMemoryVisible;
-  self.memoryVisible = _calculator.isMemoryStatusVisible;
+  self.memoryVisible = _calculator.hasMemory;
   BOOL oldTax = self.isTaxVisible;
   self.taxVisible = _calculator.isTaxStatusVisible;
   BOOL oldTaxPlus = self.isTaxPlusVisible;
@@ -1182,7 +1183,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   // the other checks should also only announce if there was a change,
   // while error announces whenever it is visibile.
 
-  if (_calculator.isErrorStatusVisible) {
+  if (_calculator.hasError) {
     [self dispatchAnnouncementForView:_errorIndicator];
   } else {
     if (self.isMemoryVisible && oldMemory != self.isMemoryVisible) {

@@ -44,8 +44,8 @@
   NSDecimalNumber *_taxResultWithTax;  // cache the last tax calculation that includes tax
   NSDecimalNumber *_taxResultJustTax;  // cache the tax from the last tax calculation
 
-  EWCTokenQueue *_tokenQueue;
-  EWCDecimalInputBuilder *_inputBuilder;
+  EWCTokenQueue *_tokenQueue;  // queue of tokens the calculator will use to detect valid calculations
+  EWCDecimalInputBuilder *_inputBuilder;  // helper class to build up a decimal value from input keys
 }
 
 @end
@@ -63,6 +63,11 @@ const static int s_maximumFractionDigits = 20;
   return [EWCCalculator new];
 }
 
+/**
+  Implementation of the empty init method.
+
+  @return The initialized instance.
+ */
 - (instancetype)init {
   self = [super init];
   if (self) {
@@ -165,6 +170,26 @@ const static int s_maximumFractionDigits = 20;
   _inputBuilder.maximumDigits = value;
 }
 
+- (NSString *)displayContent {
+
+  NSDecimalNumber *value = _display.value;
+  NSString *display = [[self getFormatter] stringFromNumber:value];
+
+  display = [self postProcessDisplay:display];
+
+  return display;
+}
+
+- (NSString *)displayAccessibleContent {
+
+  NSDecimalNumber *value = _display.value;
+  NSNumberFormatter * formatter = [self getAccessibleFormatter];
+
+  NSString *display = [formatter stringFromNumber:value];
+
+  return display;
+}
+
 ///--------------------------------
 /// @name Shared Formatting Methods
 ///--------------------------------
@@ -219,26 +244,6 @@ const static int s_maximumFractionDigits = 20;
   _callback = [callback copy];
 }
 
-- (NSString *)displayContent {
-
-  NSDecimalNumber *value = _display.value;
-  NSString *display = [[self getFormatter] stringFromNumber:value];
-
-  display = [self processDisplay:display];
-
-  return display;
-}
-
-- (NSString *)displayAccessibleContent {
-
-  NSDecimalNumber *value = _display.value;
-  NSNumberFormatter * formatter = [self getAccessibleFormatter];
-
-  NSString *display = [formatter stringFromNumber:value];
-
-  return display;
-}
-
 /**
   This method is only intended for the client to be able to explicitly set the input without typing keys one by one.
 
@@ -262,7 +267,16 @@ const static int s_maximumFractionDigits = 20;
 /// @name Display Processing Methods
 ///---------------------------------
 
-- (NSString *)processDisplay:(NSString *)display {
+/**
+  Performs final formatting of the diplay string as it is read out by a client.
+
+  The string passed in has already been decimal formatted for the appropriate locale.  This step ensures that it always contains a decimal separator, even if there are no trailing fractional digits.
+
+  @param display The decimal formatted string value of the display.
+
+  @return The display string with a decimal separator if needed.
+ */
+- (NSString *)postProcessDisplay:(NSString *)display {
   NSString *separator = [self.locale decimalSeparator];
 
   // append decimal separator if needed
@@ -273,11 +287,23 @@ const static int s_maximumFractionDigits = 20;
   return display;
 }
 
+/**
+  Clears the display and input builder state.
+ */
 - (void)clearDisplay {
   [_display clear];
   [_inputBuilder clear];
 }
 
+/**
+  Sets the value to be shown in the display.
+
+  This also resets the input builder state.
+
+  @note The calculator may enter the error state if the number being set cannot fit within the maximum number of allowed digits.
+
+  @param number The number to show in the display.
+*/
 - (void)setDisplay:(NSDecimalNumber *)number {
   [self clearDisplay];
 
@@ -301,10 +327,18 @@ const static int s_maximumFractionDigits = 20;
 /// @name Accumulator Processing Methods
 ///-------------------------------------
 
+/**
+  Clears the value in the accumulator.
+*/
 - (void)clearAccumulator {
   [_accumulator clear];
 }
 
+/**
+  Sets the value of the accumulator to used in future chained binary operations.
+
+  @param number The number to store in the accumulator.
+*/
 - (void)setAccumulator:(NSDecimalNumber *)number {
   _accumulator.value = number;
 }
@@ -313,10 +347,18 @@ const static int s_maximumFractionDigits = 20;
 /// @name Operand Processing Methods
 ///---------------------------------
 
+/**
+  Clears the saved operand.
+*/
 - (void)clearOperand {
   [_operand clear];
 }
 
+/**
+  Sets the value of the operand to used in future chained binary operations.
+
+  @param number The number to store as the operand.
+ */
 - (void)setOperand:(NSDecimalNumber *)number {
   _operand.value = number;
 }
@@ -325,10 +367,20 @@ const static int s_maximumFractionDigits = 20;
 /// @name Tax Rate Processing Methods
 ///---------------------------------
 
+/**
+  Clears the stored tax rate.
+ */
 - (void)clearTaxRate {
   [_taxRate clear];
 }
 
+/**
+  Sets the tax rate to use for tax calulations.
+
+  This cannot result in an error, since the input must have come from the display, which would already have caused an error if a value didn't fit.
+
+  @param number The number to store as the tax rate.
+ */
 - (void)setTaxRate:(NSDecimalNumber *)number {
   _taxRate.value = number;
 
@@ -341,6 +393,9 @@ const static int s_maximumFractionDigits = 20;
 /// @name Memory Processing Methods
 ///---------------------------------
 
+/**
+  Clears the general memory.
+ */
 - (void)clearMemory {
   [_memory clear];
 
@@ -349,6 +404,13 @@ const static int s_maximumFractionDigits = 20;
   }
 }
 
+/**
+  Sets the general memory value to the supplied number.
+
+  @note The calculator may enter the error state if the number being set cannot fit within the maximum number of allowed digits.
+
+  @param number The number to store in memory.
+ */
 - (void)setMemory:(NSDecimalNumber *)number {
   // restrict number to the registered number of digits
   NSDecimalNumber *clamped = [number ewc_decimalNumberByRestrictingToDigits:_maximumDigits];
@@ -374,12 +436,18 @@ const static int s_maximumFractionDigits = 20;
 /// @name Other Methods for Clearing/Resetting State
 ///-------------------------------------------------
 
+/**
+  Clears all user input and state related to ongoing calculation.
+ */
 - (void)fullClear {
   [self clearDisplay];
   [self clearCalculation];
   _rateShifted = NO;
 }
 
+/**
+  Clears all the state related to an ongoing calculation.
+ */
 - (void)clearCalculation {
   [self clearAccumulator];
   [self clearOperand];
@@ -389,6 +457,9 @@ const static int s_maximumFractionDigits = 20;
   [_tokenQueue clear];
 }
 
+/**
+  Turns of all of the status indicators related to tax calculations.
+ */
 - (void)clearAllTaxStatus {
   _taxStatusVisible = NO;
   _taxPlusStatusVisible = NO;
@@ -401,6 +472,13 @@ const static int s_maximumFractionDigits = 20;
 /// @name Display-only Operation Methods
 ///-------------------------------------
 
+/**
+  Performs a square root on the current display value.
+
+  This is not a chainiable operation, and does not take part in the usual binary operation flow.  The equal key will not repeat this operation, and instead would apply the resulting root to whatever calculation was in progress.
+
+  @note The calculator may enter an error state if the displayed value (the input) is negative.  In that case, the root will still be taken as though it were positive, but the error status will be set.
+ */
 - (void)sqrtPressed {
   // no action if in error state
   if (_error) { return; }
@@ -427,6 +505,13 @@ const static int s_maximumFractionDigits = 20;
 /// @name Math Operation Methods
 ///-----------------------------
 
+/**
+  Converts the input operation to an opcode.
+
+  @param key The user input key.
+
+  @return The operation that corresponds to the input key.
+ */
 - (EWCCalculatorOpcode)getOpcodeFromKey:(EWCCalculatorKey)key {
   EWCCalculatorOpcode op;
 
@@ -455,6 +540,11 @@ const static int s_maximumFractionDigits = 20;
   return op;
 }
 
+/**
+  Repeats the previous operation.
+
+  Used when the user inputs a bare equal key to repeat the last operation.
+ */
 - (void)performLastOperation {
   NSDecimalNumber *acc = _accumulator.value;
   NSDecimalNumber *opd = _operand.value;
@@ -463,6 +553,17 @@ const static int s_maximumFractionDigits = 20;
   [self performBinaryOperation:op withData:acc andOperand:opd];
 }
 
+/**
+  Performs a binary operation.
+
+  The operations are laregly as expected.  The percent operations become enqueued by performing a calculation and using the percent key in place of the equal key.
+
+  @note The calculator can enter an error state by trying to divide by zero (op is onw of the two divide operations and operand is 0).
+
+  @param op The operation to perform.
+  @param data The first value in the binary operation.
+  @param operand The second value in the binary operation.  Notably, for division, this is the divisor.
+ */
 - (void)performBinaryOperation:(EWCCalculatorOpcode)op
   withData:(NSDecimalNumber *)data
   andOperand:(NSDecimalNumber *)operand {
@@ -529,6 +630,16 @@ const static int s_maximumFractionDigits = 20;
   [self setDisplay:_accumulator.value];
 }
 
+/**
+  Performs a unary operation in response to the user entering something like "3+=".
+
+  For add and subtract, the unary operation acts like adding or subtracting the data value to or from zero.  For multiply, it multiplies with itself, acting like a square operation.  For divide, it divides into one, acting like a reciprocal function.
+
+  The unary operations are effectively implemented as binary operations, allowing subsequent applications of the equal key to continue the operation chain.
+
+  @param op The operation to perform.
+  @param data The value to use for the unary operation.
+ */
 - (void)performUnaryOperation:(EWCCalculatorOpcode)op
   withData:(NSDecimalNumber *)data {
 
@@ -567,7 +678,11 @@ const static int s_maximumFractionDigits = 20;
 /// @name Other Input Key Processing Methods
 ///-----------------------------------------
 
+/**
+  Process the clear key.
 
+  In an error state, this clears the error.  If the user just edited a value (resulting in that value being the final data item in the queue), just clear out the data value.  Otherwise, clear the entire calculator state back to defaults.
+ */
 - (void)processClearKey {
   if (_error) {
     _error = NO;
@@ -588,6 +703,11 @@ const static int s_maximumFractionDigits = 20;
   [self fullClear];
 }
 
+/**
+  Handles the memory key.
+
+  In isolation, this acts as a memory recall function, but if the last button pressed was the memory key, pressing it again will clear the stored memory value.
+ */
 - (void)processMemoryKey {
   if (_lastKey == EWCCalculatorMemoryKey) {
     // clear memory
@@ -599,6 +719,9 @@ const static int s_maximumFractionDigits = 20;
   }
 }
 
+/**
+  Adds the current value to the stored memory value.
+ */
 - (void)processMemoryPlusKey {
   NSDecimalNumber *mem = _memory.value;
   NSDecimalNumber *opd = _display.value;
@@ -607,6 +730,11 @@ const static int s_maximumFractionDigits = 20;
   [self setMemory:mem];
 }
 
+/**
+  Subtracts the current value from the stored memory value.
+
+  @note The calculator can enter an error state if the subtraction would result in a value to large to fit in the maximum allowed digits.
+ */
 - (void)processMemoryMinusKey {
   NSDecimalNumber *mem = _memory.value;
   NSDecimalNumber *opd = _display.value;
@@ -615,10 +743,18 @@ const static int s_maximumFractionDigits = 20;
   [self setMemory:mem];
 }
 
+/**
+  Toggles the rate shifted state for setting or recalling the tax rate.
+ */
 - (void)processRateKey {
   _rateShifted = ! _rateShifted;
 }
 
+/**
+  Updates the display with one of hte results from the previous tax adjustment calculation.
+
+  It will either show the adjusted result, or just the tax component.  This method doesn't know whether the previous calculation was a plus or minus, so it is still up to the caller to update the relevant status indicators.
+ */
 - (void)displayTaxResult {
   NSDecimalNumber *value;
 
@@ -629,10 +765,14 @@ const static int s_maximumFractionDigits = 20;
   }
 
   [self setDisplay:value];
-//  [self setAccumulator:value];
   _displayAvailable = YES;
 }
 
+/**
+  Processes the tax plus key.
+
+  The key has several possible actions.  In the shifted state, it is used to set the saved tax rate.  When not shifted, it will calculate the tax adjusted value.  Subsequent presses will toggle between showing the adjusted result, and showing the amount of tax that was added.
+ */
 - (void)processTaxPlusKey {
   if (_rateShifted) {
     // treat as store
@@ -669,6 +809,11 @@ const static int s_maximumFractionDigits = 20;
   }
 }
 
+/**
+  Processes the tax minus key.
+
+  The key has several possible actions.  In the shifted state, it is used to recall the saved tax rate.  When not shifted, it will deduct tax from the current value.  Subsequent presses will toggle between showing the deducted result, and showing the amount of tax that was deducted.
+ */
 - (void)processTaxMinusKey {
   if (_rateShifted) {
     // treat as recall
@@ -714,12 +859,22 @@ const static int s_maximumFractionDigits = 20;
   }
 }
 
+/**
+  Process key input when the calculator is in an error state.  The only valid user action is to press the clear key.
+
+  @param key The user input key.
+ */
 - (void)processInputForErrorState:(EWCCalculatorKey)key {
   if (key == EWCCalculatorClearKey) {
     [self processClearKey];
   }
 }
 
+/**
+  Process an input key, setting all appropriate states.
+
+  @parama key The user input key.
+ */
 - (void)processKey:(EWCCalculatorKey)key {
   BOOL handled = NO;
   BOOL isRateKey = EWCCalculatorKeyIsRateKey(key);
@@ -858,12 +1013,12 @@ const static int s_maximumFractionDigits = 20;
 }
 
 /**
- Parses the operation queue knowing that the first token is data.  Knowing this restricts the possible valid operation combinations, making the parsing a little easier.
+  Parses the operation queue knowing that the first token is data.  Knowing this restricts the possible valid operation combinations, making the parsing a little easier.
 
- @param aToken The data token that started the operation queue.
+  @param aToken The data token that started the operation queue.
 
- @return YES if the tokens processed during parsing should be removed from the queue (they have been applied to the calculation), otherwise NO (there wasn't yet a complete operation).
-*/
+  @return YES if the tokens processed during parsing should be removed from the queue (they have been applied to the calculation), otherwise NO (there wasn't yet a complete operation).
+ */
 - (BOOL)parseStartingWithData:(EWCCalculatorToken *)aToken {
 
   // must be one of

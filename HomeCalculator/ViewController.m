@@ -19,6 +19,8 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+#import <AVFoundation/AVFoundation.h>
+
 #import "ViewController.h"
 
 #import "EWCGridLayoutView.h"
@@ -111,6 +113,11 @@ typedef struct {
   UIButton *_taxMinusButton;  // reference to the tax- button so the labels can be updated
   EWCLabelEditManager *_labelManager;  // provides the logic for attaching the edit menu to a copy/paste-enabled label
   EWCLayoutConstants const *_currentLayout;  // points to the currently configured layout constants
+
+  AVAudioPlayer *_clickPlayer;  // player to load the sound for regular key clicks
+  AVAudioPlayer *_deletePlayer;  // player to load the sound for the clear key click
+  AVAudioPlayer *_modifyPlayer;  // player to load the sound for the rate shift key click
+  AVAudioPlayer *_lastPlayer;  // tracks the last played sound
 }
 
 ///------------------------------------------------------
@@ -125,6 +132,16 @@ typedef struct {
 @property (nonatomic, getter=isTaxPercentVisible) BOOL taxPercentVisible;
 
 @end
+
+///----------------------
+/// @name Sound Constants
+///----------------------
+
+static char const * const s_keyClickName = "key_press_click";
+static char const * const s_keyDeleteName = "key_press_delete";
+static char const * const s_keyModifyName = "key_press_modifier";
+static char const * const s_soundExt = ".caf";
+static char const * const s_soundPath = "/System/Library/Audio/UISounds/";
 
 ///-----------------------
 /// @name Layout Constants
@@ -1014,7 +1031,66 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   Callback method that forwards a UI touch event to a calculator input.
  */
 - (void)onCalculatorButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
-  [_calculator pressKey:(EWCCalculatorKey)sender.tag];
+  EWCCalculatorKey key = (EWCCalculatorKey)sender.tag;
+  [self playSoundForKey:key];
+  [_calculator pressKey:key];
+}
+
+/**
+  Entry point for playing a sound for the pressed key.
+
+  @param key The key that was pressed.
+ */
+- (void)playSoundForKey:(EWCCalculatorKey)key {
+  _lastPlayer = [self ensureSoundIdForKey:key];
+  [_lastPlayer play];
+}
+
+/**
+  Gets the audio player for the sound of the pressed key.
+
+  @param key The key that was pressed.
+
+  @return An audio player instance that can be used to play the appropriate key sound.
+ */
+- (AVAudioPlayer *)ensureSoundIdForKey:(EWCCalculatorKey)key {
+  // get the file reference for the key
+  char const *filename;
+  AVAudioPlayer * __strong *player;
+
+  // stop any playing sounds
+  if (_lastPlayer) {
+    [_lastPlayer stop];
+  }
+
+  // figure out the source file and player var
+  switch (key) {
+    case EWCCalculatorRateKey:
+      filename = s_keyModifyName;
+      player = &_modifyPlayer;
+      break;
+
+    case EWCCalculatorClearKey:
+      filename = s_keyDeleteName;
+      player = &_deletePlayer;
+      break;
+
+    default:
+      filename = s_keyClickName;
+      player = &_clickPlayer;
+  }
+
+  // if the player isn't loaded yet, load it
+  if (! *player) {
+    NSString *path = [NSString stringWithFormat:@"%s%s%s",
+      s_soundPath, filename, s_soundExt];
+
+    NSURL *fileURL = [NSURL fileURLWithPath:path];
+
+    *player = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
+  }
+
+  return *player;
 }
 
 ///---------------------------------

@@ -136,7 +136,7 @@
                             </stackView>
                             <label opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="0000" textAlignment="right" lineBreakMode="clip" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="o6F-UZ-pgr" customClass="EWCCopyableLabel">
                                 <rect key="frame" x="20" y="20" width="794" height="654"/>
-                                <accessibility key="accessibilityConfiguration" hint="long press to copy or paste"/>
+                                <accessibility key="accessibilityConfiguration" hint="long press to copy or paste. swipe left to delete last entered digit."/>
                                 <fontDescription key="fontDescription" type="system" pointSize="150"/>
                                 <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>

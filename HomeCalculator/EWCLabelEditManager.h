@@ -20,10 +20,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #import <Foundation/Foundation.h>
-
-@class UILabel;
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+typedef void(^EWCLabelSwipedHandler)(UILabel *label, UISwipeGestureRecognizerDirection direction);
 
 /**
   `EWCLabelEditManager` provides gesture recognition management for a UILabel that supports edit operations.
@@ -34,6 +35,11 @@ NS_ASSUME_NONNULL_BEGIN
   The UILabel to which to provide gesture recognition.
  */
 @property (nonatomic, weak) UILabel *managedLabel;
+
+/**
+  Handler to be called in response to a swipe gesture.
+ */
+@property (nonatomic, copy) EWCLabelSwipedHandler swipeHandler;
 
 @end
 

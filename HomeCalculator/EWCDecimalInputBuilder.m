@@ -102,6 +102,9 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
   } else if (key == EWCCalculatorDecimalKey) {
     ok = YES;
     [self decimalPressed];
+  } else if (key == EWCCalculatorBackspaceKey) {
+    ok = YES;
+    [self backspacePressed];
   }
 
   // this isn't a key we handle, then no longer editing
@@ -188,6 +191,93 @@ typedef NS_ENUM(NSInteger, EWCCalculatorInputMode) {
 
   _inputMode = EWCCalculatorInputModeFraction;
   _fractionPower = 0;
+}
+
+/**
+  Remove the terminal character if editing.
+ */
+- (void)backspacePressed {
+  if (! _editing) {
+    return;
+  }
+
+  if (_numDigits == 0) {
+    // nothing to do
+    return;
+  }
+
+  if (_numDigits == 1) {
+    // just replace with 0
+    _value = [NSDecimalNumber zero];
+    _numDigits = 0;
+    _sign = 1;
+    return;
+  }
+
+  // if the number is negative, note that and flip it positive
+  NSDecimalNumber *value = _value;
+  int sign = 1;
+  if ([value compare:[NSDecimalNumber zero]] == NSOrderedAscending) {
+    sign = -1;
+    value = [[NSDecimalNumber zero] decimalNumberBySubtracting:value];
+  }
+
+  switch (_inputMode) {
+    case EWCCalculatorInputModeWhole: {
+      // shift down by a power of ten then round away the decimal
+      value = [value decimalNumberByMultiplyingByPowerOf10:-1];
+
+      // remove the final digit by rounding down the final power
+      NSDecimalNumberHandler *formatter = [NSDecimalNumberHandler
+        decimalNumberHandlerWithRoundingMode:NSRoundDown
+        scale:0
+        raiseOnExactness:NO
+        raiseOnOverflow:NO
+        raiseOnUnderflow:NO
+        raiseOnDivideByZero:NO];
+
+      // add to the fraction part by decimal right shifting to the appropriate power of 10
+      value = [value decimalNumberByRoundingAccordingToBehavior:formatter];
+
+    }
+    break;
+
+    case EWCCalculatorInputModeFraction: {
+      _fractionPower++;
+
+      // remove the final digit by rounding down the final power
+      NSDecimalNumberHandler *formatter = [NSDecimalNumberHandler
+        decimalNumberHandlerWithRoundingMode:NSRoundDown
+        scale:(-_fractionPower)
+        raiseOnExactness:NO
+        raiseOnOverflow:NO
+        raiseOnUnderflow:NO
+        raiseOnDivideByZero:NO];
+
+      // add to the fraction part by decimal right shifting to the appropriate power of 10
+      value = [value decimalNumberByRoundingAccordingToBehavior:formatter];
+
+      if (_fractionPower == 0) {
+        _inputMode = EWCCalculatorInputModeWhole;
+
+        // numDigits can be off if there was no whole part, so do a hard check for zero here
+        if ([value compare:[NSDecimalNumber zero]] == NSOrderedSame) {
+          _numDigits = 0;
+          _sign = 1;
+        }
+      }
+    }
+    break;
+  }
+
+  --_numDigits;
+
+  // restore the sign
+  if (sign < 0) {
+    value = [[NSDecimalNumber zero] decimalNumberBySubtracting:value];
+  }
+
+  _value = value;
 }
 
 @end

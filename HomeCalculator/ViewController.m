@@ -352,6 +352,10 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   _labelManager = [EWCLabelEditManager new];
   _displayArea.editDelegate = self;
   _labelManager.managedLabel = _displayArea;
+  ViewController __weak *weakSelf = self;
+  _labelManager.swipeHandler = ^(UILabel *label, UISwipeGestureRecognizerDirection direction) {
+    [weakSelf onBackspacePressed];
+  };
 
   // layout everything
   [self updateLayoutOnChange];
@@ -1109,6 +1113,14 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
 }
 
 /**
+  Callback for when user wants to backspace a digit.
+*/
+- (void)onBackspacePressed {
+  [self playSoundForKey:EWCCalculatorBackspaceKey];
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+}
+
+/**
   Entry point for playing a sound for the pressed key.
 
   @param key The key that was pressed.
@@ -1145,6 +1157,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
       break;
 
     case EWCCalculatorClearKey:
+    case EWCCalculatorBackspaceKey:
       filename = s_keyDeleteName;
       player = &_deletePlayer;
       break;

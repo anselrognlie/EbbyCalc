@@ -52,6 +52,7 @@ typedef NS_ENUM(NSInteger, EWCCalculatorKey) {
   EWCCalculatorPercentKey,
   EWCCalculatorSqrtKey,
   EWCCalculatorEqualKey,
+  EWCCalculatorBackspaceKey,
 };
 
 /**

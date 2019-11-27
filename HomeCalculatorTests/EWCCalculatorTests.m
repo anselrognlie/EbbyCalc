@@ -489,4 +489,243 @@
   XCTAssertEqualObjects(_calculator.displayContent, @"3.0001");
 }
 
+- (void)testPositiveWholeNumberBackspace {
+  [self applyKeys:@[
+    @(EWCCalculatorOneKey),
+    @(EWCCalculatorZeroKey),
+    @(EWCCalculatorTwoKey),
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorFourKey),
+    @(EWCCalculatorFiveKey),
+    @(EWCCalculatorSixKey),
+    @(EWCCalculatorSevenKey),
+    @(EWCCalculatorEightKey),
+    @(EWCCalculatorNineKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1,023,456,789.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"102,345,678.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"10,234,567.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1,023,456.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"102,345.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"10,234.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1,023.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"102.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"10.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.");
+  [_calculator pressKey:EWCCalculatorOneKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1.");
+}
+
+- (void)testNegativeWholeNumberBackspace {
+  [self applyKeys:@[
+    @(EWCCalculatorOneKey),
+    @(EWCCalculatorZeroKey),
+    @(EWCCalculatorTwoKey),
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorFourKey),
+    @(EWCCalculatorFiveKey),
+    @(EWCCalculatorSixKey),
+    @(EWCCalculatorSevenKey),
+    @(EWCCalculatorEightKey),
+    @(EWCCalculatorNineKey),
+    @(EWCCalculatorSignKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-1,023,456,789.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-102,345,678.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10,234,567.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-1,023,456.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-102,345.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10,234.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-1,023.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-102.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-1.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.");
+  [_calculator pressKey:EWCCalculatorOneKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1.");
+}
+
+- (void)testPositiveFractionNumberBackspace {
+  [self applyKeys:@[
+    @(EWCCalculatorDecimalKey),
+    @(EWCCalculatorOneKey),
+    @(EWCCalculatorZeroKey),
+    @(EWCCalculatorTwoKey),
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorFourKey),
+    @(EWCCalculatorFiveKey),
+    @(EWCCalculatorSixKey),
+    @(EWCCalculatorSevenKey),
+    @(EWCCalculatorEightKey),
+    @(EWCCalculatorNineKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.1023456789");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.102345678");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.10234567");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.1023456");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.102345");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.10234");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.1023");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.102");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.10");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.1");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.");
+  [_calculator pressKey:EWCCalculatorOneKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1.");
+}
+
+- (void)testNegativeFractionNumberBackspace {
+  [self applyKeys:@[
+    @(EWCCalculatorDecimalKey),
+    @(EWCCalculatorOneKey),
+    @(EWCCalculatorZeroKey),
+    @(EWCCalculatorTwoKey),
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorFourKey),
+    @(EWCCalculatorFiveKey),
+    @(EWCCalculatorSixKey),
+    @(EWCCalculatorSevenKey),
+    @(EWCCalculatorEightKey),
+    @(EWCCalculatorNineKey),
+    @(EWCCalculatorSignKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-0.1023456789");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-0.102345678");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-0.10234567");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-0.1023456");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-0.102345");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-0.10234");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-0.1023");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-0.102");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-0.10");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-0.1");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.");
+  [_calculator pressKey:EWCCalculatorOneKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1.");
+}
+
+- (void)testPositiveMixedNumberBackspace {
+  [self applyKeys:@[
+    @(EWCCalculatorOneKey),
+    @(EWCCalculatorZeroKey),
+    @(EWCCalculatorTwoKey),
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorFourKey),
+    @(EWCCalculatorDecimalKey),
+    @(EWCCalculatorFiveKey),
+    @(EWCCalculatorSixKey),
+    @(EWCCalculatorSevenKey),
+    @(EWCCalculatorEightKey),
+    @(EWCCalculatorNineKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"10,234.56789");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"10,234.5678");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"10,234.567");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"10,234.56");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"10,234.5");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"10,234.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1,023.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"102.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"10.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.");
+  [_calculator pressKey:EWCCalculatorOneKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1.");
+}
+
+- (void)testNegativeMixedNumberBackspace {
+  [self applyKeys:@[
+    @(EWCCalculatorOneKey),
+    @(EWCCalculatorZeroKey),
+    @(EWCCalculatorTwoKey),
+    @(EWCCalculatorThreeKey),
+    @(EWCCalculatorFourKey),
+    @(EWCCalculatorDecimalKey),
+    @(EWCCalculatorFiveKey),
+    @(EWCCalculatorSixKey),
+    @(EWCCalculatorSevenKey),
+    @(EWCCalculatorEightKey),
+    @(EWCCalculatorNineKey),
+    @(EWCCalculatorSignKey),
+  ]];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10,234.56789");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10,234.5678");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10,234.567");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10,234.56");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10,234.5");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10,234.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-1,023.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-102.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-10.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"-1.");
+  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"0.");
+  [_calculator pressKey:EWCCalculatorOneKey];
+  XCTAssertEqualObjects(_calculator.displayContent, @"1.");
+}
+
 @end

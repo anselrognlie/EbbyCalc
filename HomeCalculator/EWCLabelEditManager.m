@@ -20,10 +20,10 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #import "EWCLabelEditManager.h"
-#import <UIKit/UIKit.h>
 
 @interface EWCLabelEditManager () {
   UIGestureRecognizer *_pressRecognizer;  // gesture recognizer to handle long presses
+  UISwipeGestureRecognizer *_swipeRecognizer;  // the gesture recognizer for left swipes to backspace
 }
 @end
 
@@ -59,7 +59,14 @@
       initWithTarget:self action:@selector(labelPressed:)];
   }
 
+  if (! _swipeRecognizer) {
+    _swipeRecognizer = [[UISwipeGestureRecognizer alloc]
+      initWithTarget:self action:@selector(labelSwiped:)];
+    _swipeRecognizer.direction = UISwipeGestureRecognizerDirectionLeft;
+  }
+
   [_managedLabel addGestureRecognizer:_pressRecognizer];
+  [_managedLabel addGestureRecognizer:_swipeRecognizer];
   [_managedLabel setUserInteractionEnabled:YES];
 }
 
@@ -73,6 +80,7 @@
   if (! _managedLabel) { return; }
 
   [_managedLabel setUserInteractionEnabled:NO];
+  [_managedLabel removeGestureRecognizer:_swipeRecognizer];
   [_managedLabel removeGestureRecognizer:_pressRecognizer];
 }
 
@@ -81,7 +89,7 @@
 
   The menu uses the informal `UIResponderStandardEditActions` in order to query the supplied control for, and to carry out supported operations.
 
-  @param sender The source of the press gesture.  Ignored.
+  @param sender The source of the press gesture.
  */
 - (void)labelPressed:(UITapGestureRecognizer *)sender {
   if (sender.state == UIGestureRecognizerStateBegan) {
@@ -93,6 +101,21 @@
     CGPoint pressLocation = [sender locationInView:_managedLabel];
     CGRect rect = CGRectMake(pressLocation.x, pressLocation.y, 0, 0);
     [menu showMenuFromView:_managedLabel rect:rect];
+  }
+}
+
+/**
+  Invokes the externally registered block in response to the swipe.
+
+  We expect this to be used to perform a backspace operation on user input.
+
+  @param sender The source of the swipe gesture.
+ */
+- (void)labelSwiped:(UISwipeGestureRecognizer *)sender {
+  if (sender.state == UIGestureRecognizerStateEnded) {
+    if (_swipeHandler) {
+      _swipeHandler(_managedLabel, sender.direction);
+    }
   }
 }
 

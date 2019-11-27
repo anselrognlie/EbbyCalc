@@ -118,6 +118,7 @@ typedef struct {
   AVAudioPlayer *_deletePlayer;  // player to load the sound for the clear key click
   AVAudioPlayer *_modifyPlayer;  // player to load the sound for the rate shift key click
   AVAudioPlayer *_lastPlayer;  // tracks the last played sound
+  BOOL _playKeyClicks;  // preference setting whether to use audible key clicks
 }
 
 ///------------------------------------------------------
@@ -142,6 +143,12 @@ static char const * const s_keyDeleteName = "key_press_delete";
 static char const * const s_keyModifyName = "key_press_modifier";
 static char const * const s_soundExt = ".caf";
 static char const * const s_soundPath = "/System/Library/Audio/UISounds/";
+
+///-------------------------
+/// @name Settings Constants
+///-------------------------
+
+static char const * const s_playClicksPref = "play_key_clicks_preference";
 
 ///-----------------------
 /// @name Layout Constants
@@ -351,6 +358,15 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
 
   // perform initial display updated from calculator state
   [self updateDisplayFromCalculator];
+
+  // monitor when we come to the forground
+  [[NSNotificationCenter defaultCenter] addObserver:self
+    selector:@selector(didBecomeActive)
+    name:UIApplicationDidBecomeActiveNotification
+    object:nil];
+
+  // if just installed, we need to register our defaults
+  [self registerDefaultPreferencesIfNeeded];
 }
 
 /**
@@ -603,6 +619,62 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
 
   // this will set the display value directly, so always return nil
   return nil;
+}
+
+///-----------------------
+/// @name Settings Methods
+///-----------------------
+
+/**
+  Registered to be called when the app comes into the foreground
+ */
+- (void)didBecomeActive {
+  [self reloadSettings];
+}
+
+/**
+  Refresh the user defaults and load our settings.
+ */
+- (void)reloadSettings {
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings synchronize];
+  _playKeyClicks = [settings
+    boolForKey:@"play_key_clicks_preference"];
+}
+
+/**
+  Check whether our settings have been loaded, using the settings bundle to fill in defaults if needed.
+ */
+- (void)registerDefaultPreferencesIfNeeded {
+
+  // make sure the user defaults are current
+  NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
+  [settings synchronize];
+
+  // check for a known preference
+  if (! [settings objectForKey:@(s_playClicksPref)]) {
+    // not found, so load the settings bundle
+    NSString *bundle = [[NSBundle mainBundle]
+      pathForResource:@"Settings" ofType:@"bundle"];
+
+    // get the configured setting defaults
+    NSDictionary *settingsBundle = [NSDictionary
+      dictionaryWithContentsOfFile:[bundle stringByAppendingPathComponent:@"Root.plist"]];
+    NSArray *defs = settingsBundle[@"PreferenceSpecifiers"];
+
+    // for each def, add it to a dictionary of values to populate into the
+    // user default
+    NSMutableDictionary *defaultsToPopulate = [NSMutableDictionary new];
+    for (NSDictionary *def in defs) {
+      NSString *key = def[@"Key"];
+      if (key) {
+        defaultsToPopulate[key] = def[@"DefaultValue"];
+      }
+    }
+
+    // update the user default with our defaults
+    [settings registerDefaults:defaultsToPopulate];
+  }
 }
 
 ///---------------------
@@ -1042,8 +1114,10 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   @param key The key that was pressed.
  */
 - (void)playSoundForKey:(EWCCalculatorKey)key {
-  _lastPlayer = [self ensureSoundIdForKey:key];
-  [_lastPlayer play];
+  if (_playKeyClicks) {
+    _lastPlayer = [self ensureSoundIdForKey:key];
+    [_lastPlayer play];
+  }
 }
 
 /**

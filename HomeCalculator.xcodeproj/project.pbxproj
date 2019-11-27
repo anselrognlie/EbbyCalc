@@ -28,6 +28,7 @@
 		FD5F2D922385D00A0045B1AD /* EWCGridCustomLayoutCallback.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F2D912385D00A0045B1AD /* EWCGridCustomLayoutCallback.m */; };
 		FD5F2D952388C5E70045B1AD /* EWCTokenQueue.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F2D942388C5E70045B1AD /* EWCTokenQueue.m */; };
 		FD5F2D98238B21270045B1AD /* EWCDecimalInputBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F2D97238B21270045B1AD /* EWCDecimalInputBuilder.m */; };
+		FD5F2D9D238E02FF0045B1AD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = FD5F2D9C238E02FF0045B1AD /* Settings.bundle */; };
 		FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB5236CC30200780234 /* AppDelegate.m */; };
 		FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB8236CC30200780234 /* SceneDelegate.m */; };
 		FDBA3EBC236CC30200780234 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EBB236CC30200780234 /* ViewController.m */; };
@@ -88,6 +89,7 @@
 		FD5F2D942388C5E70045B1AD /* EWCTokenQueue.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCTokenQueue.m; sourceTree = "<group>"; };
 		FD5F2D96238B21270045B1AD /* EWCDecimalInputBuilder.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCDecimalInputBuilder.h; sourceTree = "<group>"; };
 		FD5F2D97238B21270045B1AD /* EWCDecimalInputBuilder.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCDecimalInputBuilder.m; sourceTree = "<group>"; };
+		FD5F2D9C238E02FF0045B1AD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		FDBA3EB1236CC30200780234 /* Home Calculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Home Calculator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDBA3EB4236CC30200780234 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		FDBA3EB5236CC30200780234 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -222,6 +224,7 @@
 				FD22A9C5237D1BBE003E2C74 /* img */,
 				FDC1A4FE237758C400D21FEB /* Localizable.strings */,
 				FD22A9A6237D1158003E2C74 /* Assets.xcassets */,
+				FD5F2D9C238E02FF0045B1AD /* Settings.bundle */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -357,6 +360,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				FD22A9DC237D1BBE003E2C74 /* icon80.png in Resources */,
+				FD5F2D9D238E02FF0045B1AD /* Settings.bundle in Resources */,
 				FD22A9D7237D1BBE003E2C74 /* icon60.png in Resources */,
 				FD22A9D5237D1BBE003E2C74 /* icon29.png in Resources */,
 				FD22A9A7237D1158003E2C74 /* Assets.xcassets in Resources */,

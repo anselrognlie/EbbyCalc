@@ -201,8 +201,8 @@ All operations of the calculator are also made available through hardware keyboa
 | Backspace | Backspace (delete) key |
 | Digits | Use any numeric key |
 | . | Period (.) key |
-| = | = or Enter (Return) key |
-| +&#124;- | Backslash (\) key |
+| = | Equal (=) or Enter (Return) key |
+| +&#124;- | Backslash (\\) key |
 | % | Percent (%) key |
 | √ | Letter Y key |
 | × | Asterisk (*) key |

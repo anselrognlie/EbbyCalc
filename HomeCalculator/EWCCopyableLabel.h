@@ -35,6 +35,24 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, weak) id<EWCEditDelegate> editDelegate;
 
+/**
+  Tells the control to perform a copy operation.
+
+  The default implementation just takes the displayed text, then gives a registered delegate the opportunity to customize the behavior before writing the value to the clipboard.
+
+  @param sender The entity initiating the copy operation.  Ignored.
+ */
+- (void)copy:(nullable id)sender;
+
+/**
+  Tells the control to perform a paste operation.
+
+  The default implementation just reads the clipboard, then gives a registered delegate the opportunity to customize the behavior before updating the displayed text.
+
+  @param sender The entity initiating the copy operation.  Ignored.
+ */
+- (void)paste:(nullable id)sender;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -1,20 +1,20 @@
 About Home Calculator
 =====================
 
-Home Calculator is a simple calculator app primarily targetting the iPad since it does not ship with a native calculator app. I was frustrated with the other basic iPad calculators, so I decided to write my own. I wanted it to resemble the style of the iPhone native app, while supporting the set of operations that the physical calculator I normally used for household expense tracking provided, most importantly a stored tax calculation (for sales tax) and the particular behavior of the sign key combined with chained operations.
+Home Calculator is a simple calculator app primarily targeting the iPad since it does not ship with a native calculator app. I was frustrated with the other basic iPad calculators, so I decided to write my own. I wanted it to resemble the style of the iPhone native app, while supporting the set of operations that the physical calculator I normally used for household expense tracking provided, most importantly a stored tax calculation (for sales tax) and the particular behavior of the sign key combined with chained operations.
 
 This is not a scientific calculator, nor an engineering calculator, and I don't expect it will ever become one.  It does properly use decimal-based number types to avoid floating point rounding errors, and provides 16-digits of display precision, which is more than enough for my needs.
 
 The regular view of the calculator follows the layout of the aforementioned physical calculator, as that's where I'm used to the buttons being, but the layout does get rearranged for very narrow layouts, such as during Split View or Slide Over scenarios.
 
-This app is available for installation in the App Store.  Please file any bug or feature requests on github.com, though no guaratees are given regarding response or timeliness.  But feel free to make your own fork!
+This app is available for installation in the App Store.  Please file any bug or feature requests on github.com, though no guarantees are given regarding response or timeliness.  But feel free to make your own fork!
 
 # Features
 
 - Up to 16 digit numeric representation
 - Large, adaptive buttons
 - Support for Slide Over and Split View
-- Decimal-based numeric engine to avoid currency rouding errors
+- Decimal-based numeric engine to avoid currency rounding errors
 - Customizable key click audible feedback
 - VoiceOver accessibility
 - Support for common 4-function calculator operations
@@ -24,6 +24,7 @@ This app is available for installation in the App Store.  Please file any bug or
 - Clear most recent calculation input (for fixing mis-typed data)
 - Backspace to delete digits of most recently entered input
 - Copy and paste of the input field
+- Hardware keyboard support
 
 # Operations
 
@@ -109,14 +110,14 @@ Press the √ button to take the square root of the value currently being displa
 
 ## Percent Calculations
 
-The % key works as a sort of equal sign, indicating that whatever binary operation has been input, the second argument should be interpretted as a percent.  Thus,
+The % key works as a sort of equal sign, indicating that whatever binary operation has been input, the second argument should be interpreted as a percent.  Thus,
 
 80 + 50 % yields 120 (80 plus 50 percent of 80).  
 80 - 50 % yields 40 (80 minus 50 percent of 80).  
 80 × 50 % yields 40 (80 times 50 percent (= .5 = divided by 2)).  
 80 ÷ 50 % yields 160 (80 divided by 50 percent (= .5 = times 2)).  
 
-Each press of the = key will peform the same percent calculation on the current result.  So each of the above examples would either add, subtract, multiply, or divide 50 percent from the new result.
+Each press of the = key will perform the same percent calculation on the current result.  So each of the above examples would either add, subtract, multiply, or divide 50 percent from the new result.
 
 e.g. 80 + 50 % yields 120  
 = 180  
@@ -126,11 +127,11 @@ e.g. 80 + 50 % yields 120
 
 ### Add to memory (set memory)
 
-m+ will add the current result to the value stored in the general purpose memory location (initially 0).  If the result would exceed 16 digits, the calculator will enter an error state.  Note that the memory state indicator (M) will become visibile upon setting the memory location if it was not already visibile.
+m+ will add the current result to the value stored in the general purpose memory location (initially 0).  If the result would exceed 16 digits, the calculator will enter an error state.  Note that the memory state indicator (M) will become visible upon setting the memory location if it was not already visible.
 
 ### Subtract from memory
 
-m- will subtract the current result from the value stored in the general purpose memory location (initially 0).  If the result would exceed 16 digits, the calculator will enter an error state.  Note that the memory state indicator (M) will become visibile upon setting the memory location if it was not already visibile.
+m- will subtract the current result from the value stored in the general purpose memory location (initially 0).  If the result would exceed 16 digits, the calculator will enter an error state.  Note that the memory state indicator (M) will become visible upon setting the memory location if it was not already visible.
 
 ### Display or clear memory
 
@@ -144,7 +145,7 @@ To use the tax operations, first the tax rate must be set.
 
 1. Enter the tax rate.  For example, if the tax rate is 10.1%, just enter 10.1
 2. Press the rate key.  Note the tax+ key becomes a store key.
-3. Press the store key.  Note that the tax rate indicator (TAX%) will become visibile, indicating that the displayed value is the tax rate.
+3. Press the store key.  Note that the tax rate indicator (TAX%) will become visible, indicating that the displayed value is the tax rate.
 
 ### Reviewing the tax rate
 
@@ -177,7 +178,7 @@ When entering a value, swiping to the left in the display area will delete the l
 
 ## Copy and paste
 
-The display can be copied or pasted by long tapping in the display area, then seelcting either copy or paste from the context menu that appears.  Any value pasted must "look" like a number in the current locale.
+The display can be copied or pasted by long tapping in the display area, then selecting either copy or paste from the context menu that appears.  Any value pasted must "look" like a number in the current locale.
 
 ## Errors
 
@@ -189,6 +190,31 @@ Errors can arise from any of the following:
 - Attempt to take the square root of a negative number
 - Attempt to perform any calculation that would exceed 16 digits in the result
 - Attempt to alter the general purpose memory location in such a way that it would exceed 16 digits
+
+# Keyboard Input
+
+All operations of the calculator are also made available through hardware keyboard keys, with the following mappings:
+
+| Calculator Key | Keyboard Key |
+| --- | --- |
+| C | Escape (esc) key |
+| Backspace | Backspace (delete) key |
+| Digits | Use any numeric key |
+| . | Period (.) key |
+| = | = or Enter (Return) key |
+| +&#124;- | Backslash (\) key |
+| % | Percent (%) key |
+| √ | Letter Y key |
+| × | Asterisk (*) key |
+| ÷ | Slash (/) key |
+| + | Plus (+) key |
+| − | Minus (-) key |
+| rate | Letter Q key |
+| tax+/store | Letter W key |
+| tax-/recall | Letter E key |
+| mrc | Letter A key |
+| m+ | Letter S key |
+| m- | Letter D key |
 
 # Copyright and License
 

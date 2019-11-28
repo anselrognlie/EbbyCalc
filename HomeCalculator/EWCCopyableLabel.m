@@ -60,13 +60,6 @@
   return [super canPerformAction:action withSender:sender];
 }
 
-/**
-  Tells the control to perform a copy operation.
-
-  The default implementation just takes the displayed text, then gives a registered delegate the opportunity to customize the behavior before writing the value to the clipboard.
-
-  @param sender The entity initiating the copy operation.  Ignored.
- */
 - (void)copy:(id)sender {
   NSString *text = self.text;
 
@@ -79,14 +72,6 @@
   }
 }
 
-
-/**
-  Tells the control to perform a paste operation.
-
-  The default implementation just reads the clipboard, then gives a registered delegate the opportunity to customize the behavior before updating the displayed text.
-
-  @param sender The entity initiating the copy operation.  Ignored.
- */
 - (void)paste:(id)sender {
   NSString *text = [UIPasteboard generalPasteboard].string;
   if (_editDelegate) {

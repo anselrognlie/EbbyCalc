@@ -29,6 +29,7 @@
 #import "EWCCalculatorUserDefaultsData.h"
 #import "EWCLabelEditManager.h"
 #import "EWCCopyableLabel.h"
+#import "EWCKeyCommandCalculatorRecord.h"
 
 /**
   `EWCApplicationLayout` represents the orientation of the application layout.
@@ -119,6 +120,10 @@ typedef struct {
   AVAudioPlayer *_modifyPlayer;  // player to load the sound for the rate shift key click
   AVAudioPlayer *_lastPlayer;  // tracks the last played sound
   BOOL _playKeyClicks;  // preference setting whether to use audible key clicks
+
+  NSArray<EWCKeyCommandCalculatorRecord *> *_keyMappings;  // the single authoratative mapping from a hardware key to a calculator key
+  NSArray<UIKeyCommand *> *_keyCommands;  // the hardware key commands we are interested in
+  NSDictionary<NSString *, NSNumber *> *_commandToKey;  // mapping of keyboard commands to calculator keys
 }
 
 ///------------------------------------------------------
@@ -369,6 +374,9 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
     name:UIApplicationDidBecomeActiveNotification
     object:nil];
 
+  // initialize the hardware keys we care about
+  [self setupKeyCommands];
+
   // if just installed, we need to register our defaults
   [self registerDefaultPreferencesIfNeeded];
 }
@@ -380,6 +388,23 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
  */
 - (void)viewWillLayoutSubviews {
   [self updateLayoutOnChange];
+}
+
+/**
+  Mark that this controller can receive input events directly.
+
+  This allows the OS to give us key commands that we care about.
+ */
+- (BOOL)canBecomeFirstResponder
+{
+    return YES;
+}
+
+/**
+  Tell the OS the keys we care about.
+ */
+- (NSArray *)keyCommands {
+  return _keyCommands;
 }
 
 ///-------------------------
@@ -578,6 +603,127 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
     tag:EWCCalculatorEqualKey forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
+}
+
+///------------------------------
+/// @name Key Input Event Handler
+///------------------------------
+
+/**
+  Setup the collection of key commands we will respond to.
+ */
+- (void)setupKeyCommands {
+  _keyMappings = @[
+    [self makeKeyCommandRecordForInput:@"\r" calculatorKey:EWCCalculatorEqualKey],
+    [self makeKeyCommandRecordForInput:@"\b" calculatorKey:EWCCalculatorBackspaceKey],
+    // digits
+    [self makeKeyCommandRecordForInput:@"." calculatorKey:EWCCalculatorDecimalKey],
+    [self makeKeyCommandRecordForInput:@"0" calculatorKey:EWCCalculatorZeroKey],
+    [self makeKeyCommandRecordForInput:@"1" calculatorKey:EWCCalculatorOneKey],
+    [self makeKeyCommandRecordForInput:@"2" calculatorKey:EWCCalculatorTwoKey],
+    [self makeKeyCommandRecordForInput:@"3" calculatorKey:EWCCalculatorThreeKey],
+    [self makeKeyCommandRecordForInput:@"4" calculatorKey:EWCCalculatorFourKey],
+    [self makeKeyCommandRecordForInput:@"5" calculatorKey:EWCCalculatorFiveKey],
+    [self makeKeyCommandRecordForInput:@"6" calculatorKey:EWCCalculatorSixKey],
+    [self makeKeyCommandRecordForInput:@"7" calculatorKey:EWCCalculatorSevenKey],
+    [self makeKeyCommandRecordForInput:@"8" calculatorKey:EWCCalculatorEightKey],
+    [self makeKeyCommandRecordForInput:@"9" calculatorKey:EWCCalculatorNineKey],
+    // operators
+    [self makeKeyCommandRecordForInput:@"+" calculatorKey:EWCCalculatorAddKey],
+    [self makeKeyCommandRecordForInput:@"-" calculatorKey:EWCCalculatorSubtractKey],
+    [self makeKeyCommandRecordForInput:@"*" calculatorKey:EWCCalculatorMultiplyKey],
+    [self makeKeyCommandRecordForInput:@"/" calculatorKey:EWCCalculatorDivideKey],
+    [self makeKeyCommandRecordForInput:@"=" calculatorKey:EWCCalculatorEqualKey],
+    [self makeKeyCommandRecordForInput:@"\\" calculatorKey:EWCCalculatorSignKey],
+    [self makeKeyCommandRecordForInput:@"%" calculatorKey:EWCCalculatorPercentKey],
+    [self makeKeyCommandRecordForInput:@"y" calculatorKey:EWCCalculatorSqrtKey],
+    // clear
+    [self makeKeyCommandRecordForInput:@"UIKeyInputEscape" calculatorKey:EWCCalculatorClearKey],
+    // tax
+    [self makeKeyCommandRecordForInput:@"q" calculatorKey:EWCCalculatorRateKey],
+    [self makeKeyCommandRecordForInput:@"w" calculatorKey:EWCCalculatorTaxPlusKey],
+    [self makeKeyCommandRecordForInput:@"e" calculatorKey:EWCCalculatorTaxMinusKey],
+    // memory
+    [self makeKeyCommandRecordForInput:@"a" calculatorKey:EWCCalculatorMemoryKey],
+    [self makeKeyCommandRecordForInput:@"s" calculatorKey:EWCCalculatorMemoryPlusKey],
+    [self makeKeyCommandRecordForInput:@"d" calculatorKey:EWCCalculatorMemoryMinusKey],
+  ];
+
+  NSMutableArray<UIKeyCommand *> *commandBuilder = [NSMutableArray<UIKeyCommand *> new];
+
+  // add the special keys for copy/paste
+  [commandBuilder addObject:[UIKeyCommand
+    keyCommandWithInput:@"c"
+    modifierFlags:UIKeyModifierCommand
+    action:@selector(handleKeyCommand:)]];
+  [commandBuilder addObject:[UIKeyCommand
+    keyCommandWithInput:@"v"
+    modifierFlags:UIKeyModifierCommand
+    action:@selector(handleKeyCommand:)]];
+
+  // add the regular keys
+  for (EWCKeyCommandCalculatorRecord *rec in _keyMappings) {
+    [commandBuilder addObject:rec.command];
+  }
+
+  // set the commands
+  _keyCommands = [commandBuilder copy];
+
+  // build the command to key mappings
+  NSMutableDictionary<NSString *, NSNumber *> *mappingBuilder = [NSMutableDictionary<NSString *, NSNumber *> new];
+  for (EWCKeyCommandCalculatorRecord *rec in _keyMappings) {
+    mappingBuilder[rec.command.input] = @(rec.calculatorKey);
+  }
+
+  _commandToKey = [mappingBuilder copy];
+}
+
+/**
+  Helper to simplifiy the allocation of regular keyboard command mappings.
+
+  @param input The string to recognize for the keyboard input.
+  @param calculatorKey The calculator key to map the input to.
+
+  @return A mapping record of the keyboard input to the calculator key.
+ */
+- (EWCKeyCommandCalculatorRecord *)makeKeyCommandRecordForInput:(NSString *)input calculatorKey:(EWCCalculatorKey)calculatorKey {
+
+  return [EWCKeyCommandCalculatorRecord
+    recordWithCommand:[UIKeyCommand keyCommandWithInput:input modifierFlags:0 action:@selector(handleKeyCommand:)]
+    calculatorKey:calculatorKey];
+}
+
+/**
+  Handler to process hardware key input.
+
+  @param command The event about the hardware key that was triggered.
+ */
+- (void)handleKeyCommand:(UIKeyCommand *)command {
+  // check for copy/paste
+  if ((command.modifierFlags & UIKeyModifierCommand) != 0) {
+    if ([command.input isEqualToString:@"c"]) {
+      [_displayArea copy:nil];
+    } else if ([command.input isEqualToString:@"v"]) {
+      [_displayArea paste:nil];
+    }
+  } else {
+    // translate key input to a virtual calculator key and hand it over for processing
+    EWCCalculatorKey key = [self calculatorKeyFromKeyboardCommand:command];
+    [self sendKeyToCalculator:key];
+  }
+}
+
+/**
+  Converts an individual keyboard command to the appropriate calculator key.
+
+  @param command The command representing the registered keyboard input.
+
+  @return The calculator key corresponding to the input.
+ */
+- (EWCCalculatorKey)calculatorKeyFromKeyboardCommand:(UIKeyCommand *)command {
+  NSString *input = command.input;
+
+  return (EWCCalculatorKey)_commandToKey[input].intValue;
 }
 
 ///---------------------------
@@ -1108,16 +1254,14 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
  */
 - (void)onCalculatorButtonPressed:(UIButton *)sender forEvent:(UIEvent *)event {
   EWCCalculatorKey key = (EWCCalculatorKey)sender.tag;
-  [self playSoundForKey:key];
-  [_calculator pressKey:key];
+  [self sendKeyToCalculator:key];
 }
 
 /**
   Callback for when user wants to backspace a digit.
 */
 - (void)onBackspacePressed {
-  [self playSoundForKey:EWCCalculatorBackspaceKey];
-  [_calculator pressKey:EWCCalculatorBackspaceKey];
+  [self sendKeyToCalculator:EWCCalculatorBackspaceKey];
 }
 
 /**
@@ -1130,6 +1274,16 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
     _lastPlayer = [self ensureSoundIdForKey:key];
     [_lastPlayer play];
   }
+}
+
+/**
+  Play an appropriate sound for a key, and sends the key to the calculator.
+
+  @param key The key to send to the calculator.
+ */
+- (void)sendKeyToCalculator:(EWCCalculatorKey)key {
+  [self playSoundForKey:key];
+  [_calculator pressKey:key];
 }
 
 /**

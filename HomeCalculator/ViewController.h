@@ -53,6 +53,11 @@ NS_ASSUME_NONNULL_BEGIN
 */
 - (nullable NSString *)willPasteText:(NSString *)text withSender:(id)sender;
 
+/**
+  Reloads the app settings.
+ */
+- (void)refreshSettings;
+
 @end
 
 NS_ASSUME_NONNULL_END

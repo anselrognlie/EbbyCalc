@@ -379,12 +379,6 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   _deletePlayer = nil;
   _modifyPlayer = nil;
 
-  // monitor when we come to the forground
-  [[NSNotificationCenter defaultCenter] addObserver:self
-    selector:@selector(didBecomeActive)
-    name:UIApplicationDidBecomeActiveNotification
-    object:nil];
-
   // initialize the hardware keys we care about
   [self setupKeyCommands];
 
@@ -806,17 +800,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
 /// @name Settings Methods
 ///-----------------------
 
-/**
-  Registered to be called when the app comes into the foreground
- */
-- (void)didBecomeActive {
-  [self reloadSettings];
-}
-
-/**
-  Refresh the user defaults and load our settings.
- */
-- (void)reloadSettings {
+- (void)refreshSettings {
   NSUserDefaults *settings = [NSUserDefaults standardUserDefaults];
   [settings synchronize];
   _playKeyClicks = [settings

@@ -20,8 +20,11 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #import "SceneDelegate.h"
+#import "ViewController.h"
 
-@interface SceneDelegate ()
+@interface SceneDelegate () {
+  ViewController *_viewController;
+}
 
 @end
 
@@ -32,6 +35,16 @@
   // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
   // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
   // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
+
+  // make sure the scene is our window scene
+  if (! [scene isKindOfClass:[UIWindowScene class]]) {
+    return;
+  }
+
+  UIWindow *window = self.window;
+  if (window) {
+    _viewController = (ViewController *)self.window.rootViewController;
+  }
 }
 
 
@@ -46,6 +59,8 @@
 - (void)sceneDidBecomeActive:(UIScene *)scene {
   // Called when the scene has moved from an inactive state to an active state.
   // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+
+  [_viewController refreshSettings];
 }
 
 

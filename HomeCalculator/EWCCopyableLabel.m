@@ -21,6 +21,7 @@
 
 #import "EWCCopyableLabel.h"
 #import "EWCEditDelegate.h"
+#import <MobileCoreServices/MobileCoreServices.h>
 
 @interface EWCCopyableLabel() {
 }
@@ -68,18 +69,22 @@
   }
 
   if (text) {
-    [[UIPasteboard generalPasteboard] setString:text];
+    [[UIPasteboard generalPasteboard] setValue:text forPasteboardType:(NSString *)kUTTypeUTF8PlainText];
   }
 }
 
 - (void)paste:(id)sender {
-  NSString *text = [UIPasteboard generalPasteboard].string;
-  if (_editDelegate) {
-    text = [_editDelegate willPasteText:text withSender:self];
-  }
+  UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
 
-  if (text) {
-    self.text = text;
+  if (pasteboard.hasStrings) {
+    NSString *text = pasteboard.string;
+    if (_editDelegate) {
+      text = [_editDelegate willPasteText:text withSender:self];
+    }
+
+    if (text) {
+      self.text = text;
+    }
   }
 }
 

@@ -155,6 +155,12 @@ static char const * const s_soundPath = "/System/Library/Audio/UISounds/";
 
 static char const * const s_playClicksPref = "play_key_clicks_preference";
 
+///------------------------
+/// @name Mapping Constants
+///------------------------
+
+static char const * const s_escapeMarker = "ESCAPE";
+
 ///-----------------------
 /// @name Layout Constants
 ///-----------------------
@@ -367,6 +373,11 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
 
   // perform initial display updated from calculator state
   [self updateDisplayFromCalculator];
+
+  // ensure that object references are cleared out
+  _clickPlayer = nil;
+  _deletePlayer = nil;
+  _modifyPlayer = nil;
 
   // monitor when we come to the forground
   [[NSNotificationCenter defaultCenter] addObserver:self
@@ -610,54 +621,74 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
 ///------------------------------
 
 /**
+  Helper method to get a localized key mapping.
+
+  @param mapping The base name of the key mapping to lookup.
+
+  @return The string to register with the UIKeyCommand shortcut for the calculator key.
+ */
+- (NSString *)getLocalizedKeyMapping:(NSString *)mapping {
+
+  NSString *lookup = [NSString stringWithFormat:@"%@ Key Mapping", mapping];
+  NSString *str = NSLocalizedString(lookup, @"");
+
+  // Fix up special mappings
+  if ([str isEqualToString:@(s_escapeMarker)]) {
+    str = UIKeyInputEscape;
+  }
+
+  return str;
+}
+
+/**
   Setup the collection of key commands we will respond to.
  */
 - (void)setupKeyCommands {
   _keyMappings = @[
-    [self makeKeyCommandRecordForInput:@"\r" calculatorKey:EWCCalculatorEqualKey],
-    [self makeKeyCommandRecordForInput:@"\b" calculatorKey:EWCCalculatorBackspaceKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Enter"] calculatorKey:EWCCalculatorEqualKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Backspace"] calculatorKey:EWCCalculatorBackspaceKey],
     // digits
-    [self makeKeyCommandRecordForInput:@"." calculatorKey:EWCCalculatorDecimalKey],
-    [self makeKeyCommandRecordForInput:@"0" calculatorKey:EWCCalculatorZeroKey],
-    [self makeKeyCommandRecordForInput:@"1" calculatorKey:EWCCalculatorOneKey],
-    [self makeKeyCommandRecordForInput:@"2" calculatorKey:EWCCalculatorTwoKey],
-    [self makeKeyCommandRecordForInput:@"3" calculatorKey:EWCCalculatorThreeKey],
-    [self makeKeyCommandRecordForInput:@"4" calculatorKey:EWCCalculatorFourKey],
-    [self makeKeyCommandRecordForInput:@"5" calculatorKey:EWCCalculatorFiveKey],
-    [self makeKeyCommandRecordForInput:@"6" calculatorKey:EWCCalculatorSixKey],
-    [self makeKeyCommandRecordForInput:@"7" calculatorKey:EWCCalculatorSevenKey],
-    [self makeKeyCommandRecordForInput:@"8" calculatorKey:EWCCalculatorEightKey],
-    [self makeKeyCommandRecordForInput:@"9" calculatorKey:EWCCalculatorNineKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Decimal"] calculatorKey:EWCCalculatorDecimalKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Zero"] calculatorKey:EWCCalculatorZeroKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"One"] calculatorKey:EWCCalculatorOneKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Two"] calculatorKey:EWCCalculatorTwoKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Three"] calculatorKey:EWCCalculatorThreeKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Four"] calculatorKey:EWCCalculatorFourKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Five"] calculatorKey:EWCCalculatorFiveKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Six"] calculatorKey:EWCCalculatorSixKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Seven"] calculatorKey:EWCCalculatorSevenKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Eight"] calculatorKey:EWCCalculatorEightKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Nine"] calculatorKey:EWCCalculatorNineKey],
     // operators
-    [self makeKeyCommandRecordForInput:@"+" calculatorKey:EWCCalculatorAddKey],
-    [self makeKeyCommandRecordForInput:@"-" calculatorKey:EWCCalculatorSubtractKey],
-    [self makeKeyCommandRecordForInput:@"*" calculatorKey:EWCCalculatorMultiplyKey],
-    [self makeKeyCommandRecordForInput:@"/" calculatorKey:EWCCalculatorDivideKey],
-    [self makeKeyCommandRecordForInput:@"=" calculatorKey:EWCCalculatorEqualKey],
-    [self makeKeyCommandRecordForInput:@"\\" calculatorKey:EWCCalculatorSignKey],
-    [self makeKeyCommandRecordForInput:@"%" calculatorKey:EWCCalculatorPercentKey],
-    [self makeKeyCommandRecordForInput:@"y" calculatorKey:EWCCalculatorSqrtKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Add"] calculatorKey:EWCCalculatorAddKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Subtract"] calculatorKey:EWCCalculatorSubtractKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Multiply"] calculatorKey:EWCCalculatorMultiplyKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Divide"] calculatorKey:EWCCalculatorDivideKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Equal"] calculatorKey:EWCCalculatorEqualKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Sign"] calculatorKey:EWCCalculatorSignKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Percent"] calculatorKey:EWCCalculatorPercentKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Sqrt"] calculatorKey:EWCCalculatorSqrtKey],
     // clear
-    [self makeKeyCommandRecordForInput:@"UIKeyInputEscape" calculatorKey:EWCCalculatorClearKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Clear"] calculatorKey:EWCCalculatorClearKey],
     // tax
-    [self makeKeyCommandRecordForInput:@"q" calculatorKey:EWCCalculatorRateKey],
-    [self makeKeyCommandRecordForInput:@"w" calculatorKey:EWCCalculatorTaxPlusKey],
-    [self makeKeyCommandRecordForInput:@"e" calculatorKey:EWCCalculatorTaxMinusKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Rate"] calculatorKey:EWCCalculatorRateKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Tax+"] calculatorKey:EWCCalculatorTaxPlusKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Tax-"] calculatorKey:EWCCalculatorTaxMinusKey],
     // memory
-    [self makeKeyCommandRecordForInput:@"a" calculatorKey:EWCCalculatorMemoryKey],
-    [self makeKeyCommandRecordForInput:@"s" calculatorKey:EWCCalculatorMemoryPlusKey],
-    [self makeKeyCommandRecordForInput:@"d" calculatorKey:EWCCalculatorMemoryMinusKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Memory"] calculatorKey:EWCCalculatorMemoryKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Memory+"] calculatorKey:EWCCalculatorMemoryPlusKey],
+    [self makeKeyCommandRecordForInput:[self getLocalizedKeyMapping:@"Memory-"] calculatorKey:EWCCalculatorMemoryMinusKey],
   ];
 
   NSMutableArray<UIKeyCommand *> *commandBuilder = [NSMutableArray<UIKeyCommand *> new];
 
   // add the special keys for copy/paste
   [commandBuilder addObject:[UIKeyCommand
-    keyCommandWithInput:@"c"
+    keyCommandWithInput:[self getLocalizedKeyMapping:@"Copy"]
     modifierFlags:UIKeyModifierCommand
     action:@selector(handleKeyCommand:)]];
   [commandBuilder addObject:[UIKeyCommand
-    keyCommandWithInput:@"v"
+    keyCommandWithInput:[self getLocalizedKeyMapping:@"Paste"]
     modifierFlags:UIKeyModifierCommand
     action:@selector(handleKeyCommand:)]];
 

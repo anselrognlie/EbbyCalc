@@ -74,3 +74,38 @@
 "Tall Layout" = "buttons in tall layout";
 "Wide Layout" = "buttons in wide layout";
 
+"Rate Key Mapping" = "q";
+"Tax+ Key Mapping" = "w";
+"Tax- Key Mapping" = "e";
+
+"Clear Key Mapping" = "ESCAPE";
+
+"Zero Key Mapping" = "0";
+"One Key Mapping" = "1";
+"Two Key Mapping" = "2";
+"Three Key Mapping" = "3";
+"Four Key Mapping" = "4";
+"Five Key Mapping" = "5";
+"Six Key Mapping" = "6";
+"Seven Key Mapping" = "7";
+"Eight Key Mapping" = "8";
+"Nine Key Mapping" = "9";
+"Decimal Key Mapping" = ".";
+"Sign Key Mapping" = "\\";
+
+"Multiply Key Mapping" = "*";
+"Divide Key Mapping" = "/";
+"Subtract Key Mapping" = "−";
+"Add Key Mapping" = "+";
+"Percent Key Mapping" = "%";
+"Sqrt Key Mapping" = "y";
+"Equal Key Mapping" = "=";
+"Enter Key Mapping" = "\r";
+"Backspace Key Mapping" = "\b";
+
+"Memory Key Mapping" = "a";
+"Memory+ Key Mapping" = "s";
+"Memory- Key Mapping" = "d";
+
+"Copy Key Mapping" = "c";
+"Paste Key Mapping" = "v";

@@ -146,8 +146,7 @@ typedef struct {
 static char const * const s_keyClickName = "key_press_click";
 static char const * const s_keyDeleteName = "key_press_delete";
 static char const * const s_keyModifyName = "key_press_modifier";
-static char const * const s_soundExt = ".caf";
-static char const * const s_soundPath = "/System/Library/Audio/UISounds/";
+static char const * const s_soundExt = ".wav";
 
 ///-------------------------
 /// @name Settings Constants
@@ -1338,8 +1337,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
 
   // if the player isn't loaded yet, load it
   if (! *player) {
-    NSString *path = [NSString stringWithFormat:@"%s%s%s",
-      s_soundPath, filename, s_soundExt];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@(filename) ofType:@(s_soundExt)];
 
     NSURL *fileURL = [NSURL fileURLWithPath:path];
 

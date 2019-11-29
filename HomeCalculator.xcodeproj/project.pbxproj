@@ -30,6 +30,9 @@
 		FD5F2D98238B21270045B1AD /* EWCDecimalInputBuilder.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F2D97238B21270045B1AD /* EWCDecimalInputBuilder.m */; };
 		FD5F2D9D238E02FF0045B1AD /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = FD5F2D9C238E02FF0045B1AD /* Settings.bundle */; };
 		FD5F2E2223905B1A0045B1AD /* EWCKeyCommandCalculatorRecord.m in Sources */ = {isa = PBXBuildFile; fileRef = FD5F2E2123905B1A0045B1AD /* EWCKeyCommandCalculatorRecord.m */; };
+		FD5F2E3A2391D5F40045B1AD /* key_press_modifier.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD5F2E372391D5F30045B1AD /* key_press_modifier.wav */; };
+		FD5F2E3B2391D5F40045B1AD /* key_press_click.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD5F2E382391D5F40045B1AD /* key_press_click.wav */; };
+		FD5F2E3C2391D5F40045B1AD /* key_press_delete.wav in Resources */ = {isa = PBXBuildFile; fileRef = FD5F2E392391D5F40045B1AD /* key_press_delete.wav */; };
 		FDBA3EB6236CC30200780234 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB5236CC30200780234 /* AppDelegate.m */; };
 		FDBA3EB9236CC30200780234 /* SceneDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EB8236CC30200780234 /* SceneDelegate.m */; };
 		FDBA3EBC236CC30200780234 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = FDBA3EBB236CC30200780234 /* ViewController.m */; };
@@ -93,6 +96,9 @@
 		FD5F2D9C238E02FF0045B1AD /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = Settings.bundle; sourceTree = "<group>"; };
 		FD5F2E2023905B1A0045B1AD /* EWCKeyCommandCalculatorRecord.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = EWCKeyCommandCalculatorRecord.h; sourceTree = "<group>"; };
 		FD5F2E2123905B1A0045B1AD /* EWCKeyCommandCalculatorRecord.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = EWCKeyCommandCalculatorRecord.m; sourceTree = "<group>"; };
+		FD5F2E372391D5F30045B1AD /* key_press_modifier.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = key_press_modifier.wav; sourceTree = "<group>"; };
+		FD5F2E382391D5F40045B1AD /* key_press_click.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = key_press_click.wav; sourceTree = "<group>"; };
+		FD5F2E392391D5F40045B1AD /* key_press_delete.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = key_press_delete.wav; sourceTree = "<group>"; };
 		FDBA3EB1236CC30200780234 /* Home Calculator.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Home Calculator.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		FDBA3EB4236CC30200780234 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		FDBA3EB5236CC30200780234 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -169,6 +175,16 @@
 			path = img;
 			sourceTree = "<group>";
 		};
+		FD5F2E302391D4C70045B1AD /* audio */ = {
+			isa = PBXGroup;
+			children = (
+				FD5F2E382391D5F40045B1AD /* key_press_click.wav */,
+				FD5F2E392391D5F40045B1AD /* key_press_delete.wav */,
+				FD5F2E372391D5F30045B1AD /* key_press_modifier.wav */,
+			);
+			path = audio;
+			sourceTree = "<group>";
+		};
 		FDBA3EA8236CC30200780234 = {
 			isa = PBXGroup;
 			children = (
@@ -226,6 +242,7 @@
 		FDC1A4CA2370C14500D21FEB /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				FD5F2E302391D4C70045B1AD /* audio */,
 				FD22A9C5237D1BBE003E2C74 /* img */,
 				FDC1A4FE237758C400D21FEB /* Localizable.strings */,
 				FD22A9A6237D1158003E2C74 /* Assets.xcassets */,
@@ -369,8 +386,11 @@
 				FD22A9D7237D1BBE003E2C74 /* icon60.png in Resources */,
 				FD22A9D5237D1BBE003E2C74 /* icon29.png in Resources */,
 				FD22A9A7237D1158003E2C74 /* Assets.xcassets in Resources */,
+				FD5F2E3B2391D5F40045B1AD /* key_press_click.wav in Resources */,
+				FD5F2E3A2391D5F40045B1AD /* key_press_modifier.wav in Resources */,
 				FD22A9DD237D1BBE003E2C74 /* icon87.png in Resources */,
 				FD22A9DA237D1BBE003E2C74 /* icon58.png in Resources */,
+				FD5F2E3C2391D5F40045B1AD /* key_press_delete.wav in Resources */,
 				FDC1A4FC237758C400D21FEB /* Localizable.strings in Resources */,
 				FDBA3EC4236CC30500780234 /* LaunchScreen.storyboard in Resources */,
 				FD22A9E0237D1BBE003E2C74 /* icon20.png in Resources */,

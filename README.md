@@ -1,7 +1,7 @@
-About Home Calculator
+About EbbyCalc
 =====================
 
-Home Calculator is a simple calculator app primarily targeting the iPad since it does not ship with a native calculator app. I was frustrated with the other basic iPad calculators, so I decided to write my own. I wanted it to resemble the style of the iPhone native app, while supporting the set of operations that the physical calculator I normally used for household expense tracking provided, most importantly a stored tax calculation (for sales tax) and the particular behavior of the sign key combined with chained operations.
+EbbyCalc is a simple calculator app primarily targeting the iPad since it does not ship with a native calculator app. I was frustrated with the other basic iPad calculators, so I decided to write my own. I wanted it to resemble the style of the iPhone native app, while supporting the set of operations that the physical calculator I normally used for household expense tracking provided, most importantly a stored tax calculation (for sales tax) and the particular behavior of the sign key combined with chained operations.
 
 This is not a scientific calculator, nor an engineering calculator, and I don't expect it will ever become one.  It does properly use decimal-based number types to avoid floating point rounding errors, and provides 16-digits of display precision, which is more than enough for my needs.
 

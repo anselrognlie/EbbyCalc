@@ -115,11 +115,11 @@ typedef struct {
   EWCLabelEditManager *_labelManager;  // provides the logic for attaching the edit menu to a copy/paste-enabled label
   EWCLayoutConstants const *_currentLayout;  // points to the currently configured layout constants
 
-  AVAudioPlayer *_clickPlayer;  // player to load the sound for regular key clicks
-  AVAudioPlayer *_deletePlayer;  // player to load the sound for the clear key click
-  AVAudioPlayer *_modifyPlayer;  // player to load the sound for the rate shift key click
   AVAudioPlayer *_lastPlayer;  // tracks the last played sound
   BOOL _playKeyClicks;  // preference setting whether to use audible key clicks
+  NSData *_clickData;  // sound data for regular clicks
+  NSData *_deleteData;  // sound data for the clear key click
+  NSData *_modifyData;  // sound data for the rate shift key click
 
   NSArray<EWCKeyCommandCalculatorRecord *> *_keyMappings;  // the single authoratative mapping from a hardware key to a calculator key
   NSArray<UIKeyCommand *> *_keyCommands;  // the hardware key commands we are interested in
@@ -147,6 +147,7 @@ static char const * const s_keyClickName = "key_press_click";
 static char const * const s_keyDeleteName = "key_press_delete";
 static char const * const s_keyModifyName = "key_press_modifier";
 static char const * const s_soundExt = ".wav";
+static const float s_soundVolume = 0.1;
 
 ///-------------------------
 /// @name Settings Constants
@@ -373,10 +374,8 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   // perform initial display updated from calculator state
   [self updateDisplayFromCalculator];
 
-  // ensure that object references are cleared out
-  _clickPlayer = nil;
-  _deletePlayer = nil;
-  _modifyPlayer = nil;
+  // load the sound data we need for key input
+  [self loadSoundData];
 
   // initialize the hardware keys we care about
   [self setupKeyCommands];
@@ -607,6 +606,28 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
     tag:EWCCalculatorEqualKey forWidth:fontDim];
   [_digitButtons addObject:button];
   [_allButtons addObject:button];
+}
+
+/**
+  Preload the data for the sounds.
+ */
+- (void)loadSoundData {
+  char const * const names[] = {
+    s_keyClickName,
+    s_keyDeleteName,
+    s_keyModifyName};
+  const int soundCount = sizeof(names) / sizeof(char *);
+
+  NSData * __strong *data[] = {
+    &_clickData,
+    &_deleteData,
+    &_modifyData,
+  };
+
+  for (int i = 0; i < soundCount; ++i) {
+    NSString *path = [[NSBundle mainBundle] pathForResource:@(names[i]) ofType:@(s_soundExt)];
+    *(data[i]) = [NSData dataWithContentsOfFile:path];
+  }
 }
 
 ///------------------------------
@@ -1286,6 +1307,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
 - (void)playSoundForKey:(EWCCalculatorKey)key {
   if (_playKeyClicks) {
     _lastPlayer = [self ensureSoundIdForKey:key];
+    _lastPlayer.volume = s_soundVolume;
     [_lastPlayer play];
   }
 }
@@ -1309,42 +1331,32 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
  */
 - (AVAudioPlayer *)ensureSoundIdForKey:(EWCCalculatorKey)key {
   // get the file reference for the key
-  char const *filename;
-  AVAudioPlayer * __strong *player;
+  NSData *data;
+  AVAudioPlayer * player;
 
-  // stop any playing sounds
+  // fade out any playing sounds
   if (_lastPlayer) {
-    [_lastPlayer stop];
+    [_lastPlayer setVolume:0 fadeDuration:0.001];
   }
 
   // figure out the source file and player var
   switch (key) {
     case EWCCalculatorRateKey:
-      filename = s_keyModifyName;
-      player = &_modifyPlayer;
+      data = _modifyData;
       break;
 
     case EWCCalculatorClearKey:
     case EWCCalculatorBackspaceKey:
-      filename = s_keyDeleteName;
-      player = &_deletePlayer;
+      data = _deleteData;
       break;
 
     default:
-      filename = s_keyClickName;
-      player = &_clickPlayer;
+      data = _clickData;
   }
 
-  // if the player isn't loaded yet, load it
-  if (! *player) {
-    NSString *path = [[NSBundle mainBundle] pathForResource:@(filename) ofType:@(s_soundExt)];
+  player = [[AVAudioPlayer alloc] initWithData:data error:nil];
 
-    NSURL *fileURL = [NSURL fileURLWithPath:path];
-
-    *player = [[AVAudioPlayer alloc] initWithContentsOfURL:fileURL error:nil];
-  }
-
-  return *player;
+  return player;
 }
 
 ///---------------------------------

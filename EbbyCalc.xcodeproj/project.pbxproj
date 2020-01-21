@@ -311,6 +311,7 @@
 				FDBA3EAD236CC30200780234 /* Sources */,
 				FDBA3EAE236CC30200780234 /* Frameworks */,
 				FDBA3EAF236CC30200780234 /* Resources */,
+				FD81E7F123B180D2009B47C5 /* Run Script */,
 			);
 			buildRules = (
 			);
@@ -414,6 +415,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		FD81E7F123B180D2009B47C5 /* Run Script */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Run Script";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "currBuildNumber=$(/usr/libexec/PlistBuddy -c \"Print CFBundleVersion\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\n#currBuildNumber=$CURRENT_PROJECT_VERSION\nnextBuildNumber=$(($currBuildNumber + 1))\necho \"nextBuildNumber: $nextBuildNumber\"\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion $nextBuildNumber\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\"\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nnewVersion=$(/usr/libexec/PlistBuddy -c \"Print CFBundleShortVersionString\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\nversionString=\"${newVersion}.$currBuildNumber\"\necho \"versionString: $versionString\"\n/usr/libexec/PlistBuddy -c \"Set PreferenceSpecifiers:2:DefaultValue $versionString\" \"${WRAPPER_NAME}/Settings.bundle/Root.plist\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		FDBA3EAD236CC30200780234 /* Sources */ = {
@@ -609,6 +631,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = EbbyCalc/EbbyCalc.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_TEAM = RU9C9DUDK9;
 				INFOPLIST_FILE = EbbyCalc/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -616,10 +639,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.EbbyCalc;
 				PRODUCT_NAME = EbbyCalc;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
@@ -629,6 +654,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = EbbyCalc/EbbyCalc.entitlements;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 108;
 				DEVELOPMENT_TEAM = RU9C9DUDK9;
 				INFOPLIST_FILE = EbbyCalc/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -636,10 +662,12 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.ebbyware.EbbyCalc;
 				PRODUCT_NAME = EbbyCalc;
 				SUPPORTS_MACCATALYST = NO;
 				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
 		};

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>StringsTable</key>
+	<string>Privacy</string>
+	<key>PreferenceSpecifiers</key>
+	<array>
+		<dict>
+			<key>Type</key>
+			<string>PSGroupSpecifier</string>
+			<key>Title</key>
+			<string>Pledge Title</string>
+			<key>FooterText</key>
+			<string>EbbyCalc collects and transmits NO user data. Application data is kept local to the app and not transmitted back to Ebbyware Software at any time.
+
+Additional information can be found at http://www.ebbyware.com/privacy.html</string>
+		</dict>
+	</array>
+</dict>
+</plist>

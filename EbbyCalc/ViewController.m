@@ -165,7 +165,7 @@ static char const * const s_escapeMarker = "ESCAPE";
 /// @name Layout Constants
 ///-----------------------
 
-static const float s_tallGridHeightWidthRatio = 1.800;  // the aspect ratio that determines whether to layout the buttons in tall or wide mode
+static const float s_tallGridHeightWidthRatio = 1.700;  // the aspect ratio that determines whether to layout the buttons in tall or wide mode
 
 static const float s_minimumDisplayScaleFactor = 0.25;  // the minimum scale font that can be applied to the display to fit the contents on screen
 static const int s_maximumDigits = 16;  // the number of digits we will support

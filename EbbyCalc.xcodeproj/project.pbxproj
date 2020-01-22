@@ -433,7 +433,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "currBuildNumber=$CURRENT_PROJECT_VERSION\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nnewVersion=$(/usr/libexec/PlistBuddy -c \"Print CFBundleShortVersionString\" \"${PROJECT_DIR}/${INFOPLIST_FILE}\")\nversionString=\"${MARKETING_VERSION}.$currBuildNumber\"\necho \"versionString: $versionString\"\n/usr/libexec/PlistBuddy -c \"Set PreferenceSpecifiers:2:DefaultValue $versionString\" \"${WRAPPER_NAME}/Settings.bundle/Root.plist\"\n";
+			shellScript = "currBuildNumber=$CURRENT_PROJECT_VERSION\n\ncd \"${BUILT_PRODUCTS_DIR}\"\nversionString=\"${MARKETING_VERSION}.$currBuildNumber\"\necho \"versionString: $versionString\"\n/usr/libexec/PlistBuddy -c \"Set PreferenceSpecifiers:2:DefaultValue $versionString\" \"${WRAPPER_NAME}/Settings.bundle/Root.plist\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -631,7 +631,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = EbbyCalc/EbbyCalc.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = RU9C9DUDK9;
 				INFOPLIST_FILE = EbbyCalc/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -654,7 +654,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = EbbyCalc/EbbyCalc.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 9;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = RU9C9DUDK9;
 				INFOPLIST_FILE = EbbyCalc/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;

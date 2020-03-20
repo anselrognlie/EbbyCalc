@@ -115,7 +115,7 @@ typedef struct {
   EWCLabelEditManager *_labelManager;  // provides the logic for attaching the edit menu to a copy/paste-enabled label
   EWCLayoutConstants const *_currentLayout;  // points to the currently configured layout constants
 
-  AVAudioPlayer *_lastPlayer;  // tracks the last played sound
+  NSMutableArray<AVAudioPlayer *> *_players;  // tracks sounds that have been started
   BOOL _playKeyClicks;  // preference setting whether to use audible key clicks
   NSData *_clickData;  // sound data for regular clicks
   NSData *_deleteData;  // sound data for the clear key click
@@ -147,7 +147,7 @@ static char const * const s_keyClickName = "key_press_click";
 static char const * const s_keyDeleteName = "key_press_delete";
 static char const * const s_keyModifyName = "key_press_modifier";
 static char const * const s_soundExt = ".wav";
-static const float s_soundVolume = 0.1;
+static const float s_soundVolume = 0.8;
 
 ///-------------------------
 /// @name Settings Constants
@@ -628,6 +628,8 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
     NSString *path = [[NSBundle mainBundle] pathForResource:@(names[i]) ofType:@(s_soundExt)];
     *(data[i]) = [NSData dataWithContentsOfFile:path];
   }
+
+  _players = [NSMutableArray array];
 }
 
 ///------------------------------
@@ -1306,9 +1308,10 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
  */
 - (void)playSoundForKey:(EWCCalculatorKey)key {
   if (_playKeyClicks) {
-    _lastPlayer = [self ensureSoundIdForKey:key];
-    _lastPlayer.volume = s_soundVolume;
-    [_lastPlayer play];
+    AVAudioPlayer *player = [self ensureSoundIdForKey:key];
+    player.volume = s_soundVolume;
+    [player play];
+    [_players addObject:player];
   }
 }
 
@@ -1334,10 +1337,7 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   NSData *data;
   AVAudioPlayer * player;
 
-  // fade out any playing sounds
-  if (_lastPlayer) {
-    [_lastPlayer setVolume:0 fadeDuration:0.001];
-  }
+  [self cleanupSounds];
 
   // figure out the source file and player var
   switch (key) {
@@ -1357,6 +1357,21 @@ static const EWCLayoutConstants s_tallLayoutConstants = {
   player = [[AVAudioPlayer alloc] initWithData:data error:nil];
 
   return player;
+}
+
+/**
+ Makes sure that we only keep references to sounds that are still active.
+ */
+- (void)cleanupSounds {
+  NSPredicate *selector = [NSPredicate predicateWithBlock:^ BOOL (id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+    AVAudioPlayer *player = evaluatedObject;
+    return player.playing;
+  }];
+
+  NSMutableArray<AVAudioPlayer *> *playing = [[_players
+    filteredArrayUsingPredicate:selector] mutableCopy];
+
+  _players = playing;
 }
 
 ///---------------------------------

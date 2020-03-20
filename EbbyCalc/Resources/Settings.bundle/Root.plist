@@ -23,8 +23,8 @@
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
 			<string>About Title</string>
-      <key>FooterText</key>
-      <string>Footer Title</string>
+			<key>FooterText</key>
+			<string>Footer Title</string>
 		</dict>
 		<dict>
 			<key>Type</key>
@@ -34,7 +34,7 @@
 			<key>Key</key>
 			<string>version_preference</string>
 			<key>DefaultValue</key>
-			<string>VersionValue</string>
+			<string>1.0.1.200</string>
 		</dict>
 		<dict>
 			<key>Type</key>
